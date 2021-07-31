@@ -16,12 +16,36 @@ conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
 main_window = ttk.Notebook(root)
 main_window.pack(fill="both", expand="yes")
 
+class Menu:
+    def __init__(self):
+        # Create a menu in root called top_menu and configure root to use top_menu
+        top_menu = tk.Menu(root)
+        root.config(menu=top_menu)
+
+        def file_menu():
+            # File menu
+            file_menu = tk.Menu(top_menu, tearoff="false")
+            top_menu.add_cascade(label="File", menu=file_menu)
+            file_menu.add_command(label="Exit", command=root.quit)
+
+        # Customers menu
+        customers_menu = tk.Menu(top_menu, tearoff="false")
+        top_menu.add_cascade(label="Customers", menu=customers_menu)
+        customers_menu.add_command(label="New Customer", command=customers.new_customer)
+        customers_menu.add_command(label="Edit Customer", command=customers.edit_customer)
+        customers_menu.add_command(label="Delete Customer", command=customers.delete_customer)
+
+        # Vendors menu
+        vendors_menu = tk.Menu(top_menu, tearoff="false")
+        top_menu.add_cascade(label="Vendors", menu=vendors_menu)
+        vendors_menu.add_command(label="New Vendor", command=vendors.new_vendor)
+        vendors_menu.add_command(label="Edit Vendor", command=vendors.edit_vendor)
+        vendors_menu.add_command(label="Delete Vendor", command=vendors.delete_vendor)
+
+        file_menu()
 class Customers:
 
     def __init__(self):
-        """
-        Creates the Tkinter Notebook tab, tab heading and customer database table
-        """
         
         def customer_database_table():
             # Connect to the database
@@ -42,6 +66,10 @@ class Customers:
                 phone INTEGER
                 )""") 
 
+            # Close connection
+            conn.commit()
+            conn.close() 
+
         def customer_tab():
             # Create the tab
             self.tab = tk.Frame(main_window)
@@ -50,43 +78,35 @@ class Customers:
             # Add the tab to the notebook and provide a heading
             main_window.add(self.tab, text="Customers")
         
-        def customer_ribbon():
-            """                 
-            Creates the ribbon of fuctional buttons
-            """
-        
-            # Make a frame for the button icons to sit
+        def customer_ribbon():       
+            # Make a frame for the buttons
             customer_ribbon_frame = tk.Frame(self.tab)
             customer_ribbon_frame.pack(fill="x", padx=10, pady=10)
 
-            # Assign an image to each button icon
+            # Assign an image to each button
             self.new_customer_icon = tk.PhotoImage(file="images/new_contact.png")
             self.delete_customer_icon = tk.PhotoImage(file="images/delete_contact.png")
             self.edit_customer_icon = tk.PhotoImage(file="images/edit_contact.png")
 
-            # Add new contact button icon to the frame
+            # Add the new contact button to the frame
             new_customer_contact_button = tk.Button(customer_ribbon_frame, image=self.new_customer_icon, command=self.new_customer)
             new_customer_contact_button.grid(padx=10, row=1, column=1)
             new_customer_contact_label = tk.Label(customer_ribbon_frame, text="Add New Customer")
             new_customer_contact_label.grid(padx=10, row=2, column=1)
 
-            # Add edit contact button icon to the frame
+            # Add the edit contact button to the frame
             edit_customer_contact_button = tk.Button(customer_ribbon_frame, image=self.edit_customer_icon, command=self.edit_customer)
             edit_customer_contact_button.grid(padx=10, row=1, column=2)
             edit_customer_contact_label = tk.Label(customer_ribbon_frame, text="Edit Customer")
             edit_customer_contact_label.grid(padx=10, row=2, column=2)
 
-            # Add delete contact button icon to the frame
+            # Add the delete contact button to the frame
             delete_customer_contact_button = tk.Button(customer_ribbon_frame, image=self.delete_customer_icon, command=self.delete_customer)
             delete_customer_contact_button.grid(padx=10, row=1, column=3)
             delete_customer_contact_label = tk.Label(customer_ribbon_frame, text="Delete Customer")
             delete_customer_contact_label.grid(padx=10, row=2, column=3)
             
         def customer_treeview():
-            """
-            Creates a Tkinter Treeview for cutomers
-            """
-
             # Create a frame for the customer treeview
             self.customer_treeview_frame = tk.Frame(self.tab)
             self.customer_treeview_frame.pack(fill="both", padx=10, pady=10, expand="yes")
@@ -154,10 +174,6 @@ class Customers:
         self.populate_customer_tree()
         
     def populate_customer_tree(self):  
-        """
-        Selects everything in the customer database table and displays it in Treeview
-        """
-
         # Connect to the database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
@@ -193,20 +209,16 @@ class Customers:
         conn.close() 
 
     def new_customer(self):
-        """
-        Opens a new window with the entry boxes used to create a new contact
-        """
-
         # Create a new window and make it sit on top all all other windows
         new_customer_window = tk.Toplevel()
-        new_customer_window.title("Add New Contact")
-        new_customer_window.attributes()
+        new_customer_window.title("Add New Customer")
+        new_customer_window.attributes('-topmost', 'True')
 
         # Create a frame in the new window    
         new_customer_window_frame = tk.Frame(new_customer_window)
         new_customer_window_frame.pack(fill="both", expand=1, pady=10)      
 
-        # Add the entry boxes
+        # Add the entry boxes to the frame
         new_id_label = tk.Label(new_customer_window_frame, text="ID")
         #new_id_label.grid(row=1, column=1, padx=10, pady=5)
         new_id_entry = tk.Entry(new_customer_window_frame, width=15)
@@ -257,38 +269,24 @@ class Customers:
         new_phone_entry = tk.Entry(new_customer_window_frame, width=15)
         new_phone_entry.grid(row=10, column=2, padx=10, pady=5)
 
-        # Save contact
-        new_customer_window_save_button = tk.Button(new_customer_window_frame, text="Save", command=lambda:[save_new_customer()])
+        # Save contact button
+        new_customer_window_save_button = tk.Button(new_customer_window_frame, text="Save", command=lambda:[save_new_customer(), new_customer_window.destroy()])
         new_customer_window_save_button.grid(row=11, column=1, padx=10, pady=5)
 
-        # Close window
+        # Close window button
         new_customer_window_close_button = tk.Button(new_customer_window_frame, text="Close", command=new_customer_window.destroy)
         new_customer_window_close_button.grid(row=11, column=2)
 
         def save_new_customer():
-            """
-            Takes the data from the entry boxes and adds it to the database table as a new contact
-            """
-            
+
             # Connect to database
             conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
             
             # Make sure the new contact has at least a name. If not, provide a popup window asking for a name.
             if len(new_name_entry.get()) == 0:
-                fault_window = tk.Toplevel()
-                fault_window.title("Error")
-                fault_window.attributes()
-                
-                fault_window_frame = tk.Frame(fault_window)
-                fault_window_frame.pack(fill="both", expand=1, pady=10)
-                
-                fault = tk.Label(fault_window_frame, text="A new customer must have a name")
-                fault.pack(side="left", padx=10, pady=10)
-                
-                close_button = tk.Button(fault_window, text="Close", command=fault_window.destroy)
-                close_button.pack(side="bottom", pady=10)
-            
+                Message("A new customer must have a name")
+                            
             # Add the pulled data to the database.
             else:
                 cur.execute("""INSERT INTO Customers (  
@@ -323,13 +321,9 @@ class Customers:
             conn.close() 
 
             # Re-populate the Treeview
-            self.populate_customer_tree()
+            self.populate_customer_tree()          
 
     def edit_customer (self):
-        """
-        Opens a new window with the entry boxes used to edit an existing contact
-        """
-
         # Select the Customer to edit
         selected_customer = self.customer_treeview.focus()
         values_customer = self.customer_treeview.item(selected_customer, 'values') 
@@ -340,7 +334,7 @@ class Customers:
             # Create update window
             edit_customer_window = tk.Toplevel()
             edit_customer_window.title("Update Contact")
-            edit_customer_window.attributes()
+            edit_customer_window.attributes('-topmost', 'True')
 
             # Create frame in the window    
             edit_customer_window_frame = tk.Frame(edit_customer_window)
@@ -409,52 +403,26 @@ class Customers:
             edit_email_entry.insert(0, values_customer[8])
             edit_phone_entry.insert(0, values_customer[9])
 
-            # Save contact 
+            # Save contact button
             close_button = tk.Button(edit_customer_window_frame, text="Save", command=lambda:[update_customer()])
             close_button.grid(row=11, column=1, padx=10, pady=5)
 
-            # Close window
+            # Close window button
             close_button = tk.Button(edit_customer_window_frame, text="Cancel", command=edit_customer_window.destroy)
             close_button.grid(row=11, column=2)
 
         # If a customer isn't select tell the user to select one
         else:
-            fault_window = tk.Toplevel()
-            fault_window.title("Error")
-            fault_window.attributes()
-             
-            fault_window_frame = tk.Frame(fault_window)
-            fault_window_frame.pack(fill="both", expand=1, pady=10)
-             
-            fault = tk.Label(fault_window_frame, text="Please select a contact to edit")
-            fault.pack(side="left", padx=10, pady=10)
-             
-            close_button = tk.Button(fault_window, text="Close", command=fault_window.destroy)
-            close_button.pack(side="bottom", pady=10)
+            Message("Please select a contact to edit")
 
         def update_customer():
-            """
-            Take the data from the entry boxes and update the database of the row selected in the Treeview
-            """
-        
             # Connect to the database
             conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
-            # Make sure the contact has at least a name. If not, show a pop-up window asking for a name
+            # Make sure the contact has a name. If not, show a pop-up window asking for a name
             if len(edit_name_entry.get()) == 0:
-                fault_window = tk.Toplevel()
-                fault_window.title("Error")
-                fault_window.attributes()
-                
-                fault_window.frame = tk.Frame(fault_window)
-                fault_window.frame.pack(fill="both", expand=1, pady=10)
-                
-                fault = tk.Label(fault_window.frame, text="A customer must have a name")
-                fault.pack(side="left", padx=10, pady=10)
-                
-                close_button = tk.Button(fault_window, text="Close", command=fault_window.destroy)
-                close_button.pack(side="bottom", pady=10)
+                Message("A customer must have a name")
             
             # If the contact has a name then update the database
             else:
@@ -495,38 +463,21 @@ class Customers:
             self.populate_customer_tree()
 
     def delete_customer (self):
-        """
-        Delete the row selected in the Treeview from the database
-        """
-
         # Connect to the database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
-        # Make the selected item in Treeview the focus and make it a variable called 'selected'
-        # Pull the values in 'selected' from the 'values' part of the database
-        selected = self.customer_treeview.focus()
-        values = self.customer_treeview.item(selected, 'values') 
+        # Select the customer to delete
+        selected_customer = self.customer_treeview.focus()
+        values_customer = self.customer_treeview.item(selected_customer, 'values') 
         
         # If a customer is selected then delete from the database
-        if values:
-            # Delete the database row(rowid) that has the same rowid as the one selected in the Treeview
-            cur.execute("DELETE FROM Customers WHERE rowid = " + values[0])
+        if values_customer:
+            cur.execute("DELETE FROM Customers WHERE rowid = " + values_customer[0])
 
         # If a customer isn't selected then tell the user to select one         
         else:
-            fault_window = tk.Toplevel()
-            fault_window.title("Error")
-            fault_window.attributes('-topmost', 'true')
-             
-            fault_window_frame = tk.Frame(fault_window)
-            fault_window_frame.pack(fill="both", expand=1, pady=10)
-             
-            fault_failed = tk.Label(fault_window_frame, text="Please select a contact to delete")
-            fault_failed.pack(side="left", padx=10, pady=10)
-             
-            fault_close_button = tk.Button(fault_window, text="Close", command=fault_window.destroy)
-            fault_close_button.pack(side="bottom", pady=10)
+            Message("Please select a customer to delete")
    
         # Close connection
         conn.commit()
@@ -538,10 +489,7 @@ class Customers:
 class Vendors:
 
     def __init__(self):
-        """
-        Creates the Tkinter Notebook tab, tab heading and vendor database table
-        """
-        
+
         def vendor_database_table():
             
             # Connect to the database
@@ -571,42 +519,34 @@ class Vendors:
             main_window.add(self.tab, text="Vendors")
         
         def vendor_ribbon():
-            """                 
-            Creates the ribbon of fuctional buttons
-            """
-        
-            # Make a frame for the button icons to sit
+            # Make a frame for the buttons
             vendor_ribbon_frame = tk.Frame(self.tab)
             vendor_ribbon_frame.pack(fill="x", padx=10, pady=10)
 
-            # Assign an image to each button icon
+            # Assign an image to each button
             self.new_vendor_icon = tk.PhotoImage(file="images/new_contact.png")
             self.delete_vendor_icon = tk.PhotoImage(file="images/delete_contact.png")
             self.edit_vendor_icon = tk.PhotoImage(file="images/edit_contact.png")
 
-            # Add new contact button icon to the frame
-            new_vendor_contact_button = tk.Button(vendor_ribbon_frame, image=self.new_vendor_icon, command=self.new_vendor)
-            new_vendor_contact_button.grid(padx=10, row=1, column=1)
-            new_vendor_contact_label = tk.Label(vendor_ribbon_frame, text="Add New Vendor")
-            new_vendor_contact_label.grid(padx=10, row=2, column=1)
+            # Add new contact button to the frame
+            new_vendor_button = tk.Button(vendor_ribbon_frame, image=self.new_vendor_icon, command=self.new_vendor)
+            new_vendor_button.grid(padx=10, row=1, column=1)
+            new_vendor_label = tk.Label(vendor_ribbon_frame, text="Add New Vendor")
+            new_vendor_label.grid(padx=10, row=2, column=1)
 
-            # Add edit contact button icon to the frame
-            edit_vendor_contact_button = tk.Button(vendor_ribbon_frame, image=self.edit_vendor_icon, command=self.edit_vendor)
-            edit_vendor_contact_button.grid(padx=10, row=1, column=2)
-            edit_vendor_contact_label = tk.Label(vendor_ribbon_frame, text="Edit Vendor")
-            edit_vendor_contact_label.grid(padx=10, row=2, column=2)
+            # Add edit contact button to the frame
+            edit_vendor_button = tk.Button(vendor_ribbon_frame, image=self.edit_vendor_icon, command=self.edit_vendor)
+            edit_vendor_button.grid(padx=10, row=1, column=2)
+            edit_vendor_label = tk.Label(vendor_ribbon_frame, text="Edit Vendor")
+            edit_vendor_label.grid(padx=10, row=2, column=2)
 
-            # Add delete contact button icon to the frame
-            delete_vendor_contact_button = tk.Button(vendor_ribbon_frame, image=self.delete_vendor_icon, command=self.delete_vendor)
-            delete_vendor_contact_button.grid(padx=10, row=1, column=3)
-            delete_vendor_contact_label = tk.Label(vendor_ribbon_frame, text="Delete Vendor")
-            delete_vendor_contact_label.grid(padx=10, row=2, column=3)
+            # Add delete contact button to the frame
+            delete_vendor_button = tk.Button(vendor_ribbon_frame, image=self.delete_vendor_icon, command=self.delete_vendor)
+            delete_vendor_button.grid(padx=10, row=1, column=3)
+            delete_vendor_label = tk.Label(vendor_ribbon_frame, text="Delete Vendor")
+            delete_vendor_label.grid(padx=10, row=2, column=3)
             
         def vendor_treeview():
-            """
-            Creates a Tkinter Treeview for cutomers
-            """
-
             # Create a frame for the vendor treeview
             self.vendor_treeview_frame = tk.Frame(self.tab)
             self.vendor_treeview_frame.pack(fill="both", padx=10, pady=10, expand="yes")
@@ -674,10 +614,6 @@ class Vendors:
         self.populate_vendor_tree()
         
     def populate_vendor_tree(self):  
-        """
-        Selects everything in the vendor database table and displays it in Treeview
-        """
-
         # Connect to the database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
@@ -713,14 +649,10 @@ class Vendors:
         conn.close() 
 
     def new_vendor(self):
-        """
-        Opens a new window with the entry boxes used to create a new contact
-        """
-
         # Create a new window and make it sit on top all all other windows
         new_vendor_window = tk.Toplevel()
         new_vendor_window.title("Add New Contact")
-        new_vendor_window.attributes()
+        new_vendor_window.attributes('-topmost', 'True')
 
         # Create a frame in the new window    
         new_vendor_window_frame = tk.Frame(new_vendor_window)
@@ -777,11 +709,11 @@ class Vendors:
         new_phone_entry = tk.Entry(new_vendor_window_frame, width=15)
         new_phone_entry.grid(row=10, column=2, padx=10, pady=5)
 
-        # Save contact
+        # Save contact button
         new_vendor_window_save_button = tk.Button(new_vendor_window_frame, text="Save", command=lambda:[save_new_vendor()])
         new_vendor_window_save_button.grid(row=11, column=1, padx=10, pady=5)
 
-        # Close window
+        # Close window button
         new_vendor_window_close_button = tk.Button(new_vendor_window_frame, text="Cancel", command=new_vendor_window.destroy)
         new_vendor_window_close_button.grid(row=11, column=2)
 
@@ -796,18 +728,7 @@ class Vendors:
             
             # Make sure the new contact has at least a name. If not, provide a popup window asking for a name.
             if len(new_name_entry.get()) == 0:
-                fault_window = tk.Toplevel()
-                fault_window.title("Error")
-                fault_window.attributes()
-                
-                fault_window_frame = tk.Frame(fault_window)
-                fault_window_frame.pack(fill="both", expand=1, pady=10)
-                
-                fault = tk.Label(fault_window_frame, text="A new vendor must have a name")
-                fault.pack(side="left", padx=10, pady=10)
-                
-                close_button = tk.Button(fault_window, text="Close", command=fault_window.destroy)
-                close_button.pack(side="bottom", pady=10)
+                Message("A new vendor must have a name")
             
             # Add the pulled data to the database.
             else:
@@ -846,10 +767,6 @@ class Vendors:
             self.populate_vendor_tree()
 
     def edit_vendor (self):
-        """
-        Opens a new window with the entry boxes used to edit an existing contact
-        """
-
         # Select the vendor to edit
         selected_vendor = self.vendor_treeview.focus()
         values_vendor = self.vendor_treeview.item(selected_vendor, 'values') 
@@ -860,7 +777,7 @@ class Vendors:
             # Create update window
             edit_vendor_window = tk.Toplevel()
             edit_vendor_window.title("Update Contact")
-            edit_vendor_window.attributes()
+            edit_vendor_window.attributes('-topmost', 'True')
 
             # Create frame in the window    
             edit_vendor_window_frame = tk.Frame(edit_vendor_window)
@@ -929,28 +846,17 @@ class Vendors:
             edit_email_entry.insert(0, values_vendor[8])
             edit_phone_entry.insert(0, values_vendor[9])
 
-            # Save contact 
+            # Save contact button
             close_button = tk.Button(edit_vendor_window_frame, text="Save", command=lambda:[update_vendor()])
             close_button.grid(row=11, column=1, padx=10, pady=5)
 
-            # Close window
+            # Close window button
             close_button = tk.Button(edit_vendor_window_frame, text="Cancel", command=edit_vendor_window.destroy)
             close_button.grid(row=11, column=2)
 
         # If a vendor isn't select tell the user to select one
         else:
-            fault_window = tk.Toplevel()
-            fault_window.title("Error")
-            fault_window.attributes()
-             
-            fault_window_frame = tk.Frame(fault_window)
-            fault_window_frame.pack(fill="both", expand=1, pady=10)
-             
-            fault = tk.Label(fault_window_frame, text="Please select a contact to edit")
-            fault.pack(side="left", padx=10, pady=10)
-             
-            close_button = tk.Button(fault_window, text="Close", command=fault_window.destroy)
-            close_button.pack(side="bottom", pady=10)
+            Message("Please select a vendor to edit")
 
         def update_vendor():
             """
@@ -963,18 +869,7 @@ class Vendors:
 
             # Make sure the contact has at least a name. If not, show a pop-up window asking for a name
             if len(edit_name_entry.get()) == 0:
-                fault_window = tk.Toplevel()
-                fault_window.title("Error")
-                fault_window.attributes()
-                
-                fault_window.frame = tk.Frame(fault_window)
-                fault_window.frame.pack(fill="both", expand=1, pady=10)
-                
-                fault = tk.Label(fault_window.frame, text="A vendor must have a name")
-                fault.pack(side="left", padx=10, pady=10)
-                
-                close_button = tk.Button(fault_window, text="Close", command=fault_window.destroy)
-                close_button.pack(side="bottom", pady=10)
+                Message("A vendor must have a name")
             
             # If the contact has a name then update the database
             else:
@@ -1015,38 +910,21 @@ class Vendors:
             self.populate_vendor_tree()
 
     def delete_vendor (self):
-        """
-        Delete the row selected in the Treeview from the database
-        """
-
         # Connect to the database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
-        # Make the selected item in Treeview the focus and make it a variable called 'selected'
-        # Pull the values in 'selected' from the 'values' part of the database
-        selected = self.vendor_treeview.focus()
-        values = self.vendor_treeview.item(selected, 'values') 
+        # Select a vendor to delete
+        selected_vendor = self.vendor_treeview.focus()
+        values_vendor = self.vendor_treeview.item(selected_vendor, 'values') 
         
         # If a vendor is selected then delete from the database
-        if values:
-            # Delete the database row(rowid) that has the same rowid as the one selected in the Treeview
+        if values_vendor:
             cur.execute("DELETE FROM vendors WHERE rowid = " + values[0])
 
         # If a vendor isn't selected then tell the user to select one         
         else:
-            fault_window = tk.Toplevel()
-            fault_window.title("Error")
-            fault_window.attributes('-topmost', 'true')
-             
-            fault_window_frame = tk.Frame(fault_window)
-            fault_window_frame.pack(fill="both", expand=1, pady=10)
-             
-            fault_failed = tk.Label(fault_window_frame, text="Please select a contact to delete")
-            fault_failed.pack(side="left", padx=10, pady=10)
-             
-            fault_close_button = tk.Button(fault_window, text="Close", command=fault_window.destroy)
-            fault_close_button.pack(side="bottom", pady=10)
+            Message("Please select a contact to delete")
    
         # Close connection
         conn.commit()
@@ -1093,56 +971,47 @@ class Chart_of_accounts:
             main_window.add(self.tab, text="Chart of Accounts")
         
         def accounts_ribbon():
-            """ 
-            Creates the ribbon and functional buttons
-            """
-
-            # Make a frame for the ribbon on the tab
+            # Make a frame for the ribbon
             accounts_ribbon_frame = tk.Frame(self.tab)
-            accounts_ribbon_frame.pack(fill="x", padx=10, pady=10)
+            accounts_ribbon_frame.pack(side="top", fill="x", padx=10, pady=10)
         
-            # Assign an image to each button icon
+            # Assign an image to each button
             self.new_account_icon = tk.PhotoImage(file="images/new_account.png")
             self.new_child_account_icon = tk.PhotoImage(file="images/new_child_account.png")
             self.delete_account_icon = tk.PhotoImage(file="images/delete_account.png")
             self.edit_account_icon = tk.PhotoImage(file="images/edit_account.png")
 
-            # Add "new account" button icon to the frame and give it a command
+            # Add "new account" button to the frame and give it a command
             new_account_button = tk.Button(accounts_ribbon_frame, image=self.new_account_icon, command=self.new_parent_account)
             new_account_button.grid(padx=10, row=1, column=1)
 
             new_account_label = tk.Label(accounts_ribbon_frame, text="Add New Account")
             new_account_label.grid(padx=10, row=2, column=1)
 
-            # Add " add child account" button icon to the frame and give it a command
-            new_child_account_button = tk.Button(accounts_ribbon_frame, image=self.new_child_account_icon, command=self.child_account)
+            # Add "add child account" button to the frame and give it a command  
+            new_child_account_button = tk.Button(accounts_ribbon_frame, image=self.new_child_account_icon, command=self.new_child_account)
             new_child_account_button.grid(padx=10, row=1, column=2)
-
             new_child_account_label = tk.Label(accounts_ribbon_frame, text="Add Child Account")
             new_child_account_label.grid(padx=10, row=2, column=2)
 
-            # Add "edit account" button icon to the frame and give it a command
-            edit_account_button = tk.Button(accounts_ribbon_frame, image=self.edit_account_icon)
+            # Add "edit account" button to the frame and give it a command
+            edit_account_button = tk.Button(accounts_ribbon_frame, image=self.edit_account_icon, command=self.edit_account)
             edit_account_button.grid(padx=10, row=1, column=3)
 
             edit_account_label = tk.Label(accounts_ribbon_frame, text="Edit Account")
             edit_account_label.grid(padx=10, row=2, column=3)
 
-            # Add "delete account" button icon to the frame and give it a command
-            delete_account_button = tk.Button(accounts_ribbon_frame, image=self.delete_account_icon)
+            # Add "delete account" button to the frame and give it a command
+            delete_account_button = tk.Button(accounts_ribbon_frame, image=self.delete_account_icon, command=self.delete_account)
             delete_account_button.grid(padx=10, row=1, column=4)
 
             delete_account_label = tk.Label(accounts_ribbon_frame, text="Delete Account")
             delete_account_label.grid(padx=10, row=2, column=4)
             
         def accounts_treeview():
-            """
-            Creates a Treeview in the tab. Adds a scrollbar to the Treeview, columns, and column headings.
-            """          
-
             # Create a frame for the Treeview
             self.accounts_treeview_frame = tk.Frame(self.tab)
-            self.accounts_treeview_frame.pack(fill="both", padx=10, expand=1)
+            self.accounts_treeview_frame.pack(side="bottom", fill="both", padx=10, expand=1)
 
             # Create a scrollbar for the Treeview
             self.accounts_treeview_scroll = tk.Scrollbar(self.accounts_treeview_frame)
@@ -1156,7 +1025,7 @@ class Chart_of_accounts:
             self.accounts_treeview['columns'] = ("ID", "Account Number", "Type", "Account Name", "Total", "Parent", "Child")
             
             # Create the Treeview column headings
-            self.accounts_treeview.column("#0", minwidth=0, width=0, stretch="false")
+            self.accounts_treeview.column("#0", minwidth=20, width=20, stretch="false")
             self.accounts_treeview.heading("#0", text="")
 
             self.accounts_treeview.column("ID", width=0, stretch="false") 
@@ -1179,15 +1048,14 @@ class Chart_of_accounts:
             
             self.accounts_treeview.column("Child", width=0, stretch="false")            
             self.accounts_treeview.heading("Child", text="Child") 
-
+        
         accounts_database_table()
         accounts_tab()
         accounts_ribbon()
         accounts_treeview()
         self.populate_accounts_tree()
-
+             
     def populate_accounts_tree(self): 
-       
         # Connect to database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
@@ -1218,7 +1086,7 @@ class Chart_of_accounts:
         
         # For each row in the child table, add the data to the Treeview columns
         for row in child_record:
-            self.tab_tree.insert(parent=row[5], index='end', iid=row[2], text='', values=(
+            self.accounts_treeview.insert(parent=row[5], index='end', iid=row[2], text='', values=(
                 row[0], 
                 row[2], 
                 row[7],
@@ -1233,15 +1101,10 @@ class Chart_of_accounts:
         conn.close() 
 
     def new_parent_account(self):
-
-        """
-        Opens a new window with the entry boxes used to create a new account
-        """
-
         # Create window and add a frame
         new_account_window = tk.Toplevel()
         new_account_window.title("Add New Account")
-        #new_account_window.attributes('-topmost', 'true')
+        new_account_window.attributes('-topmost', 'True')
             
         new_account_window_frame = tk.Frame(new_account_window)
         new_account_window_frame.pack(fill="both", expand=1, pady=10)      
@@ -1302,52 +1165,11 @@ class Chart_of_accounts:
             # Pull the data from the entry boxes and store them in a list called 'inputted_data'. "NO" is to signal that this is not a child account.
             inputted_data = [new_account_number_entry.get(), new_account_name_entry.get(), "NO", new_account_type_entry.get()]
 
-            # Make sure the new account has a number. If not, provide a popup window asking for a number.    
-            if len(new_account_number_entry.get()) == 0:
-                fault_window = tk.Toplevel()
-                fault_window.title("Error")
-                fault_window.attributes('-topmost', 'true')
-                
-                fault_window.frame = tk.Frame(fault_window)
-                fault_window.frame.pack(fill="both", expand=1, pady=10)
-                
-                fault = tk.Label(fault_window.frame, text="A new account must have an Account Number, Name and account type")
-                fault.pack(side="left", padx=10, pady=10)
-                
-                close_button = tk.Button(fault_window, text="Close", command=fault_window.destroy)
-                close_button.pack(side="bottom", pady=10)    
+            # Make sure the new account has a number, andme and type. If not, provide a popup window asking for a number.    
+            if len(new_account_number_entry.get()) == 0 or len(new_account_name_entry.get()) == 0 or (new_account_type_entry.get() != "Bank" and new_account_type_entry.get() != "Cash" and new_account_type_entry.get() != "Income" and new_account_type_entry.get() != "Expenses"):
+                Message("A new account must have an Account Number, Name and account type")  
 
-            # Make sure the new account has a name. If not, provide a popup window asking for a name.
-            elif len(new_account_name_entry.get()) == 0:
-                fault_window = tk.Toplevel()
-                fault_window.title("Error")
-                fault_window.attributes('-topmost', 'true')
-                
-                fault_window.frame = tk.Frame(fault_window)
-                fault_window.frame.pack(fill="both", expand=1, pady=10)
-                
-                fault = tk.Label(fault_window.frame, text="A new account must have an Account Number, Name and account type")
-                fault.pack(side="left", padx=10, pady=10)
-                
-                close_button = tk.Button(fault_window, text="Close", command=fault_window.destroy)
-                close_button.pack(side="bottom", pady=10)      
-            
-            # Make sure the new account has an account type selected
-            elif new_account_type_entry.get() != "Bank" and new_account_type_entry.get() != "Cash" and new_account_type_entry.get() != "Income" and new_account_type_entry.get() != "Expenses":
-                fault_window = tk.Toplevel()
-                fault_window.title("Error")
-                fault_window.attributes('-topmost', 'true')
-                
-                fault_window.frame = tk.Frame(fault_window)
-                fault_window.frame.pack(fill="both", expand=1, pady=10)
-                
-                fault = tk.Label(fault_window.frame, text="A new account must have an Account Number, Name and account type")
-                fault.pack(side="left", padx=10, pady=10)
-                
-                close_button = tk.Button(fault_window, text="Close", command=fault_window.destroy)
-                close_button.pack(side="bottom", pady=10)       
-
-            # If the new account has a name and number insert into database...
+            # If the new account has a name, number and type insert into database...
             else:
                 if len(new_account_number_entry.get() and new_account_name_entry.get()) != 0:
                     # Check to see if the account number is in use already. Attempt to make an account number list from the database using the account number in the entry box        
@@ -1356,36 +1178,11 @@ class Chart_of_accounts:
                     cur.execute("SELECT account_number FROM child_accounts WHERE account_number = " + new_account_number_entry.get() + "")
                     child_account_number_query = cur.fetchone()
 
-                    # If of the lists exist (True), ie account number is in the database tell the user the account number is in use.
-                    if parent_account_number_query:
-                        fault_window = tk.Toplevel()
-                        fault_window.title("Error")
-                        fault_window.attributes('-topmost', 'true')
-                        
-                        fault_window.frame = tk.Frame(fault_window)
-                        fault_window.frame.pack(fill="both", expand=1, pady=10)
-                        
-                        fault = tk.Label(fault_window.frame, text="That account number is in use already")
-                        fault.pack(side="left", padx=10, pady=10)
-                        
-                        close_button = tk.Button(fault_window, text="Close", command=fault_window.destroy)
-                        close_button.pack(side="bottom", pady=10)    
-                    
-                    elif child_account_number_query:
-                        fault_window = tk.Toplevel()
-                        fault_window.title("Error")
-                        fault_window.attributes('-topmost', 'true')
-                        
-                        fault_window.frame = tk.Frame(self.window)
-                        fault_window.frame.pack(fill="both", expand=1, pady=10)
-                        
-                        fault = tk.Label(fault_window.frame, text="That account number is in use already")
-                        fault.pack(side="left", padx=10, pady=10)
-                        
-                        close_button = tk.Button(fault_window, text="Close", command=fault_window.destroy)
-                        close_button.pack(side="bottom", pady=10)         
-                        
-                        # If false, (account number in entry box isn't in database) insert entry box data into database
+                    # If either of the lists exist (True), ie account number is in the database tell the user the account number is in use.
+                    if parent_account_number_query or child_account_number_query:
+                        Message("That account number is in use already")  
+
+                    # If false, (account number in entry box isn't in database) insert entry box data into database
                     else:
                         # Insert entry box data into database and close connection.
                         cur.execute("""INSERT INTO parent_accounts (
@@ -1404,210 +1201,105 @@ class Chart_of_accounts:
             conn.commit()
             conn.close() 
 
-            # Re=populate the Treeview
+            # Repopulate the Treeview
             self.populate_accounts_tree()
         
     def new_child_account(self):
-        """
-        Opens a new window with the entry boxes used to create a new account
-        """
-
-        # Make the selected item in Treeview the focus and make it a variable called 'selected'
-        # Pull the values in 'selected' from the 'values' part of the database
-        self.selected = self.tab_tree.focus()
-        self.selected_account = self.tab_tree.item(self.selected, 'values') 
+        # Select a parent account to create a child from...
+        selected_account = self.accounts_treeview.focus()
+        values_account = self.accounts_treeview.item(selected_account, 'values') 
         
-        if self.selected_account:
+        # If a parent account is selected open a window to enter the child account details into
+        if values_account:
             # Create window and add a frame
-            self.child_account_window = Toplevel()
-            self.child_account_window.title("Add Child Account")
-            self.child_account_window.attributes('-topmost', 'true')
+            child_account_window = tk.Toplevel()
+            child_account_window.title("Add Child Account")
+            child_account_window.attributes('-topmost', 'True')
                 
-            self.child_account_window_frame = Frame(self.child_account_window)
-            self.child_account_window_frame.pack(fill="both", expand=1, pady=10)      
+            child_account_window_frame = tk.Frame(child_account_window)
+            child_account_window_frame.pack(fill="both", expand=1, pady=10)      
 
             # Create the entry boxes
-            self.child_account_id_label = Label(self.child_account_window_frame, text="ID")
-            #self.child_account_id_label.grid(row=1, column=1, padx=10, pady=5)
-            self.child_account_id_entry = Entry(self.child_account_window_frame, width=15)
-            #self.child_account_id_entry.grid(row=1, column=2, padx=10, pady=5)
+            child_account_id_label = tk.Label(child_account_window_frame, text="ID")
+            #child_account_id_label.grid(row=1, column=1, padx=10, pady=5)
+            child_account_id_entry = tk.Entry(child_account_window_frame, width=15)
+            #child_account_id_entry.grid(row=1, column=2, padx=10, pady=5)
             
-            self.child_account_number_label = Label(self.child_account_window_frame, text="Account Number")
-            self.child_account_number_label.grid(row=2, column=1, padx=10, pady=5)
-            self.child_account_number_entry = Entry(self.child_account_window_frame, width=15)
-            self.child_account_number_entry.grid(row=2, column=2, padx=10, pady=5)
+            child_account_number_label = tk.Label(child_account_window_frame, text="Account Number")
+            child_account_number_label.grid(row=2, column=1, padx=10, pady=5)
+            child_account_number_entry = tk.Entry(child_account_window_frame, width=15)
+            child_account_number_entry.grid(row=2, column=2, padx=10, pady=5)
 
-            self.child_account_name_label = Label(self.child_account_window_frame, text="Account Name")
-            self.child_account_name_label.grid(row=3, column=1, padx=10, pady=5)
-            self.child_account_name_entry = Entry(self.child_account_window_frame, width=15)
-            self.child_account_name_entry.grid(row=3, column=2, padx=10, pady=5)    
+            child_account_name_label = tk.Label(child_account_window_frame, text="Account Name")
+            child_account_name_label.grid(row=3, column=1, padx=10, pady=5)
+            child_account_name_entry = tk.Entry(child_account_window_frame, width=15)
+            child_account_name_entry.grid(row=3, column=2, padx=10, pady=5)    
 
-            self.child_account_total_label = Label(self.child_account_window_frame, text="Total")
-            #self.child_account_total_label.grid(row=4, column=1, padx=10, pady=5)
-            self.child_account_total_entry = Entry(self.child_account_window_frame, width=15)
-            #self.child_account_total_entry.grid(row=4, column=2, padx=10, pady=5)       
+            child_account_total_label = tk.Label(child_account_window_frame, text="Total")
+            #child_account_total_label.grid(row=4, column=1, padx=10, pady=5)
+            child_account_total_entry = tk.Entry(child_account_window_frame, width=15)
+            #child_account_total_entry.grid(row=4, column=2, padx=10, pady=5)       
 
-            self.child_parent_account_label = Label(self.child_account_window_frame, text="Parent")
-            self.child_parent_account_label.grid(row=5, column=1, padx=10, pady=5)
-            self.child_parent_account_entry = Entry(self.child_account_window_frame, width=15)
-            self.child_parent_account_entry.grid(row=5, column=2, padx=10, pady=5)     
+            parent_account_number_label = tk.Label(child_account_window_frame, text="Parent")
+            parent_account_number_label.grid(row=5, column=1, padx=10, pady=5)
+            parent_account_number_entry = tk.Entry(child_account_window_frame, width=15)
+            parent_account_number_entry.grid(row=5, column=2, padx=10, pady=5) 
+            parent_account_number_entry.insert(0, values_account[1])  
+            parent_account_number_entry.config(state='readonly')  
 
-            self.child_child_account_status_label = Label(self.child_account_window_frame, text="Child Account?")
-            #self.child_child_account_status_label.grid(row=6, column=1, padx=10, pady=5)
-            self.child_child_account_status_entry = Entry(self.child_account_window_frame, width=15)
-            #self.child_child_account_status_entry.grid(row=6, column=2, padx=10, pady=5)
+            child_account_status_label = tk.Label(child_account_window_frame, text="Child Account?")
+            #child_account_status_label.grid(row=6, column=1, padx=10, pady=5)
+            child_account_status_entry = tk.Entry(child_account_window_frame, width=15)
+            #child_account_status_entry.grid(row=6, column=2, padx=10, pady=5)
 
-            self.child_account_type_label = Label(self.child_account_window_frame, text="Type")
-            self.child_account_type_label.grid(row=7, column=1, padx=10, pady=5)
-            self.child_account_type_entry = Entry(self.child_account_window_frame, width=15)
-            self.child_account_type_entry.grid(row=7, column=2, padx=10, pady=5)
-
-            # Using the account number and account type of the selected account as the parent account number and account type, insert the account number and account type into the entry boxes
-            self.child_parent_account_entry.insert(0, self.selected_account[1])
-            self.child_account_type_entry.insert(0,self.selected_account[2])
-            
-            # Make account type and parent account number read-only
-            self.child_account_type_entry.config(state='readonly')
-            self.child_parent_account_entry.config(state='readonly')
+            child_account_type_label = tk.Label(child_account_window_frame, text="Type")
+            child_account_type_label.grid(row=7, column=1, padx=10, pady=5)
+            child_account_type_entry = tk.Entry(child_account_window_frame, width=15)
+            child_account_type_entry.grid(row=7, column=2, padx=10, pady=5)
+            child_account_type_entry.insert(0, values_account[2])
+            child_account_type_entry.config(state='readonly')
 
             # Save contact and close window
-            self.close_button = Button(self.child_account_window_frame, text="Save", command=lambda:[self.child_account(), self.child_account_window.destroy()])
-            self.close_button.grid(row=8, column=1)
+            save_button = tk.Button(child_account_window_frame, text="Save", command=lambda:[save_child_account(), child_account_window.destroy()])
+            save_button.grid(row=8, column=1)
 
             # Close window
-            self.close_button = Button(self.child_account_window_frame, text="Close", command=self.child_account_window.destroy)
-            self.close_button.grid(row=8, column=2)    
+            close_button = tk.Button(child_account_window_frame, text="Close", command=child_account_window.destroy)
+            close_button.grid(row=8, column=2)    
 
         # If a parent account hasn't been selected tell the user to choose a parent account. 
         else:
-            self.window = Toplevel()
-            self.window.title("Error")
-            self.window.attributes('-topmost', 'true')
-            
-            self.window_frame = Frame(self.window)
-            self.window_frame.pack(fill="both", expand=1, pady=10)
-            
-            self.failed = Label(self.window_frame, text="Please select a parent account first")
-            self.failed.pack(side=LEFT, padx=10, pady=10)
-            
-            self.close_button = Button(self.window, text="Close", command=self.window.destroy)
-            self.close_button.pack(side=BOTTOM, pady=10)
+            Message("Please select a parent account first")
         
-        def child_account(self):
-            """
-            Creates a new account but as a child to an existing account
-            """
-
+        def save_child_account():
+            # Connect to the database
             conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Pull the data from the entry boxes and store them in a list called 'inputted_data'. "YES" is to signal that it's a child account.
-            inputted_data = [self.child_account_number_entry.get(), self.child_account_name_entry.get(), self.child_parent_account_entry.get(), "YES", self.child_account_type_entry.get()]
+            inputted_data = [child_account_number_entry.get(), child_account_name_entry.get(), parent_account_number_entry.get(), "YES", child_account_type_entry.get()]
 
-            # Make sure the new account has a number. If not, provide a popup window asking for a number. 
-            if len(self.child_account_number_entry.get()) == 0:
-                self.window = Toplevel()
-                self.window.title("Error")
-                self.window.attributes('-topmost', 'true')
-                
-                self.window.frame = Frame(self.window)
-                self.window.frame.pack(fill="both", expand=1, pady=10)
-                
-                self.failed = Label(self.window.frame, text="A new " + self.button_info + " must have an Account Number and Name")
-                self.failed.pack(side=LEFT, padx=10, pady=10)
-                
-                self.close_button = Button(self.window, text="Close", command=self.window.destroy)
-                self.close_button.pack(side=BOTTOM, pady=10)    
-
-            # Make sure the new account has a name. If not, provide a popup window asking for a name. 
-            elif len(self.child_account_name_entry.get()) == 0:
-                self.window = Toplevel()
-                self.window.title("Error")
-                self.window.attributes('-topmost', 'true')
-                
-                self.window.frame = Frame(self.window)
-                self.window.frame.pack(fill="both", expand=1, pady=10)
-                
-                self.failed = Label(self.window.frame, text="A new " + self.button_info + " must have an Account Number and Name")
-                self.failed.pack(side=LEFT, padx=10, pady=10)
-                
-                self.close_button = Button(self.window, text="Close", command=self.window.destroy)
-                self.close_button.pack(side=BOTTOM, pady=10) 
-
-            # Make sure the new account has a parent account number. If not, provide a pop-up window asking for a parent account to be selected. 
-            elif len(self.child_parent_account_entry.get()) == 0:
-                
-                self.window = Toplevel()
-                self.window.title("Error")
-                self.window.attributes('-topmost', 'true')
-                
-                self.window.frame = Frame(self.window)
-                self.window.frame.pack(fill="both", expand=1, pady=10)
-                
-                self.failed = Label(self.window.frame, text="Please select a parent account first")
-                self.failed.pack(side=LEFT, padx=10, pady=10)
-                
-                self.close_button = Button(self.window, text="Close", command=self.window.destroy)
-                self.close_button.pack(side=BOTTOM, pady=10)
-            
-            # If the parent account chosen is already a child account tell the user that a child account cannot be a parent account
-            elif self.selected_account[5] == "YES":
-                self.window = Toplevel()
-                self.window.title("Error")
-                self.window.attributes('-topmost', 'true')
-                
-                self.window.frame = Frame(self.window)
-                self.window.frame.pack(fill="both", expand=1, pady=10)
-                
-                self.failed = Label(self.window.frame, text="You cannot have a child account of a child account")
-                self.failed.pack(side=LEFT, padx=10, pady=10)
-                
-                self.close_button = Button(self.window, text="Close", command=self.window.destroy)
-                self.close_button.pack(side=BOTTOM, pady=10)
+            # Make sure the new account has a number and name. If not, provide a popup window asking for a number and name. 
+            if len(child_account_number_entry.get()) == 0 or len(child_account_name_entry.get()) == 0:
+                Message("A new child account must have an Account Number and Name")    
 
             # If the new account has an account number, name and parent account then add to database
-            elif len(self.child_account_number_entry.get() and self.child_account_name_entry.get() and self.child_parent_account_entry.get()) != 0: 
+            elif len(child_account_number_entry.get() and child_account_name_entry.get()) != 0: 
 
                 # Check to see if the account number is in use already. Attempt to make an account number list from the database using the account number in the entry box        
-                cur.execute("SELECT account_number FROM Accounts WHERE account_number = " + self.child_account_number_entry.get() + "")
+                cur.execute("SELECT account_number FROM parent_accounts WHERE account_number = " + child_account_number_entry.get() + "")
                 parent_account_number_query = cur.fetchone()
-                cur.execute("SELECT account_number FROM Child_Accounts WHERE account_number = " + self.child_account_number_entry.get() + "")
+                cur.execute("SELECT account_number FROM child_accounts WHERE account_number = " + child_account_number_entry.get() + "")
                 child_account_number_query = cur.fetchone()
 
                 # If the list exists (True), ie account number is in the database tell the user the account number is in use.
-                if parent_account_number_query:
-                    self.window = Toplevel()
-                    self.window.title("Error")
-                    self.window.attributes('-topmost', 'true')
-                    
-                    self.window.frame = Frame(self.window)
-                    self.window.frame.pack(fill="both", expand=1, pady=10)
-                    
-                    self.failed = Label(self.window.frame, text="That account number is already in use")
-                    self.failed.pack(side=LEFT, padx=10, pady=10)
-                    
-                    self.close_button = Button(self.window, text="Close", command=self.window.destroy)
-                    self.close_button.pack(side=BOTTOM, pady=10)  
-
-                # If the list exists (True), ie account number is in the database tell the user the account number is in use.
-                if child_account_number_query:
-                    self.window = Toplevel()
-                    self.window.title("Error")
-                    self.window.attributes('-topmost', 'true')
-                    
-                    self.window.frame = Frame(self.window)
-                    self.window.frame.pack(fill="both", expand=1, pady=10)
-                    
-                    self.failed = Label(self.window.frame, text="That account number is already in use")
-                    self.failed.pack(side=LEFT, padx=10, pady=10)
-                    
-                    self.close_button = Button(self.window, text="Close", command=self.window.destroy)
-                    self.close_button.pack(side=BOTTOM, pady=10)   
+                if parent_account_number_query or child_account_number_query:
+                    Message("That account number is already in use")
 
                 # If the list doesn't exist (False), add the contents of the entry boxes to the database
                 else:
                     # Add contents of entry boxes to the database
-                    cur.execute("INSERT INTO Child_Accounts (account_number, account_name, total, parent, child, type) VALUES (?, ?, 0.00, ?, ?, ?)", inputted_data)
+                    cur.execute("INSERT INTO child_accounts (account_number, account_name, total, parent, child, type) VALUES (?, ?, 0.00, ?, ?, ?)", inputted_data)
 
             # Close connection
             conn.commit()
@@ -1615,13 +1307,428 @@ class Chart_of_accounts:
 
             # Re-populate the Treeview      
             self.populate_accounts_tree()
+    
+    def edit_account(self):
+        # Select an account to edit
+        selected_account = self.accounts_treeview.focus()
+        values_account = self.accounts_treeview.item(selected_account, 'values') 
+
+        # If an account is selected open the new window and fill the entry boxes with the existing data
+        if values_account:
+            # Create window and add a frame
+            edit_account_window = tk.Toplevel()
+            edit_account_window.title("Edit Account")
+            edit_account_window.attributes('-topmost', 'True')
+                
+            edit_account_window_frame = tk.Frame(edit_account_window)
+            edit_account_window_frame.pack(fill="both", expand=1, pady=10)      
+
+            # Create the entry boxes
+            edit_account_id_label = tk.Label(edit_account_window_frame, text="ID")
+            #edit_account_id_label.grid(row=1, column=1, padx=10, pady=5)
+            edit_account_id_entry = tk.Entry(edit_account_window_frame, width=15)
+            #edit_account_id_entry.grid(row=1, column=2, padx=10, pady=5)
             
-Customers()
-Vendors()
+            edit_account_number_label = tk.Label(edit_account_window_frame, text="Account Number")
+            edit_account_number_label.grid(row=2, column=1, padx=10, pady=5)
+            edit_account_number_entry = tk.Entry(edit_account_window_frame, width=15)
+            edit_account_number_entry.grid(row=2, column=2, padx=10, pady=5)
+
+            edit_account_name_label = tk.Label(edit_account_window_frame, text="Account Name")
+            edit_account_name_label.grid(row=3, column=1, padx=10, pady=5)
+            edit_account_name_entry = tk.Entry(edit_account_window_frame, width=15)
+            edit_account_name_entry.grid(row=3, column=2, padx=10, pady=5)    
+
+            edit_account_total_label = tk.Label(edit_account_window_frame, text="Total")
+            #edit_account_total_label.grid(row=4, column=1, padx=10, pady=5)
+            edit_account_total_entry = tk.Entry(edit_account_window_frame, width=15)
+            #edit_account_total_entry.grid(row=4, column=2, padx=10, pady=5)       
+
+            edit_parent_account_label = tk.Label(edit_account_window_frame, text="Parent")
+            edit_parent_account_label.grid(row=5, column=1, padx=10, pady=5)
+            edit_parent_account_entry = tk.Entry(edit_account_window_frame, width=15)
+            edit_parent_account_entry.grid(row=5, column=2, padx=10, pady=5)     
+
+            edit_child_account_status_label = tk.Label(edit_account_window_frame, text="Child Account?")
+            #edit_child_account_status_label.grid(row=6, column=1, padx=10, pady=5)
+            edit_child_account_status_entry = tk.Entry(edit_account_window_frame, width=15)
+            #edit_child_account_status_entry.grid(row=6, column=2, padx=10, pady=5)
+
+            edit_account_type_label = tk.Label(edit_account_window_frame, text="Type")
+            edit_account_type_label.grid(row=7, column=1, padx=10, pady=5)
+            edit_account_type_entry = tk.Entry(edit_account_window_frame, width=15)
+            edit_account_type_entry.grid(row=7, column=2, padx=10, pady=5)
+
+            # Insert the pulled values from the database into the entry boxes
+            edit_account_id_entry.insert(0, values_account[0])
+            edit_account_number_entry.insert(0,values_account[1])
+            edit_account_name_entry.insert(0, values_account[3])
+            edit_account_total_entry.insert(0, values_account[4])
+            edit_parent_account_entry.insert(0, values_account[5])
+            edit_child_account_status_entry.insert(0, values_account[6])
+            edit_account_type_entry.insert(0, values_account[2])
+
+            # Make parent account number and account type readonly
+            edit_account_number_entry.config(state='readonly')
+            edit_parent_account_entry.config(state='readonly')
+            edit_account_type_entry.config(state='readonly')
+
+            # Update account button
+            save_button = tk.Button(edit_account_window_frame, text="Save", command=lambda:[save_account_edit(), edit_account_window.destroy()])
+            save_button.grid(row=8, column=1)
+
+            # Close window button
+            close_button = tk.Button(edit_account_window_frame, text="Close", command=edit_account_window.destroy)
+            close_button.grid(row=8, column=2)
+
+        # If an account in the Treeview isn't selected tell the user to select and account
+        else:
+            Message("Please select an account to edit")
+    
+        def save_account_edit():
+            #Connect to the database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
+
+            # Make sure the account has a name, if not show a popup window telling customer to set a name
+            if len(edit_account_name_entry.get()) == 0:
+                Message("An account must have a name and number")
+            
+            # If the account that is being enetered is not a child account insert the data from the entry boxes into the Accounts table
+            elif values_account[6] == "NO":
+                # Update the parent account
+                cur.execute("""UPDATE parent_accounts SET 
+                    account_name = :account_name 
+                    
+                    WHERE 
+                    oid = :oid""", 
+                    {
+                    'account_name' : edit_account_name_entry.get(), 
+                    'oid' : edit_account_id_entry.get()
+                    })
+            
+            # If the account that is being enetered is a child account insert the data from the entry boxes into the Child_accounts tabel
+            else:
+                # Update the child account database
+                cur.execute("""UPDATE child_accounts SET 
+                account_number = :account_number, 
+                account_name = :account_name 
+                
+                WHERE 
+                
+                oid = :oid""", 
+                {
+                'account_number' : edit_account_number_entry.get(), 
+                'account_name' : edit_account_name_entry.get(), 
+                'oid' : edit_account_id_entry.get()
+                })
+
+            # Close connection
+            conn.commit()
+            conn.close() 
+
+            # Re-populate the Treeview               
+            self.populate_accounts_tree()
+
+    def delete_account(self):
+        # Connect to the database
+        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        cur = conn.cursor()
+
+        # Select an account to delete
+        selected_account = self.accounts_treeview.focus()
+        values_account = self.accounts_treeview.item(selected_account, 'values') 
+        
+        # If an account has been selected in Treeview
+        if values_account:
+            # If the account that is being deleted is a child account...
+            if values_account[6] == "YES":
+                # Select rowid and everything in the Child_accounts table. 
+                cur.execute("SELECT rowid, * FROM child_accounts")
+
+                # Delete the database row(rowid) that has the same rowid as the one selected in the Treeview         
+                cur.execute("DELETE FROM child_accounts WHERE rowid = " + str(values_account[0]))
+
+            # If the account that is being deleted is not a child account...
+            elif values_account[6] == "NO":
+                # Does the account number exist in the Child_accounts table named as a parent account (ie, does the account to be deleted have child accounts?)
+                cur.execute("SELECT parent FROM child_accounts WHERE parent = " + values_account[1] + "")
+                parent_to_child_query = cur.fetchone()
+
+                #If true, show a popup window telling user to delete all child accoutns first
+                if parent_to_child_query:
+                    Message("Please delete all child accounts first")
+                
+                # If the account doesn't have children delete from database
+                else:
+                    # Select rowid and everything in table, fetch and save as 'record'
+                    cur.execute("SELECT rowid, * FROM parent_accounts")
+                    
+                    # Delete the row whchi has the rowid from the entry box    
+                    cur.execute("DELETE FROM parent_accounts WHERE rowid = " + str(values_account[0]))
+
+        else:
+            Message("Please select an account to delete")
+    
+        # Close connection
+        conn.commit()
+        conn.close() 
+
+        # Re-populate the Treeview
+        self.populate_accounts_tree()
+
+class Settings:
+
+    def __init__(self):
+
+        def settings_database_table():
+            # Connect to the database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
+
+            # Create database table
+            cur.execute('''CREATE TABLE IF NOT EXISTS settings (   
+            company TEXT, 
+            street TEXT, 
+            town TEXT, 
+            city TEXT, 
+            county TEXT, 
+            postcode TEXT, 
+            email TEXT, 
+            phone INTEGER
+            )''')
+
+            # Close connection
+            conn.commit()
+            conn.close() 
+
+        def settings_tab():
+            # Create the settings tab
+            self.settings_tab = tk.Frame(main_window)
+            self.settings_tab.pack(fill="both")
+
+            # Add the tab to the Notebook
+            main_window.add(self.settings_tab, text="Settings")         
+        
+        settings_database_table()
+        settings_tab()
+        self.business_address()
+
+    def business_address(self):
+        # Create the frame for the business address form
+        business_address_frame = tk.LabelFrame(self.settings_tab, text="Business Address")
+        business_address_frame.pack(fill="x", padx=10, pady=10)
+
+        # Add the entry boxes
+        company_label = tk.Label(business_address_frame, text="Company")
+        company_label.grid(row=1, column=1, padx=10, pady=5)
+        company_entry = tk.Entry(business_address_frame, width=15)
+        company_entry.grid(row=1, column=2, padx=10, pady=5)
+        
+        street_label = tk.Label(business_address_frame, text="Street")
+        street_label.grid(row=2, column=1, padx=10, pady=5)
+        street_entry = tk.Entry(business_address_frame, width=15)
+        street_entry.grid(row=2, column=2, padx=10, pady=5)
+    
+        town_label = tk.Label(business_address_frame, text="Town")
+        town_label.grid(row=3, column=1, padx=10, pady=5)
+        town_entry = tk.Entry(business_address_frame, width=15)
+        town_entry.grid(row=3, column=2, padx=10, pady=5)
+        
+        city_label = tk.Label(business_address_frame, text="City")
+        city_label.grid(row=4, column=1, padx=10, pady=5)
+        city_entry = tk.Entry(business_address_frame, width=15)
+        city_entry.grid(row=4, column=2, padx=10, pady=5)
+        
+        county_label = tk.Label(business_address_frame, text="County")
+        county_label.grid(row=5, column=1, padx=10, pady=5)
+        county_entry = tk.Entry(business_address_frame, width=15)
+        county_entry.grid(row=5, column=2, padx=10, pady=5)
+        
+        postcode_label = tk.Label(business_address_frame, text="Postcode")
+        postcode_label.grid(row=6, column=1, padx=10, pady=5)
+        postcode_entry = tk.Entry(business_address_frame, width=15)
+        postcode_entry.grid(row=6, column=2, padx=10, pady=5)
+        
+        email_label = tk.Label(business_address_frame, text="Email")
+        email_label.grid(row=7, column=1, padx=10, pady=5)
+        email_entry = tk.Entry(business_address_frame, width=15)
+        email_entry.grid(row=7, column=2, padx=10, pady=5)
+        
+        phone_label = tk.Label(business_address_frame, text="Phone")
+        phone_label.grid(row=8, column=1, padx=10, pady=5)
+        phone_entry = tk.Entry(business_address_frame, width=15)
+        phone_entry.grid(row=8, column=2, padx=10, pady=5)
+
+        def populate_business_address():
+            # Connect to the database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
+
+            # Clear the business address entry boxes 
+            company_entry.delete(0, 'end')
+            street_entry.delete(0, 'end')
+            town_entry.delete(0, 'end')
+            city_entry.delete(0, 'end')
+            county_entry.delete(0, 'end')
+            postcode_entry.delete(0, 'end')
+            email_entry.delete(0, 'end')
+            phone_entry.delete(0, 'end')
+
+            # Create the business address table
+            cur.execute('''CREATE TABLE IF NOT EXISTS business_address (   
+            company TEXT, 
+            street TEXT, 
+            town TEXT, 
+            city TEXT, 
+            county TEXT, 
+            postcode TEXT, 
+            email TEXT, 
+            phone INTEGER
+            )''')
+
+            # Select everything from the business address table
+            cur.execute("SELECT * FROM business_address WHERE rowid = 1")
+            values_business_address = cur.fetchall()  
+
+            # Insert the data from the table into the business address entry boxes
+            for record in values_business_address:
+                company_entry.insert(0, record[0])
+                street_entry.insert(0, record[1])
+                town_entry.insert(0, record[2])
+                city_entry.insert(0, record[3])
+                county_entry.insert(0, record[4])
+                postcode_entry.insert(0, record[5])
+                email_entry.insert(0, record[6])
+                phone_entry.insert(0, record[7])
+            
+            # If there are data for the business address in the database create a button named update
+            if values_business_address:
+                update_business_address_button = tk.Button(business_address_frame, text="Update", command=lambda:[update_business_address()])
+                update_business_address_button.grid(row=9, column=1, padx=10, pady=5)
+            
+            # If the table is empty then create a button named save
+            else:
+                save_business_address_button = tk.Button(business_address_frame, text="Save", command=lambda:[save_business_address(), populate_business_address()])
+                save_business_address_button.grid(row=9, column=1, padx=10, pady=5)
+
+            # Close connection
+            conn.commit()
+            conn.close() 
+
+        def save_business_address():
+                # Connect to the database
+                conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+                cur = conn.cursor()
+
+                # Get the data from the entry boxes
+                inputted_data= [
+                company_entry.get(), 
+                street_entry.get(), 
+                town_entry.get(), 
+                city_entry.get(), 
+                county_entry.get(), 
+                postcode_entry.get(), 
+                email_entry.get(), 
+                phone_entry.get()
+                ]
+
+                # If a business name hasn't been entered pop up a window asking for a name 
+                if len(company_entry.get()) == 0:
+                    Message("Please enter at least a name")
+
+                # Save the data from the entry boxes in the database
+                else:
+                    # Add data to the database
+                    cur.execute('''INSERT INTO business_address (  
+                        company, 
+                        street, 
+                        town, 
+                        city, 
+                        county, 
+                        postcode, 
+                        email, 
+                        phone
+                        ) 
+
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)'''
+                        ,inputted_data)
+
+                    # Display a message window telling the user the business address is saved
+                    Message("Business address saved")
+
+                # Close connection
+                conn.commit()
+                conn.close() 
+
+        def update_business_address():
+            # Connect to the database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
+
+            # If a business name hasn't been entered pop up a window asking for a name
+            if len(company_entry.get()) == 0:
+                Message("Please enter at least a name")
+
+            # If a business address name has been entered then save the data from the entry boxes in the database
+            else:
+                cur.execute("""UPDATE business_address SET 
+                    company = :company, 
+                    street = :street, 
+                    town = :town, 
+                    city = :city, 
+                    county = :county, 
+                    postcode = :postcode, 
+                    email = :email, 
+                    phone = :phone 
+
+                    WHERE oid = :oid""",
+                    {
+                    'company' : company_entry.get(),
+                    'street' : street_entry.get(),
+                    'town' : town_entry.get(),
+                    'city'  : city_entry.get(),
+                    'county' : county_entry.get(),
+                    'postcode' : postcode_entry.get(),
+                    'email' : email_entry.get(),
+                    'phone' : phone_entry.get(),
+                    'oid' : 1
+                    })
+
+                # Display a message window telling the user the business address is updated
+                Message("Business address updated")
+
+            # Close connection
+            conn.commit()
+            conn.close() 
+        
+        populate_business_address()
+        
+class Message:
+
+    def __init__(self, message):
+        # Create a window
+        message_window = tk.Toplevel()
+        message_window.title("Message")
+        message_window.attributes('-topmost', 'True')
+        
+        # Create a frame in the window
+        message_window_frame = tk.Frame(message_window)
+        message_window_frame.pack(fill="both", expand=1, pady=10)
+        
+        # Add a message to the frame
+        message = tk.Label(message_window_frame, text=message)
+        message.pack(side="left", padx=10, pady=10)
+        
+        # Create a close button
+        close_button = tk.Button(message_window, text="Close", command=message_window.destroy)
+        close_button.pack(side="bottom", pady=10)
+
+
+customers = Customers()
+vendors = Vendors()
 Chart_of_accounts()
+Settings()
+Menu()
 
 root.mainloop()
-
-
-################## Add child account #######################
-################## Make class for fault window???? ########
