@@ -16,33 +16,38 @@ conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
 main_window = ttk.Notebook(root)
 main_window.pack(fill="both", expand="yes")
 
-class Menu:
+class Menu_bar:
     def __init__(self):
         # Create a menu in root called top_menu and configure root to use top_menu
-        top_menu = tk.Menu(root)
-        root.config(menu=top_menu)
+        menu_bar = tk.Menu(root)
+        root.config(menu=menu_bar)
 
         def file_menu():
             # File menu
-            file_menu = tk.Menu(top_menu, tearoff="false")
-            top_menu.add_cascade(label="File", menu=file_menu)
+            file_menu = tk.Menu(menu_bar, tearoff="false")
+            menu_bar.add_cascade(label="File", menu=file_menu)
             file_menu.add_command(label="Exit", command=root.quit)
 
-        # Customers menu
-        customers_menu = tk.Menu(top_menu, tearoff="false")
-        top_menu.add_cascade(label="Customers", menu=customers_menu)
-        customers_menu.add_command(label="New Customer", command=customers.new_customer)
-        customers_menu.add_command(label="Edit Customer", command=customers.edit_customer)
-        customers_menu.add_command(label="Delete Customer", command=customers.delete_customer)
+        def customer_menu():
+            # Customers menu
+            customers_menu = tk.Menu(menu_bar, tearoff="false")
+            menu_bar.add_cascade(label="Customers", menu=customers_menu)
+            customers_menu.add_command(label="New Customer", command=customers.new_customer)
+            customers_menu.add_command(label="Edit Customer", command=customers.edit_customer)
+            customers_menu.add_command(label="Delete Customer", command=customers.delete_customer)
 
-        # Vendors menu
-        vendors_menu = tk.Menu(top_menu, tearoff="false")
-        top_menu.add_cascade(label="Vendors", menu=vendors_menu)
-        vendors_menu.add_command(label="New Vendor", command=vendors.new_vendor)
-        vendors_menu.add_command(label="Edit Vendor", command=vendors.edit_vendor)
-        vendors_menu.add_command(label="Delete Vendor", command=vendors.delete_vendor)
+        def vendor_menu():
+            # Vendors menu
+            vendors_menu = tk.Menu(menu_bar, tearoff="false")
+            menu_bar.add_cascade(label="Vendors", menu=vendors_menu)
+            vendors_menu.add_command(label="New Vendor", command=vendors.new_vendor)
+            vendors_menu.add_command(label="Edit Vendor", command=vendors.edit_vendor)
+            vendors_menu.add_command(label="Delete Vendor", command=vendors.delete_vendor)
 
         file_menu()
+        customer_menu()
+        vendor_menu()
+        
 class Customers:
 
     def __init__(self):
@@ -1729,6 +1734,6 @@ customers = Customers()
 vendors = Vendors()
 Chart_of_accounts()
 Settings()
-Menu()
+Menu_bar()
 
 root.mainloop()
