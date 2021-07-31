@@ -1,6 +1,7 @@
 # Import modules
 import tkinter as tk
 from tkinter import ttk
+from tkinter.constants import DISABLED
 from ttkthemes import ThemedTk
 import sqlite3
 
@@ -19,35 +20,66 @@ main_window.pack(fill="both", expand="yes")
 class Menu_bar:
     def __init__(self):
         # Create a menu in root called top_menu and configure root to use top_menu
-        menu_bar = tk.Menu(root)
-        root.config(menu=menu_bar)
+        self.menu_bar = tk.Menu(root)
+        root.config(menu=self.menu_bar)
 
-        def file_menu():
-            # File menu
-            file_menu = tk.Menu(menu_bar, tearoff="false")
-            menu_bar.add_cascade(label="File", menu=file_menu)
-            file_menu.add_command(label="Exit", command=root.quit)
+        self.file_menu()
+        self.customer_menu()
+        self.vendor_menu()
+        self.chart_of_accounts_menu()
 
-        def customer_menu():
-            # Customers menu
-            customers_menu = tk.Menu(menu_bar, tearoff="false")
-            menu_bar.add_cascade(label="Customers", menu=customers_menu)
-            customers_menu.add_command(label="New Customer", command=customers.new_customer)
-            customers_menu.add_command(label="Edit Customer", command=customers.edit_customer)
-            customers_menu.add_command(label="Delete Customer", command=customers.delete_customer)
-
-        def vendor_menu():
-            # Vendors menu
-            vendors_menu = tk.Menu(menu_bar, tearoff="false")
-            menu_bar.add_cascade(label="Vendors", menu=vendors_menu)
-            vendors_menu.add_command(label="New Vendor", command=vendors.new_vendor)
-            vendors_menu.add_command(label="Edit Vendor", command=vendors.edit_vendor)
-            vendors_menu.add_command(label="Delete Vendor", command=vendors.delete_vendor)
-
-        file_menu()
-        customer_menu()
-        vendor_menu()
         
+
+    def file_menu(self):
+        # File menu
+        file_menu = tk.Menu(self.menu_bar, tearoff="false")
+        self.menu_bar.add_cascade(label="File", menu=file_menu)
+        file_menu.add_command(label="Exit", command=root.quit)
+
+    def customer_menu(self):
+        # Customers menu
+
+        # New Customer
+        customers_menu = tk.Menu(self.menu_bar, tearoff="false")
+        self.menu_bar.add_cascade(label="Customers", menu=customers_menu)
+        customers_menu.add_command(label="New Customer", command=customers.new_customer)
+        
+        # Edit Customer
+
+        def is_customer_selected(event):
+            selected_customer = customers.customer_treeview.focus()
+            values_customer = customers.customer_treeview.item(selected_customer, 'values')
+
+            if values_customer:
+                customers_menu.add_command(label="Edit Customer", command=customers.edit_customer)
+            else:
+                customers_menu.add_command(label="Edit Customer", command=customers.edit_customer, state="disabled")
+        
+        customers.customer_treeview.bind("<ButtonRelease-1>", is_customer_selected)
+
+        # Delete customer
+        customers_menu.add_command(label="Delete Customer", command=customers.delete_customer)
+
+    def vendor_menu(self):
+        # Vendors menu
+        vendors_menu = tk.Menu(self.menu_bar, tearoff="false")
+        self.menu_bar.add_cascade(label="Vendors", menu=vendors_menu)
+        vendors_menu.add_command(label="New Vendor", command=vendors.new_vendor)
+        vendors_menu.add_command(label="Edit Vendor", command=vendors.edit_vendor)
+        vendors_menu.add_command(label="Delete Vendor", command=vendors.delete_vendor)
+
+    def chart_of_accounts_menu(self):
+        # Chart of accounts menu
+        chart_of_accounts_menu = tk.Menu(self.menu_bar, tearoff="false")
+        self.menu_bar.add_cascade(label="Chart of Accounts", menu=chart_of_accounts_menu)
+        chart_of_accounts_menu.add_command(label="New Account", command=chart_of_accounts.new_parent_account)
+        chart_of_accounts_menu.add_command(label="New Child Account", command=chart_of_accounts.new_child_account)
+        chart_of_accounts_menu.add_command(label="Edit Account", command=chart_of_accounts.edit_account)
+        chart_of_accounts_menu.add_command(label="Delete Account", command=chart_of_accounts.delete_account)
+
+    
+        
+
 class Customers:
 
     def __init__(self):
@@ -171,7 +203,7 @@ class Customers:
             
             self.customer_treeview.column("Phone", minwidth=25, width=50) 
             self.customer_treeview.heading("Phone", text="Phone")  
-        
+
         customer_database_table()
         customer_tab()
         customer_ribbon()
@@ -196,17 +228,18 @@ class Customers:
         count = 0
         for row in customer_record:
             self.customer_treeview.insert(parent='', index='end', iid=count, text='', values=(  
-                row[0], 
-                row[2], 
-                row[3], 
-                row[4], 
-                row[5], 
-                row[6], 
-                row[7], 
-                row[8], 
-                row[9], 
-                row[10])
-                )
+                row[0], # row_id
+                row[2], # name
+                row[3], # company
+                row[4], # street
+                row[5], # town
+                row[6], # city
+                row[7], # county
+                row[8], # postcode
+                row[9], # email
+                row[10] # phone
+                ))
+
             count+=1    
 
         # Close connection
@@ -478,7 +511,7 @@ class Customers:
         
         # If a customer is selected then delete from the database
         if values_customer:
-            cur.execute("DELETE FROM Customers WHERE rowid = " + values_customer[0])
+            cur.execute("DELETE FROM Customers WHERE rowid = " + values_customer[0]) # row_id
 
         # If a customer isn't selected then tell the user to select one         
         else:
@@ -636,17 +669,18 @@ class Vendors:
         count = 0
         for row in vendor_record:
             self.vendor_treeview.insert(parent='', index='end', iid=count, text='', values=(  
-                row[0], 
-                row[2], 
-                row[3], 
-                row[4], 
-                row[5], 
-                row[6], 
-                row[7], 
-                row[8], 
-                row[9], 
-                row[10])
-                )
+                row[0], # row_id
+                row[2], # name
+                row[3], # company
+                row[4], # street
+                row[5], # town
+                row[6], # city
+                row[7], # county
+                row[8], # postcode
+                row[9], # email
+                row[10] # phone
+                ))
+
             count+=1    
 
         # Close connection
@@ -925,7 +959,7 @@ class Vendors:
         
         # If a vendor is selected then delete from the database
         if values_vendor:
-            cur.execute("DELETE FROM vendors WHERE rowid = " + values[0])
+            cur.execute("DELETE FROM vendors WHERE rowid = " + values[0]) # row_id
 
         # If a vendor isn't selected then tell the user to select one         
         else:
@@ -1048,10 +1082,10 @@ class Chart_of_accounts:
             self.accounts_treeview.column("Total", minwidth=250, width=250, stretch="false")            
             self.accounts_treeview.heading("Total", text="Total")          
             
-            self.accounts_treeview.column("Parent", width=0, stretch="false")            
+            self.accounts_treeview.column("Parent", width=0, stretch="false")          
             self.accounts_treeview.heading("Parent", text="Parent")    
             
-            self.accounts_treeview.column("Child", width=0, stretch="false")            
+            self.accounts_treeview.column("Child", width=0, stretch="false")           
             self.accounts_treeview.heading("Child", text="Child") 
         
         accounts_database_table()
@@ -1079,26 +1113,26 @@ class Chart_of_accounts:
         
         # For each row in the parent table, add the data to the Treeview columns
         for row in parent_record:
-            self.accounts_treeview.insert(parent='', index='end', iid=row[2], text='', values=(
-                row[0], 
-                row[2], 
-                row[7],
-                row[3], 
-                row[4], 
-                row[2], 
-                row[6]
+            self.accounts_treeview.insert(parent='', index='end', iid=row[2], text='', values=( # account_number
+                row[0], # row_id
+                row[2], # account_number
+                row[7], # type
+                row[3], # account_name
+                row[4], # total
+                row[2], # account_number
+                row[6]  # child (yes/no)
                 ))
         
         # For each row in the child table, add the data to the Treeview columns
         for row in child_record:
-            self.accounts_treeview.insert(parent=row[5], index='end', iid=row[2], text='', values=(
-                row[0], 
-                row[2], 
-                row[7],
-                row[3], 
-                row[4], 
-                row[5], 
-                row[6]
+            self.accounts_treeview.insert(parent=row[5], index='end', iid=row[2], text='', values=( # parent - account_number
+                row[0], # row_id
+                row[2], # account_number
+                row[7], # type
+                row[3], # account_name
+                row[4], # total
+                row[5], # parent
+                row[6]  # child (yes/no)
                 ))
 
         # Close connection
@@ -1452,8 +1486,7 @@ class Chart_of_accounts:
                 cur.execute("SELECT rowid, * FROM child_accounts")
 
                 # Delete the database row(rowid) that has the same rowid as the one selected in the Treeview         
-                cur.execute("DELETE FROM child_accounts WHERE rowid = " + str(values_account[0]))
-
+                cur.execute("DELETE FROM child_accounts WHERE rowid = " + str(values_account[0])) 
             # If the account that is being deleted is not a child account...
             elif values_account[6] == "NO":
                 # Does the account number exist in the Child_accounts table named as a parent account (ie, does the account to be deleted have child accounts?)
@@ -1470,7 +1503,7 @@ class Chart_of_accounts:
                     cur.execute("SELECT rowid, * FROM parent_accounts")
                     
                     # Delete the row whchi has the rowid from the entry box    
-                    cur.execute("DELETE FROM parent_accounts WHERE rowid = " + str(values_account[0]))
+                    cur.execute("DELETE FROM parent_accounts WHERE rowid = " + str(values_account[0])) 
 
         else:
             Message("Please select an account to delete")
@@ -1598,14 +1631,14 @@ class Settings:
 
             # Insert the data from the table into the business address entry boxes
             for record in values_business_address:
-                company_entry.insert(0, record[0])
-                street_entry.insert(0, record[1])
-                town_entry.insert(0, record[2])
-                city_entry.insert(0, record[3])
-                county_entry.insert(0, record[4])
-                postcode_entry.insert(0, record[5])
-                email_entry.insert(0, record[6])
-                phone_entry.insert(0, record[7])
+                company_entry.insert(0, record[0])  # company
+                street_entry.insert(0, record[1])   # street
+                town_entry.insert(0, record[2])     # town
+                city_entry.insert(0, record[3])     # city
+                county_entry.insert(0, record[4])   # county
+                postcode_entry.insert(0, record[5]) # postcode
+                email_entry.insert(0, record[6])    # email
+                phone_entry.insert(0, record[7])    # phone
             
             # If there are data for the business address in the database create a button named update
             if values_business_address:
@@ -1732,8 +1765,8 @@ class Message:
 
 customers = Customers()
 vendors = Vendors()
-Chart_of_accounts()
+chart_of_accounts = Chart_of_accounts()
 Settings()
-Menu_bar()
+menu_bar = Menu_bar()
 
 root.mainloop()
