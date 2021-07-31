@@ -6,7 +6,7 @@ from ttkthemes import ThemedTk
 import sqlite3
 
 # Create root
-root = ThemedTk(theme='default')
+root = ThemedTk(theme='breeze')
 root.title("Bookkeeping")
 root.geometry("1920x1080")
 
@@ -129,7 +129,7 @@ class Customers:
             new_customer_contact_label.grid(padx=10, row=2, column=1)
 
             # Add the edit contact button to the frame
-            edit_customer_contact_button = tk.Button(customer_ribbon_frame, image=self.edit_customer_icon, command=self.edit_customer)
+            edit_customer_contact_button = tk.Button(customer_ribbon_frame, image=self.edit_customer_icon, command=self.edit_customer, state="disabled")
             edit_customer_contact_button.grid(padx=10, row=1, column=2)
             edit_customer_contact_label = tk.Label(customer_ribbon_frame, text="Edit Customer")
             edit_customer_contact_label.grid(padx=10, row=2, column=2)
@@ -139,6 +139,18 @@ class Customers:
             delete_customer_contact_button.grid(padx=10, row=1, column=3)
             delete_customer_contact_label = tk.Label(customer_ribbon_frame, text="Delete Customer")
             delete_customer_contact_label.grid(padx=10, row=2, column=3)
+
+            def enable_buttons(event):
+                selected_customer = customers.customer_treeview.focus()
+                values_customer = customers.customer_treeview.item(selected_customer, 'values')
+
+                if values_customer:
+                    edit_customer_contact_button = tk.Button(customer_ribbon_frame, image=self.edit_customer_icon, command=self.edit_customer)
+                    #customers_menu.entryconfig("Delete Customer", state="normal")
+                else:
+                    pass
+        
+            self.customer_treeview.bind("<ButtonRelease-1>", enable_buttons)
             
         def customer_treeview():
             # Create a frame for the customer treeview
