@@ -6,7 +6,7 @@ from ttkthemes import ThemedTk
 import sqlite3
 
 # Create root
-root = ThemedTk(theme='breeze')
+root = ThemedTk(theme='default')
 root.title("Bookkeeping")
 root.geometry("1920x1080")
 
@@ -28,8 +28,6 @@ class Menu_bar:
         self.vendor_menu()
         self.chart_of_accounts_menu()
 
-        
-
     def file_menu(self):
         # File menu
         file_menu = tk.Menu(self.menu_bar, tearoff="false")
@@ -38,27 +36,29 @@ class Menu_bar:
 
     def customer_menu(self):
         # Customers menu
-
-        # New Customer
         customers_menu = tk.Menu(self.menu_bar, tearoff="false")
         self.menu_bar.add_cascade(label="Customers", menu=customers_menu)
+
+        # New Customer
         customers_menu.add_command(label="New Customer", command=customers.new_customer)
         
-        # Edit Customer
+        # Edit customer
+        self.edit = customers_menu.add_command(label="Edit Customer", command=customers.edit_customer, state="disabled")
+        
+        # Delete customer
+        customers_menu.add_command(label="Delete Customer", command=customers.delete_customer, state="disabled")
 
-        def is_customer_selected(event):
+        def enable_buttons(event):
             selected_customer = customers.customer_treeview.focus()
             values_customer = customers.customer_treeview.item(selected_customer, 'values')
-
+            
             if values_customer:
-                customers_menu.add_command(label="Edit Customer", command=customers.edit_customer)
+                customers_menu.entryconfig("Edit Customer", state="normal")
+                customers_menu.entryconfig("Delete Customer", state="normal")
             else:
-                customers_menu.add_command(label="Edit Customer", command=customers.edit_customer, state="disabled")
+                pass
         
-        customers.customer_treeview.bind("<ButtonRelease-1>", is_customer_selected)
-
-        # Delete customer
-        customers_menu.add_command(label="Delete Customer", command=customers.delete_customer)
+        customers.customer_treeview.bind("<ButtonRelease-1>", enable_buttons)
 
     def vendor_menu(self):
         # Vendors menu
@@ -76,9 +76,6 @@ class Menu_bar:
         chart_of_accounts_menu.add_command(label="New Child Account", command=chart_of_accounts.new_child_account)
         chart_of_accounts_menu.add_command(label="Edit Account", command=chart_of_accounts.edit_account)
         chart_of_accounts_menu.add_command(label="Delete Account", command=chart_of_accounts.delete_account)
-
-    
-        
 
 class Customers:
 
@@ -359,7 +356,10 @@ class Customers:
             conn.close() 
 
             # Re-populate the Treeview
-            self.populate_customer_tree()          
+            self.populate_customer_tree()   
+
+            # Re-generate menu
+            Menu_bar()       
 
     def edit_customer (self):
         # Select the Customer to edit
@@ -500,6 +500,9 @@ class Customers:
             # Re-populate the Treeview
             self.populate_customer_tree()
 
+            # Re-generate menu
+            Menu_bar()
+
     def delete_customer (self):
         # Connect to the database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
@@ -523,6 +526,9 @@ class Customers:
 
         # Re-populate the Treeview
         self.populate_customer_tree()
+
+        # Re-generate menu
+        Menu_bar()
 
 class Vendors:
 
