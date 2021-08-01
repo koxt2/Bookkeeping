@@ -1,12 +1,11 @@
 # Import modules
 import tkinter as tk
 from tkinter import ttk
-#from tkinter.constants import DISABLED
 from ttkthemes import ThemedTk
 import sqlite3
 
 # Create root
-root = ThemedTk(theme='aqua, breeze')
+root = ThemedTk(theme='blue')
 root.title("Bookkeeping")
 root.geometry("1920x1080")
 
@@ -123,48 +122,95 @@ class Right_click:
     def __init__(self):
         self.right_click_customer()
         self.right_click_vendor()
+        self.right_click_accounts()
         
     def right_click_customer(self):
+        # Create the menu
         right_click_customer = tk.Menu(customers.customer_treeview, tearoff="false")
         
+        # Create the menu items
         right_click_customer.add_command(label="New Customer", command=customers.new_customer)
         right_click_customer.add_command(label="Edit Customer", command=customers.edit_customer, state="disabled")
         right_click_customer.add_command(label="Delete Customer", command=customers.delete_customer, state="disabled")
 
         def popup(event):
+            # Create a toggle to determine if a customer is selected
             selected_customer = customers.customer_treeview.focus()
             values_customer = customers.customer_treeview.item(selected_customer, 'values')
             
+            # If a customer is selected change the state of menu items
             if values_customer:
-                right_click_customer.entryconfig("Edit Customer", command=customers.edit_customer, state="normal")
-                right_click_customer.entryconfig("Delete Customer", command=customers.delete_customer, state="normal")
+                right_click_customer.entryconfig("Edit Customer", state="normal")
+                right_click_customer.entryconfig("Delete Customer", state="normal")
             else:
-                pass
+                print("grrr")
+            
+            # Pop-up the menu 
             right_click_customer.tk_popup(event.x_root, event.y_root)
         
         customers.customer_treeview.bind("<Control-Button-1>", popup)
         customers.customer_treeview.bind("<ButtonRelease-3>", popup)
 
     def right_click_vendor(self):
+        # Create the menu
         right_click_vendor = tk.Menu(vendors.vendor_treeview, tearoff="false")
         
+        # Create the menu items
         right_click_vendor.add_command(label="New Vendor", command=vendors.new_vendor)
         right_click_vendor.add_command(label="Edit Vendor", command=vendors.edit_vendor, state="disabled")
         right_click_vendor.add_command(label="Delete Vendor", command=vendors.delete_vendor, state="disabled")
 
         def popup(event):
+            # Create a toggle to determine if a vendor is selected
             selected_vendor = vendors.vendor_treeview.focus()
             values_vendor = vendors.vendor_treeview.item(selected_vendor, 'values')
             
+            # If a vendor is selected change the state of menu items
             if values_vendor:
                 right_click_vendor.entryconfig("Edit Vendor", command=vendors.edit_vendor, state="normal")
                 right_click_vendor.entryconfig("Delete Vendor", command=vendors.delete_vendor, state="normal")
             else:
                 pass
+            
+            # Pop-up the menu 
             right_click_vendor.tk_popup(event.x_root, event.y_root)
         
         vendors.vendor_treeview.bind("<Control-Button-1>", popup)
-        customers.customer_treeview.bind("<ButtonRelease-3>", popup)
+        vendors.vendor_treeview.bind("<ButtonRelease-3>", popup)
+
+    def right_click_accounts(self):
+        # Create the menu
+        right_click_accounts = tk.Menu(chart_of_accounts.accounts_treeview, tearoff="false")
+
+        # Add menu items
+        right_click_accounts.add_command(label="New Account", command=chart_of_accounts.new_parent_account)
+        right_click_accounts.add_command(label="New Child Account", command=chart_of_accounts.new_child_account, state="disabled")
+        right_click_accounts.add_command(label="Edit Account", command=chart_of_accounts.edit_account, state="disabled")
+        right_click_accounts.add_command(label="Delete Account", command=chart_of_accounts.delete_account, state="disabled")
+
+        # Enable certain items if an account is selected in the treeview
+        def popup(event):
+            # Create a toggle to determine if a vendor is selected
+            selected_account = chart_of_accounts.accounts_treeview.focus()
+            values_accounts = chart_of_accounts.accounts_treeview.item(selected_account, 'values')
+
+            # If an account is selected change the state of menu items
+            if values_accounts:
+                if values_accounts[6] == "YES":
+                    right_click_accounts.entryconfig("New Child Account", state="disabled")
+                    right_click_accounts.entryconfig("Edit Account", state="normal")
+                    right_click_accounts.entryconfig("Delete Account", state="normal")
+                
+                elif values_accounts[6] == "NO":
+                    right_click_accounts.entryconfig("New Child Account", state="normal")
+                    right_click_accounts.entryconfig("Edit Account", state="normal")
+                    right_click_accounts.entryconfig("Delete Account", state="normal")
+            else:
+                pass
+            # Pop-up the menu 
+            right_click_accounts.tk_popup(event.x_root, event.y_root)
+
+        chart_of_accounts.accounts_treeview.bind("<ButtonRelease-3>", popup)
 
 class Customers:
 
@@ -847,7 +893,7 @@ class Vendors:
         new_phone_entry.grid(row=10, column=2, padx=10, pady=5)
 
         # Save contact button
-        new_vendor_window_save_button = tk.Button(new_vendor_window_frame, text="Save", command=lambda:[save_new_vendor()])
+        new_vendor_window_save_button = tk.Button(new_vendor_window_frame, text="Save", command=lambda:[save_new_vendor(), new_vendor_window.destroy()])
         new_vendor_window_save_button.grid(row=11, column=1, padx=10, pady=5)
 
         # Close window button
@@ -1186,7 +1232,7 @@ class Chart_of_accounts:
             self.accounts_treeview.column("Type", minwidth=100, width=100, stretch="false")            
             self.accounts_treeview.heading("Type", text="Type")
             
-            self.accounts_treeview.column("Account Name", minwidth=200, width=200, stretch="true")
+            self.accounts_treeview.column("Account Name", minwidth=200, width=200, stretch="false")
             self.accounts_treeview.heading("Account Name", text="Account Name") 
             
             self.accounts_treeview.column("Total", minwidth=250, width=250, stretch="false")            
@@ -1296,7 +1342,7 @@ class Chart_of_accounts:
         new_account_type_entry.grid(row=7, column=2, padx=10, pady=5)
 
         # Save contact button
-        close_button = tk.Button(new_account_window_frame, text="Save", command=lambda:[save_new_account()])
+        close_button = tk.Button(new_account_window_frame, text="Save", command=lambda:[save_new_account(), new_account_window.destroy()])
         close_button.grid(row=8, column=1)
 
         # Close window button
@@ -1888,7 +1934,7 @@ class Message:
         close_button = tk.Button(message_window, text="Close", command=message_window.destroy)
         close_button.pack(side="bottom", pady=10)
 
-
+tk.TkVersion
 customers = Customers()
 vendors = Vendors()
 chart_of_accounts = Chart_of_accounts()
