@@ -39,7 +39,7 @@ class Menu_bar:
         customers_menu = tk.Menu(self.menu_bar, tearoff="false")
         self.menu_bar.add_cascade(label="Customers", menu=customers_menu)
 
-        # New Customer
+        # New customer
         customers_menu.add_command(label="New Customer", command=customers.new_customer)
         
         # Edit customer
@@ -59,14 +59,34 @@ class Menu_bar:
                 pass
         
         customers.customer_treeview.bind("<ButtonRelease-1>", enable_buttons)
+        #customers.customer_treeview.bind("<Control-n>", customers.new_customer)
 
+    
     def vendor_menu(self):
         # Vendors menu
         vendors_menu = tk.Menu(self.menu_bar, tearoff="false")
         self.menu_bar.add_cascade(label="Vendors", menu=vendors_menu)
+
+        # New vendor
         vendors_menu.add_command(label="New Vendor", command=vendors.new_vendor)
-        vendors_menu.add_command(label="Edit Vendor", command=vendors.edit_vendor)
-        vendors_menu.add_command(label="Delete Vendor", command=vendors.delete_vendor)
+
+        # Edit vendor
+        vendors_menu.add_command(label="Edit Vendor", command=vendors.edit_vendor, state="disabled")
+        
+        # Delete vendor
+        vendors_menu.add_command(label="Delete Vendor", command=vendors.delete_vendor, state="disabled")
+
+        def enable_buttons(event):
+            selected_vendor = vendors.vendor_treeview.focus()
+            values_vendor = vendors.vendor_treeview.item(selected_vendor, 'values')
+            
+            if values_vendor:
+                vendors_menu.entryconfig("Edit Vendor", state="normal")
+                vendors_menu.entryconfig("Delete Vendor", state="normal")
+            else:
+                pass
+        
+        vendors.vendor_treeview.bind("<ButtonRelease-1>", enable_buttons)
 
     def chart_of_accounts_menu(self):
         # Chart of accounts menu
@@ -129,10 +149,10 @@ class Customers:
             new_customer_contact_label.grid(padx=10, row=2, column=1)
 
             # Add the edit contact button to the frame
-            edit_customer_contact_button = tk.Button(customer_ribbon_frame, image=self.edit_customer_icon, command=self.edit_customer, state="disabled")
-            edit_customer_contact_button.grid(padx=10, row=1, column=2)
-            edit_customer_contact_label = tk.Label(customer_ribbon_frame, text="Edit Customer")
-            edit_customer_contact_label.grid(padx=10, row=2, column=2)
+            self.edit_customer_contact_button = tk.Button(customer_ribbon_frame, image=self.edit_customer_icon, command=self.edit_customer)
+            self.edit_customer_contact_button.grid(padx=10, row=1, column=2)
+            self.edit_customer_contact_label = tk.Label(customer_ribbon_frame, text="Edit Customer")
+            self.edit_customer_contact_label.grid(padx=10, row=2, column=2)
 
             # Add the delete contact button to the frame
             delete_customer_contact_button = tk.Button(customer_ribbon_frame, image=self.delete_customer_icon, command=self.delete_customer)
@@ -140,18 +160,6 @@ class Customers:
             delete_customer_contact_label = tk.Label(customer_ribbon_frame, text="Delete Customer")
             delete_customer_contact_label.grid(padx=10, row=2, column=3)
 
-            def enable_buttons(event):
-                selected_customer = customers.customer_treeview.focus()
-                values_customer = customers.customer_treeview.item(selected_customer, 'values')
-
-                if values_customer:
-                    edit_customer_contact_button = tk.Button(customer_ribbon_frame, image=self.edit_customer_icon, command=self.edit_customer)
-                    #customers_menu.entryconfig("Delete Customer", state="normal")
-                else:
-                    pass
-        
-            self.customer_treeview.bind("<ButtonRelease-1>", enable_buttons)
-            
         def customer_treeview():
             # Create a frame for the customer treeview
             self.customer_treeview_frame = tk.Frame(self.tab)
@@ -211,7 +219,7 @@ class Customers:
             self.customer_treeview.heading("Email", text="Email")   
             
             self.customer_treeview.column("Phone", minwidth=25, width=50) 
-            self.customer_treeview.heading("Phone", text="Phone")  
+            self.customer_treeview.heading("Phone", text="Phone") 
 
         customer_database_table()
         customer_tab()
@@ -255,7 +263,7 @@ class Customers:
         conn.commit()
         conn.close() 
 
-    def new_customer(self):
+    def new_customer(self, event):
         # Create a new window and make it sit on top all all other windows
         new_customer_window = tk.Toplevel()
         new_customer_window.title("Add New Customer")
@@ -823,6 +831,9 @@ class Vendors:
             # Re-populate the Treeview
             self.populate_vendor_tree()
 
+            # Re-generate menu
+            Menu_bar()    
+
     def edit_vendor (self):
         # Select the vendor to edit
         selected_vendor = self.vendor_treeview.focus()
@@ -966,6 +977,9 @@ class Vendors:
             # Re-populate the Treeview
             self.populate_vendor_tree()
 
+            # Re-generate menu
+            Menu_bar()    
+
     def delete_vendor (self):
         # Connect to the database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
@@ -977,7 +991,7 @@ class Vendors:
         
         # If a vendor is selected then delete from the database
         if values_vendor:
-            cur.execute("DELETE FROM vendors WHERE rowid = " + values[0]) # row_id
+            cur.execute("DELETE FROM vendors WHERE rowid = " + values_vendor[0]) # row_id
 
         # If a vendor isn't selected then tell the user to select one         
         else:
@@ -989,6 +1003,9 @@ class Vendors:
 
         # Re-populate the Treeview
         self.populate_vendor_tree()
+
+        # Re-generate menu
+        Menu_bar()    
 
 class Chart_of_accounts:
     
