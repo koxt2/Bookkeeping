@@ -1,12 +1,12 @@
 # Import modules
 import tkinter as tk
 from tkinter import ttk
-from tkinter.constants import DISABLED
+#from tkinter.constants import DISABLED
 from ttkthemes import ThemedTk
 import sqlite3
 
 # Create root
-root = ThemedTk(theme='breeze')
+root = ThemedTk(theme='aqua, breeze')
 root.title("Bookkeeping")
 root.geometry("1920x1080")
 
@@ -35,19 +35,16 @@ class Menu_bar:
         file_menu.add_command(label="Exit", command=root.quit)
 
     def customer_menu(self):
-        # Customers menu
+        # Create customers menu
         customers_menu = tk.Menu(self.menu_bar, tearoff="false")
         self.menu_bar.add_cascade(label="Customers", menu=customers_menu)
 
-        # New customer
+        # Add menu items
         customers_menu.add_command(label="New Customer", command=customers.new_customer)
-        
-        # Edit customer
-        self.edit = customers_menu.add_command(label="Edit Customer", command=customers.edit_customer, state="disabled")
-        
-        # Delete customer
+        customers_menu.add_command(label="Edit Customer", command=customers.edit_customer, state="disabled")
         customers_menu.add_command(label="Delete Customer", command=customers.delete_customer, state="disabled")
 
+        # Enable certain items when a customer is selected in the treeview
         def enable_buttons(event):
             selected_customer = customers.customer_treeview.focus()
             values_customer = customers.customer_treeview.item(selected_customer, 'values')
@@ -61,21 +58,17 @@ class Menu_bar:
         customers.customer_treeview.bind("<ButtonRelease-1>", enable_buttons)
         #customers.customer_treeview.bind("<Control-n>", customers.new_customer)
 
-    
     def vendor_menu(self):
-        # Vendors menu
+        # Create vendors menu
         vendors_menu = tk.Menu(self.menu_bar, tearoff="false")
         self.menu_bar.add_cascade(label="Vendors", menu=vendors_menu)
 
-        # New vendor
+        # Add vendors menu items
         vendors_menu.add_command(label="New Vendor", command=vendors.new_vendor)
-
-        # Edit vendor
         vendors_menu.add_command(label="Edit Vendor", command=vendors.edit_vendor, state="disabled")
-        
-        # Delete vendor
         vendors_menu.add_command(label="Delete Vendor", command=vendors.delete_vendor, state="disabled")
 
+        # Enable certain items when a vendor is selected in the treeview
         def enable_buttons(event):
             selected_vendor = vendors.vendor_treeview.focus()
             values_vendor = vendors.vendor_treeview.item(selected_vendor, 'values')
@@ -89,13 +82,54 @@ class Menu_bar:
         vendors.vendor_treeview.bind("<ButtonRelease-1>", enable_buttons)
 
     def chart_of_accounts_menu(self):
-        # Chart of accounts menu
+        # Create chart of accounts menu
         chart_of_accounts_menu = tk.Menu(self.menu_bar, tearoff="false")
         self.menu_bar.add_cascade(label="Chart of Accounts", menu=chart_of_accounts_menu)
+
+        # Add menu items
         chart_of_accounts_menu.add_command(label="New Account", command=chart_of_accounts.new_parent_account)
-        chart_of_accounts_menu.add_command(label="New Child Account", command=chart_of_accounts.new_child_account)
-        chart_of_accounts_menu.add_command(label="Edit Account", command=chart_of_accounts.edit_account)
-        chart_of_accounts_menu.add_command(label="Delete Account", command=chart_of_accounts.delete_account)
+        chart_of_accounts_menu.add_command(label="New Child Account", command=chart_of_accounts.new_child_account, state="disabled")
+        chart_of_accounts_menu.add_command(label="Edit Account", command=chart_of_accounts.edit_account, state="disabled")
+        chart_of_accounts_menu.add_command(label="Delete Account", command=chart_of_accounts.delete_account, state="disabled")
+
+        # Enable certain items if an account is selected in the treeview
+        def enable_buttons(event):
+            selected_account = chart_of_accounts.accounts_treeview.focus()
+            values_accounts = chart_of_accounts.accounts_treeview.item(selected_account, 'values')
+
+            if values_accounts[6] == "YES":
+                chart_of_accounts_menu.entryconfig("New Child Account", state="disabled")
+                chart_of_accounts_menu.entryconfig("Edit Account", state="normal")
+                chart_of_accounts_menu.entryconfig("Delete Account", state="normal")
+            elif values_accounts[6] == "NO":
+                chart_of_accounts_menu.entryconfig("New Child Account", state="normal")
+                chart_of_accounts_menu.entryconfig("Edit Account", state="normal")
+                chart_of_accounts_menu.entryconfig("Delete Account", state="normal")
+            else:
+                pass
+
+        chart_of_accounts.accounts_treeview.bind("<ButtonRelease-1>", enable_buttons)
+
+class Right_click:
+    def __init__(self):
+        self.right_click_customer()
+        
+
+    def right_click_customer(self):
+        right_click_customer = tk.Menu(customers.customer_treeview, tearoff="false")
+        
+        right_click_customer.add_command(label="New Customer")
+        right_click_customer.add_command(label="Edit Customer", command=customers.edit_customer, state="disabled")
+        right_click_customer.add_command(label="Delete Customer", command=customers.delete_customer, state="disabled")
+
+        def popup(event):
+            print("rik")
+            right_click_customer.tk_popup(event.x_root, event.y_root)
+        
+        customers.customer_treeview.bind("<ButtonRelease-1>", popup)
+
+    
+        
 
 class Customers:
 
@@ -263,7 +297,7 @@ class Customers:
         conn.commit()
         conn.close() 
 
-    def new_customer(self, event):
+    def new_customer(self):
         # Create a new window and make it sit on top all all other windows
         new_customer_window = tk.Toplevel()
         new_customer_window.title("Add New Customer")
@@ -1277,6 +1311,9 @@ class Chart_of_accounts:
 
             # Repopulate the Treeview
             self.populate_accounts_tree()
+
+            # Regenerate Menu bar
+            Menu_bar()
         
     def new_child_account(self):
         # Select a parent account to create a child from...
@@ -1381,6 +1418,9 @@ class Chart_of_accounts:
 
             # Re-populate the Treeview      
             self.populate_accounts_tree()
+
+            # Regenerate Menu bar
+            Menu_bar()
     
     def edit_account(self):
         # Select an account to edit
@@ -1504,6 +1544,9 @@ class Chart_of_accounts:
             # Re-populate the Treeview               
             self.populate_accounts_tree()
 
+            # Regenerate Menu bar
+            Menu_bar()
+
     def delete_account(self):
         # Connect to the database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
@@ -1549,6 +1592,9 @@ class Chart_of_accounts:
 
         # Re-populate the Treeview
         self.populate_accounts_tree()
+
+        # Regenerate Menu bar
+        Menu_bar()
 
 class Settings:
 
@@ -1803,5 +1849,6 @@ vendors = Vendors()
 chart_of_accounts = Chart_of_accounts()
 Settings()
 menu_bar = Menu_bar()
+right_click = Right_click()
 
 root.mainloop()
