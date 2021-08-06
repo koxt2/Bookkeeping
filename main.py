@@ -71,6 +71,7 @@ class Menu_bar:
         vendors_menu.add_command(label="New Vendor", command=vendors.new_vendor)
         vendors_menu.add_command(label="Edit Vendor", command=vendors.edit_vendor, state="disabled")
         vendors_menu.add_command(label="Delete Vendor", command=vendors.delete_vendor, state="disabled")
+        vendors_menu.add_command(label="New Vendor Invoice", command=vendors.new_vendor_invoice, state="disabled")
 
         # Enable certain items when a vendor is selected in the treeview
         def enable_buttons(event):
@@ -80,6 +81,7 @@ class Menu_bar:
             if values_vendor:
                 vendors_menu.entryconfig("Edit Vendor", state="normal")
                 vendors_menu.entryconfig("Delete Vendor", state="normal")
+                vendors_menu.entryconfig("New Vendor Invoice", state="normal")
             else:
                 pass
         
@@ -160,6 +162,7 @@ class Right_click:
         right_click_vendor.add_command(label="New Vendor", command=vendors.new_vendor)
         right_click_vendor.add_command(label="Edit Vendor", command=vendors.edit_vendor, state="disabled")
         right_click_vendor.add_command(label="Delete Vendor", command=vendors.delete_vendor, state="disabled")
+        right_click_vendor.add_command(label="New Vendor Invoice", command=vendors.new_vendor_invoice, state="disabled")
 
         def popup(event):
             # Create a toggle to determine if a vendor is selected
@@ -170,6 +173,7 @@ class Right_click:
             if values_vendor:
                 right_click_vendor.entryconfig("Edit Vendor", command=vendors.edit_vendor, state="normal")
                 right_click_vendor.entryconfig("Delete Vendor", command=vendors.delete_vendor, state="normal")
+                right_click_vendor.entryconfig("New Vendor Invoice", command=vendors.new_vendor_invoice, state="normal")
             else:
                 pass
             
@@ -730,6 +734,7 @@ class Vendors:
             self.delete_vendor_icon = tk.PhotoImage(file="images/delete_contact.png")
             self.edit_vendor_icon = tk.PhotoImage(file="images/edit_contact.png")
             self.vendor_invoice_icon = tk.PhotoImage(file="images/invoice.png")
+            self.vendor_invoice_history_icon = tk.PhotoImage(file="images/invoice_history.png")
 
             # Add new contact button to the frame
             new_vendor_button = tk.Button(vendor_ribbon_frame, image=self.new_vendor_icon, command=self.new_vendor)
@@ -750,10 +755,16 @@ class Vendors:
             delete_vendor_label.grid(padx=10, row=2, column=3)
 
             # Add invoice button icon to the frame
-            vendor_invoice_button = tk.Button(vendor_ribbon_frame, image=self.vendor_invoice_icon, command=self.vendor_invoice)
-            vendor_invoice_button.grid(padx=10, row=1, column=4)
-            vendor_invoice_label = tk.Label(vendor_ribbon_frame, text="Add Vendor Invoice")
-            vendor_invoice_label.grid(padx=10, row=2, column=4)
+            new_vendor_invoice_button = tk.Button(vendor_ribbon_frame, image=self.vendor_invoice_icon, command=self.new_vendor_invoice)
+            new_vendor_invoice_button.grid(padx=10, row=1, column=4)
+            new_vendor_invoice_label = tk.Label(vendor_ribbon_frame, text="Add Vendor Invoice")
+            new_vendor_invoice_label.grid(padx=10, row=2, column=4)
+
+            # View invoices icon
+            vendor_invoice_history_button = tk.Button(vendor_ribbon_frame, image=self.vendor_invoice_history_icon, command=self.new_vendor_invoice)
+            vendor_invoice_history_button.grid(padx=10, row=1, column=5)
+            vendor_invoice_history_label = tk.Label(vendor_ribbon_frame, text="View Vendor Invoices")
+            vendor_invoice_history_label.grid(padx=10, row=2, column=5)
             
         def vendor_treeview():
             # Create a frame for the vendor treeview
@@ -1155,7 +1166,7 @@ class Vendors:
         Menu_bar()    
         Right_click()
 
-    def vendor_invoice(self):
+    def new_vendor_invoice(self):
         # Connect to database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
@@ -1208,21 +1219,10 @@ class Vendors:
             date_entry.grid(sticky="w", row=8, column=1, padx=10, pady=15)
 
             # Add the invoice number
-            invoice_number_label = tk.Label(vendor_address_frame, text="Invoice number")
-            invoice_number_label.grid(sticky="w", row=9, column=1, padx=10)
-
-            # Create a list of the all the invoices for the vendor
-            cur.execute("SELECT invoice_number FROM vendor_invoice_summary WHERE vendor_rowid = " + values_vendor[0])
-            records = cur.fetchall()
-
-            vendor_invoices = []
-            for record in records:
-                for invoice in record:
-                    vendor_invoices.append(invoice)
-
-            vendor_invoice_number_combo = ttk.Combobox(vendor_address_frame, value=vendor_invoices)
-            vendor_invoice_number_combo.bind("<<ComboboxSelected>>", self.populate_vendor_invoice_tree)
-            vendor_invoice_number_combo.grid(sticky="w", row=10, column=1, padx=10, pady=2) 
+            vendor_invoice_number_label = tk.Label(vendor_address_frame, text="Invoice number")
+            vendor_invoice_number_label.grid(sticky="w", row=9, column=1, padx=10)
+            vendor_invoice_number_entry = tk.Entry(vendor_address_frame, width=15)
+            vendor_invoice_number_entry.grid(sticky="w", row=10, column=1, padx=10, pady=2)
 
             # Add the Treeview to the invoice
             # Create a frame for the Treeview widget
@@ -1238,10 +1238,10 @@ class Vendors:
             vendor_invoice_treeview.pack(fill="both", expand="yes")  
 
             # Add the invoice total box            
-            invoice_total_box = tk.Entry(vendor_invoice_treeview_frame, width=15)
-            invoice_total_box.pack(side="right", padx=10, pady=5)
-            invoice_total_box = tk.Label(vendor_invoice_treeview_frame, text="Total")
-            invoice_total_box.pack(side="right", padx=0, pady=5)
+            invoice_total_box_entry = tk.Entry(vendor_invoice_treeview_frame, width=15)
+            invoice_total_box_entry.pack(side="right", padx=10, pady=5)
+            invoice_total_box_label = tk.Label(vendor_invoice_treeview_frame, text="Total")
+            invoice_total_box_label.pack(side="right", padx=0, pady=5)
 
             # Create the columns in the Treeview
             vendor_invoice_treeview['columns'] = (
@@ -1291,9 +1291,9 @@ class Vendors:
                     expense_accounts.append(record)
 
             invoice_item_id_label = tk.Label(vendor_invoice_entry_frame, text="id")
-            invoice_item_id_label.grid(row=1, column=1, padx=10)
+            #invoice_item_id_label.grid(row=1, column=1, padx=10)
             invoice_item_id_entry = tk.Entry(vendor_invoice_entry_frame, width=15)
-            invoice_item_id_entry.grid(row=2, column=1, padx=10)
+            #invoice_item_id_entry.grid(row=2, column=1, padx=10)
 
             invoice_item_description_label = tk.Label(vendor_invoice_entry_frame, text="Description")
             invoice_item_description_label.grid(row=1, column=2, padx=10)
@@ -1317,15 +1317,14 @@ class Vendors:
             
             # Add the functional buttons
             self.add_to_invoice_button = tk.Button(vendor_invoice_entry_frame, text="Add to invoice", command=lambda:[add_invoice_item()])
-            self.add_to_invoice_button.grid(row=3, column=1, padx=10) 
+            self.add_to_invoice_button.grid(row=3, column=2, padx=10) 
             
             self.edit_button = tk.Button(vendor_invoice_entry_frame, text="Edit selected item")
-            self.edit_button.grid(row=3, column=2, padx=10) 
+            self.edit_button.grid(row=3, column=3, padx=10) 
             
-            self.delete_button = tk.Button(vendor_invoice_entry_frame, text="Delete item")
-            self.delete_button.grid(row=3, column=3, padx=10)
+            self.delete_button = tk.Button(vendor_invoice_entry_frame, text="Delete item", command=lambda:[delete_invoice_item()])
+            self.delete_button.grid(row=3, column=4, padx=10)
             
-        # If a supplier isn't selected tell the user to select a vendor
         else:
             Message("Please select a supplier first")
         
@@ -1338,11 +1337,25 @@ class Vendors:
             conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
+            # Make a list of all the invoice numbers in use already
+            cur.execute("SELECT invoice_number FROM vendor_invoices WHERE vendor_rowid = " + values_vendor[0])
+            records = cur.fetchall()
+
+            vendor_invoices = []
+            for record in records:
+                for invoice in record:
+                    vendor_invoices.append(invoice)
+
             # Check the invoice has an invoice number. If not tell the user to set one
-            if len(vendor_invoice_number_combo.get()) == 0:
+            if len(vendor_invoice_number_entry.get()) == 0:
                 Message("Please set an invoice number")
 
-            # If the invoice has an invoice number, add to the database
+            # Check the invoice number isn't being used already
+            #elif vendor_invoice_number_entry.get() in vendor_invoices:
+            #        Message("""That invoice number is already in use. 
+            #        Please choose a different number""")
+                
+            # If the invoice has an invoice number and isn't being used, add to the database
             else:
                 # Work out the sub_total of the item being added (quantity*unit price)
                 sub_total = float(invoice_item_quantity_entry.get()) * float(invoice_item_unit_price_entry.get())
@@ -1363,7 +1376,7 @@ class Vendors:
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", [
 
                     invoice_item_id_entry.get(),
-                    vendor_invoice_number_combo.get(),
+                    vendor_invoice_number_entry.get(),
                     values_vendor[0],
                     date_entry.get(),
                     invoice_item_description_entry.get(), 
@@ -1382,7 +1395,7 @@ class Vendors:
                 cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_number=?', (sub_total, parent_account[0][0]),)
 
                 # Add up all the items in an invoice to give a total invoice figure
-                cur.execute("SELECT SUM(total) FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_combo.get() + " AND vendor_rowid = " + values_vendor[0])
+                cur.execute("SELECT SUM(total) FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
                 self.figure = cur.fetchall()
                 for figure in self.figure:
                     for value in figure:
@@ -1394,7 +1407,7 @@ class Vendors:
                 cur.execute("SELECT invoice_number FROM vendor_invoice_summary WHERE vendor_rowid = " + values_vendor[0])
                 records = cur.fetchall()
 
-                # Add all the invoice numbers to a list called "invoices"
+                # Add all the invoice numbers to a list called "vendor_invoices"
                 vendor_invoices = []
                 for record in records:
                     for invoice in record:
@@ -1402,7 +1415,7 @@ class Vendors:
 
                 # Create a summary of all the invoice items... add together the price of all the items that have the same invoice number and add as a row to the invoice summary table
                 # If the invoice being added is already in the summary database then update the invoice
-                if vendor_invoice_number_combo.get() in vendor_invoices:
+                if vendor_invoice_number_entry.get() in vendor_invoices:
                     cur.execute("""UPDATE vendor_invoice_summary SET
                         vendor_rowid = :vendor_rowid, 
                         date = :date, 
@@ -1414,9 +1427,9 @@ class Vendors:
                         {
                         'vendor_rowid' : values_vendor[0], 
                         'date' : date_entry.get(),
-                        'invoice_number' : vendor_invoice_number_combo.get(),
+                        'invoice_number' : vendor_invoice_number_entry.get(),
                         'total' : total_figure,
-                        'invoice_number' : vendor_invoice_number_combo.get(),
+                        'invoice_number' : vendor_invoice_number_entry.get(),
                         'vendor_rowid' : values_vendor[0]
                         })   
 
@@ -1432,43 +1445,99 @@ class Vendors:
 
                     values_vendor[0],
                     date_entry.get(),
-                    vendor_invoice_number_combo.get(),
+                    vendor_invoice_number_entry.get(),
                     total_figure
                     ])
 
                 # Re-populate the invoice treeview
                 # Clear the entry boxes
-                #invoice_item_id_entry.delete(0,END)
-                #invoice_item_description_entry.delete(0,END)
-                #invoice_item_quantity_entry.delete(0,END)
-                #invoice_item_unit_price_entry.delete(0,END)
-                #invoice_item_account_combo.delete(0,END)
+                invoice_item_id_entry.delete(0,'end')
+                invoice_item_description_entry.delete(0,'end')
+                invoice_item_quantity_entry.delete(0,'end')
+                invoice_item_unit_price_entry.delete(0,'end')
+                invoice_item_account_combo.delete(0,'end')
 
-                # Clear the treeview
+                # Clear the treeview and total box
                 for record in vendor_invoice_treeview.get_children():
                     vendor_invoice_treeview.delete(record)
+                invoice_total_box_entry.delete(0,'end')
 
                 # Get data from the database that has the same invoice number as the one given in the invoice
-                cur.execute("SELECT rowid, * FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_combo.get() + " AND vendor_rowid = " + values_vendor[0])
+                cur.execute("SELECT rowid, * FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
                 record = cur.fetchall()    
 
-                # Add the fetched data to the treeview
+                # Get the total from the invoice summmary table
+                cur.execute("SELECT total FROM vendor_invoice_summary WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
+                record_total = cur.fetchone()
+
+                # Add the fetched data to the treeview and total box
                 global count
                 self.count = 0
 
                 for row in record:
                     vendor_invoice_treeview.insert(parent='', index='end', iid=self.count, text='', values=(row[0], row[5], row[9], row[6], row[7], row[8]))
                     self.count+=1        
-
-
-            #accounts_tab.populate_tab_tree()
+                invoice_total_box_entry.insert(0, record_total)
 
             # Disconnect from the database
             conn.commit()
             conn.close() 
-    
-    def populate_vendor_invoice_tree(self):
-        pass
+
+        def delete_invoice_item():
+
+            # Connect to the database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
+
+            # Make the selected item in Treeview the focus and make it a variable called 'selected'
+            # Pull the values in 'selected' from the 'values' part of the database
+            selected_item = vendor_invoice_treeview.focus()
+            invoice_item = vendor_invoice_treeview.item(selected_item, 'values') 
+
+            # If an item is selected then delete it from the database
+            if invoice_item:
+                # Select the rowid and data from the database table and fetch everything
+                cur.execute("SELECT rowid, * FROM vendor_invoices")
+                record = cur.fetchall()       
+
+                # Work out the sub_total of the item being deleted (quantity*unit price)
+                sub_total = invoice_item[5]
+                
+                # Delete the database row(rowid) that has the same rowid as the one selected in the Treeview
+                cur.execute("DELETE FROM vendor_invoices WHERE rowid = " + invoice_item[0])
+
+                # Delete the item value from the account database
+                cur.execute('UPDATE child_accounts SET total=total-? WHERE account_name=?',(sub_total, invoice_item[2],))
+
+                # Update the invoice summary
+                cur.execute('UPDATE vendor_invoice_summary SET total=total-? WHERE vendor_rowid=? AND invoice_number=?', (sub_total, values_vendor[0], vendor_invoice_number_entry.get(),))
+
+                # Re-populate the invoice treeview
+                # Clear the treeview and total box
+                for record in vendor_invoice_treeview.get_children():
+                    vendor_invoice_treeview.delete(record)
+                invoice_total_box_entry.delete(0,'end')
+                
+                # Get data from the database that has the same invoice number as the one given in the invoice
+                cur.execute("SELECT rowid, * FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
+                record = cur.fetchall()  
+
+                # Add up all the items in an invoice to give a total invoice figure
+                cur.execute("SELECT total FROM vendor_invoice_summary WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
+                total_figure = cur.fetchall()
+                
+                # Add the fetched data to the treeview and total box
+                global count
+                count = 0
+
+                for row in record:
+                    vendor_invoice_treeview.insert(parent='', index='end', iid=count, text='', values=(row[0], row[5], row[9], row[6], row[7], row[8]))
+                    count+=1        
+
+                invoice_total_box_entry.insert(0, total_figure)
+
+            conn.commit()
+            conn.close()
 
 class Chart_of_accounts:
     
@@ -2288,3 +2357,4 @@ root.mainloop()
 
 
 ############## Get vendor invoice working fully #####################
+### That invoice number is in use already for this vendor. Do you want to add the item to that invoice ###
