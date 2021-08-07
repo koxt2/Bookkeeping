@@ -234,14 +234,9 @@ class Double_click:
         def vendor_clicked(event):
             # Call the method
             vendors.invoice_history()
-
-        def invoice_clicked(event):
-            # Call the method
-            vendors.view_invoice()
         
         # Bind a double click
         vendors.vendor_treeview.bind("<Double-Button-1>", vendor_clicked)  
-        vendors.vendor_invoice_history_tree.bind("<Double-Button-1>", invoice_clicked)
         
 class Customers:
 
