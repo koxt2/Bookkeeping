@@ -2660,4 +2660,6 @@ root.mainloop()
 ############## Get vendor invoice working fully #####################
 #####edit invoice
 
+
+
 #####double click invoice in history to open itemised invoice
