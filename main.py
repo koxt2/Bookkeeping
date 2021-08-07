@@ -225,6 +225,24 @@ class Right_click:
 
         chart_of_accounts.accounts_treeview.bind("<ButtonRelease-3>", popup)
 
+class Double_click:
+    def __init__(self):
+        self.vendors_double_click()
+
+    def vendors_double_click(self):
+        
+        def vendor_clicked(event):
+            # Call the method
+            vendors.invoice_history()
+
+        def invoice_clicked(event):
+            # Call the method
+            vendors.view_invoice()
+        
+        # Bind a double click
+        vendors.vendor_treeview.bind("<Double-Button-1>", vendor_clicked)  
+        vendors.vendor_invoice_history_tree.bind("<Double-Button-1>", invoice_clicked)
+        
 class Customers:
 
     def __init__(self):
@@ -404,52 +422,52 @@ class Customers:
         # Add the entry boxes to the frame
         new_id_label = tk.Label(new_customer_window_frame, text="ID")
         #new_id_label.grid(row=1, column=1, padx=10, pady=5)
-        new_id_entry = tk.Entry(new_customer_window_frame, width=15)
+        new_id_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
         #new_id_entry.grid(row=1, column=2, padx=10, pady=5)
 
         new_name_label = tk.Label(new_customer_window_frame, text="Name")
         new_name_label.grid(row=2, column=1, padx=10, pady=5)
-        new_name_entry = tk.Entry(new_customer_window_frame, width=15)
+        new_name_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
         new_name_entry.grid(row=2, column=2, padx=10, pady=5)
 
         new_company_label = tk.Label(new_customer_window_frame, text="Company")
         new_company_label.grid(row=3, column=1, padx=10, pady=5)
-        new_company_entry = tk.Entry(new_customer_window_frame, width=15)
+        new_company_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
         new_company_entry.grid(row=3, column=2, padx=10, pady=5)
 
         new_street_label = tk.Label(new_customer_window_frame, text="Street")
         new_street_label.grid(row=4, column=1, padx=10, pady=5)
-        new_street_entry = tk.Entry(new_customer_window_frame, width=15)
+        new_street_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
         new_street_entry.grid(row=4, column=2, padx=10, pady=5)
 
         new_town_label = tk.Label(new_customer_window_frame, text="Town")
         new_town_label.grid(row=5, column=1, padx=10, pady=5)
-        new_town_entry = tk.Entry(new_customer_window_frame, width=15)
+        new_town_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
         new_town_entry.grid(row=5, column=2, padx=10, pady=5)
 
         new_city_label = tk.Label(new_customer_window_frame, text="City")
         new_city_label.grid(row=6, column=1, padx=10, pady=5)
-        new_city_entry = tk.Entry(new_customer_window_frame, width=15)
+        new_city_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
         new_city_entry.grid(row=6, column=2, padx=10, pady=5)
 
         new_county_label = tk.Label(new_customer_window_frame, text="County")
         new_county_label.grid(row=7, column=1, padx=10, pady=5)
-        new_county_entry = tk.Entry(new_customer_window_frame, width=15)
+        new_county_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
         new_county_entry.grid(row=7, column=2, padx=10, pady=5)
 
         new_postcode_label = tk.Label(new_customer_window_frame, text="Postcode")
         new_postcode_label.grid(row=8, column=1, padx=10, pady=5)
-        new_postcode_entry = tk.Entry(new_customer_window_frame, width=15)
+        new_postcode_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
         new_postcode_entry.grid(row=8, column=2, padx=10, pady=5)
 
         new_email_label = tk.Label(new_customer_window_frame, text="Email")
         new_email_label.grid(row=9, column=1, padx=10, pady=5)
-        new_email_entry = tk.Entry(new_customer_window_frame, width=15)
+        new_email_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
         new_email_entry.grid(row=9, column=2, padx=10, pady=5)
 
         new_phone_label = tk.Label(new_customer_window_frame, text="Phone")
         new_phone_label.grid(row=10, column=1, padx=10, pady=5)
-        new_phone_entry = tk.Entry(new_customer_window_frame, width=15)
+        new_phone_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
         new_phone_entry.grid(row=10, column=2, padx=10, pady=5)
 
         # Save contact button
@@ -530,52 +548,52 @@ class Customers:
             # Add the entry boxes
             edit_id_label = tk.Label(edit_customer_window_frame, text="ID")
             #edit_id_label.grid(row=1, column=1, padx=10, pady=5)
-            edit_id_entry = tk.Entry(edit_customer_window_frame, width=15)
+            edit_id_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
             #edit_id_entry.grid(row=1, column=2, padx=10, pady=5)
 
             edit_name_label = tk.Label(edit_customer_window_frame, text="Name")
             edit_name_label.grid(row=2, column=1, padx=10, pady=5)
-            edit_name_entry = tk.Entry(edit_customer_window_frame, width=15)
+            edit_name_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_name_entry.grid(row=2, column=2, padx=10, pady=5)
 
             edit_company_label = tk.Label(edit_customer_window_frame, text="Company")
             edit_company_label.grid(row=3, column=1, padx=10, pady=5)
-            edit_company_entry = tk.Entry(edit_customer_window_frame, width=15)
+            edit_company_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_company_entry.grid(row=3, column=2, padx=10, pady=5)
 
             edit_street_label = tk.Label(edit_customer_window_frame, text="Street")
             edit_street_label.grid(row=4, column=1, padx=10, pady=5)
-            edit_street_entry = tk.Entry(edit_customer_window_frame, width=15)
+            edit_street_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_street_entry.grid(row=4, column=2, padx=10, pady=5)
 
             edit_town_label = tk.Label(edit_customer_window_frame, text="Town")
             edit_town_label.grid(row=5, column=1, padx=10, pady=5)
-            edit_town_entry = tk.Entry(edit_customer_window_frame, width=15)
+            edit_town_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_town_entry.grid(row=5, column=2, padx=10, pady=5)
 
             edit_city_label = tk.Label(edit_customer_window_frame, text="City")
             edit_city_label.grid(row=6, column=1, padx=10, pady=5)
-            edit_city_entry = tk.Entry(edit_customer_window_frame, width=15)
+            edit_city_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_city_entry.grid(row=6, column=2, padx=10, pady=5)
 
             edit_county_label = tk.Label(edit_customer_window_frame, text="County")
             edit_county_label.grid(row=7, column=1, padx=10, pady=5)
-            edit_county_entry = tk.Entry(edit_customer_window_frame, width=15)
+            edit_county_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_county_entry.grid(row=7, column=2, padx=10, pady=5)
 
             edit_postcode_label = tk.Label(edit_customer_window_frame, text="Postcode")
             edit_postcode_label.grid(row=8, column=1, padx=10, pady=5)
-            edit_postcode_entry = tk.Entry(edit_customer_window_frame, width=15)
+            edit_postcode_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_postcode_entry.grid(row=8, column=2, padx=10, pady=5)
 
             edit_email_label = tk.Label(edit_customer_window_frame, text="Email")
             edit_email_label.grid(row=9, column=1, padx=10, pady=5)
-            edit_email_entry = tk.Entry(edit_customer_window_frame, width=15)
+            edit_email_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_email_entry.grid(row=9, column=2, padx=10, pady=5)
 
             edit_phone_label = tk.Label(edit_customer_window_frame, text="Phone")
             edit_phone_label.grid(row=10, column=1, padx=10, pady=5)
-            edit_phone_entry = tk.Entry(edit_customer_window_frame, width=15)
+            edit_phone_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_phone_entry.grid(row=10, column=2, padx=10, pady=5)
             
             # Insert the pulled values from the database into the entry boxes
@@ -803,10 +821,10 @@ class Vendors:
                 )
             
             # Provide the headings for each column
-            self.vendor_treeview.column("#0", width=0, stretch="no")
+            self.vendor_treeview.column("#0", width=10, stretch="no")
             self.vendor_treeview.heading("#0", text="")
             
-            self.vendor_treeview.column("ID", width=0, stretch="no")
+            self.vendor_treeview.column("ID", width=10, stretch="no")
             self.vendor_treeview.heading("ID", text="ID")
             
             self.vendor_treeview.column("Name", minwidth=25, width=50) 
@@ -891,52 +909,52 @@ class Vendors:
         # Add the entry boxes
         new_id_label = tk.Label(new_vendor_window_frame, text="ID")
         #new_id_label.grid(row=1, column=1, padx=10, pady=5)
-        new_id_entry = tk.Entry(new_vendor_window_frame, width=15)
+        new_id_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
         #new_id_entry.grid(row=1, column=2, padx=10, pady=5)
 
         new_name_label = tk.Label(new_vendor_window_frame, text="Name")
         new_name_label.grid(row=2, column=1, padx=10, pady=5)
-        new_name_entry = tk.Entry(new_vendor_window_frame, width=15)
+        new_name_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
         new_name_entry.grid(row=2, column=2, padx=10, pady=5)
 
         new_company_label = tk.Label(new_vendor_window_frame, text="Company")
         new_company_label.grid(row=3, column=1, padx=10, pady=5)
-        new_company_entry = tk.Entry(new_vendor_window_frame, width=15)
+        new_company_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
         new_company_entry.grid(row=3, column=2, padx=10, pady=5)
 
         new_street_label = tk.Label(new_vendor_window_frame, text="Street")
         new_street_label.grid(row=4, column=1, padx=10, pady=5)
-        new_street_entry = tk.Entry(new_vendor_window_frame, width=15)
+        new_street_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
         new_street_entry.grid(row=4, column=2, padx=10, pady=5)
 
         new_town_label = tk.Label(new_vendor_window_frame, text="Town")
         new_town_label.grid(row=5, column=1, padx=10, pady=5)
-        new_town_entry = tk.Entry(new_vendor_window_frame, width=15)
+        new_town_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
         new_town_entry.grid(row=5, column=2, padx=10, pady=5)
 
         new_city_label = tk.Label(new_vendor_window_frame, text="City")
         new_city_label.grid(row=6, column=1, padx=10, pady=5)
-        new_city_entry = tk.Entry(new_vendor_window_frame, width=15)
+        new_city_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
         new_city_entry.grid(row=6, column=2, padx=10, pady=5)
 
         new_county_label = tk.Label(new_vendor_window_frame, text="County")
         new_county_label.grid(row=7, column=1, padx=10, pady=5)
-        new_county_entry = tk.Entry(new_vendor_window_frame, width=15)
+        new_county_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
         new_county_entry.grid(row=7, column=2, padx=10, pady=5)
 
         new_postcode_label = tk.Label(new_vendor_window_frame, text="Postcode")
         new_postcode_label.grid(row=8, column=1, padx=10, pady=5)
-        new_postcode_entry = tk.Entry(new_vendor_window_frame, width=15)
+        new_postcode_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
         new_postcode_entry.grid(row=8, column=2, padx=10, pady=5)
 
         new_email_label = tk.Label(new_vendor_window_frame, text="Email")
         new_email_label.grid(row=9, column=1, padx=10, pady=5)
-        new_email_entry = tk.Entry(new_vendor_window_frame, width=15)
+        new_email_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
         new_email_entry.grid(row=9, column=2, padx=10, pady=5)
 
         new_phone_label = tk.Label(new_vendor_window_frame, text="Phone")
         new_phone_label.grid(row=10, column=1, padx=10, pady=5)
-        new_phone_entry = tk.Entry(new_vendor_window_frame, width=15)
+        new_phone_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
         new_phone_entry.grid(row=10, column=2, padx=10, pady=5)
 
         # Save contact button
@@ -1020,52 +1038,52 @@ class Vendors:
             # Add the entry boxes
             edit_id_label = tk.Label(edit_vendor_window_frame, text="ID")
             #edit_id_label.grid(row=1, column=1, padx=10, pady=5)
-            edit_id_entry = tk.Entry(edit_vendor_window_frame, width=15)
+            edit_id_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
             #edit_id_entry.grid(row=1, column=2, padx=10, pady=5)
 
             edit_name_label = tk.Label(edit_vendor_window_frame, text="Name")
             edit_name_label.grid(row=2, column=1, padx=10, pady=5)
-            edit_name_entry = tk.Entry(edit_vendor_window_frame, width=15)
+            edit_name_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_name_entry.grid(row=2, column=2, padx=10, pady=5)
 
             edit_company_label = tk.Label(edit_vendor_window_frame, text="Company")
             edit_company_label.grid(row=3, column=1, padx=10, pady=5)
-            edit_company_entry = tk.Entry(edit_vendor_window_frame, width=15)
+            edit_company_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_company_entry.grid(row=3, column=2, padx=10, pady=5)
 
             edit_street_label = tk.Label(edit_vendor_window_frame, text="Street")
             edit_street_label.grid(row=4, column=1, padx=10, pady=5)
-            edit_street_entry = tk.Entry(edit_vendor_window_frame, width=15)
+            edit_street_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_street_entry.grid(row=4, column=2, padx=10, pady=5)
 
             edit_town_label = tk.Label(edit_vendor_window_frame, text="Town")
             edit_town_label.grid(row=5, column=1, padx=10, pady=5)
-            edit_town_entry = tk.Entry(edit_vendor_window_frame, width=15)
+            edit_town_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_town_entry.grid(row=5, column=2, padx=10, pady=5)
 
             edit_city_label = tk.Label(edit_vendor_window_frame, text="City")
             edit_city_label.grid(row=6, column=1, padx=10, pady=5)
-            edit_city_entry = tk.Entry(edit_vendor_window_frame, width=15)
+            edit_city_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_city_entry.grid(row=6, column=2, padx=10, pady=5)
 
             edit_county_label = tk.Label(edit_vendor_window_frame, text="County")
             edit_county_label.grid(row=7, column=1, padx=10, pady=5)
-            edit_county_entry = tk.Entry(edit_vendor_window_frame, width=15)
+            edit_county_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_county_entry.grid(row=7, column=2, padx=10, pady=5)
 
             edit_postcode_label = tk.Label(edit_vendor_window_frame, text="Postcode")
             edit_postcode_label.grid(row=8, column=1, padx=10, pady=5)
-            edit_postcode_entry = tk.Entry(edit_vendor_window_frame, width=15)
+            edit_postcode_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_postcode_entry.grid(row=8, column=2, padx=10, pady=5)
 
             edit_email_label = tk.Label(edit_vendor_window_frame, text="Email")
             edit_email_label.grid(row=9, column=1, padx=10, pady=5)
-            edit_email_entry = tk.Entry(edit_vendor_window_frame, width=15)
+            edit_email_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_email_entry.grid(row=9, column=2, padx=10, pady=5)
 
             edit_phone_label = tk.Label(edit_vendor_window_frame, text="Phone")
             edit_phone_label.grid(row=10, column=1, padx=10, pady=5)
-            edit_phone_entry = tk.Entry(edit_vendor_window_frame, width=15)
+            edit_phone_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_phone_entry.grid(row=10, column=2, padx=10, pady=5)
             
             # Insert the pulled values from the database into the entry boxes
@@ -1195,7 +1213,7 @@ class Vendors:
             # Add the vendor address, date and invoice number to the invoice
             # Create a frame in the window for the supplier address
             vendor_address_frame = tk.Frame(vendor_invoice_window)
-            vendor_address_frame.pack(fill="both", padx=10, pady=5)  
+            vendor_address_frame.pack(fill="both", padx=10, pady=15)  
 
             # Add the supplier address to the invoice
             vendor_name_label = tk.Label(vendor_address_frame, text=values_vendor[1])
@@ -1220,14 +1238,23 @@ class Vendors:
             vendor_postcode_label.grid(sticky="w", row=7, column=1, padx=10)
 
             # Add the date to the invoice
-            cal = tkcal.DateEntry(vendor_address_frame, showweeknumbers=False)
-            cal.grid(sticky="w", row=8, column=1, padx=10, pady=15)
+            date_frame = tk.Frame(vendor_invoice_window)
+            date_frame.pack(fill="both", padx=10, pady=15) 
+
+            date_label = tk.Label(date_frame, text="Date")
+            date_label.grid(sticky="w", row=8, column=1, padx=10)
+            cal = tkcal.DateEntry(date_frame, showweeknumbers=False)
+            cal.grid(sticky="w", row=9, column=1, padx=10)
+
             cal._top_cal.overrideredirect(False)
 
             # Add the invoice number
-            vendor_invoice_number_label = tk.Label(vendor_address_frame, text="Invoice number")
+            invoice_number_frame = tk.Frame(vendor_invoice_window)
+            invoice_number_frame.pack(fill="both", padx=10, pady=15) 
+
+            vendor_invoice_number_label = tk.Label(invoice_number_frame, text="Invoice number")
             vendor_invoice_number_label.grid(sticky="w", row=9, column=1, padx=10)
-            vendor_invoice_number_entry = tk.Entry(vendor_address_frame, width=15, background="white")
+            vendor_invoice_number_entry = tk.Entry(invoice_number_frame, width=15, background="white")
             vendor_invoice_number_entry.grid(sticky="w", row=10, column=1, padx=10, pady=2)
 
             # Add the Treeview to the invoice
@@ -1475,16 +1502,17 @@ class Vendors:
                 # Get the total from the invoice summmary table
                 cur.execute("SELECT total FROM vendor_invoice_summary WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
                 record_total = cur.fetchone()
-
+                
                 # Add the fetched data to the treeview and total box
                 global count
                 self.count = 0
 
                 for row in record:
                     vendor_invoice_treeview.insert(parent='', index='end', iid=self.count, text='', values=(row[0], row[5], row[9], row[6], row[7], row[8]))
-                    self.count+=1        
+                    self.count+=1   
+                invoice_total_box_entry.configure(state="normal")     
                 invoice_total_box_entry.insert(0, record_total)
-
+                invoice_total_box_entry.configure(state="readonly")
             # Disconnect from the database
             conn.commit()
             conn.close() 
@@ -1522,7 +1550,7 @@ class Vendors:
                 # Clear the treeview and total box
                 for record in vendor_invoice_treeview.get_children():
                     vendor_invoice_treeview.delete(record)
-                invoice_total_box_entry.delete(0,'end')
+                
                 
                 # Get data from the database that has the same invoice number as the one given in the invoice
                 cur.execute("SELECT rowid, * FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
@@ -1540,7 +1568,10 @@ class Vendors:
                     vendor_invoice_treeview.insert(parent='', index='end', iid=count, text='', values=(row[0], row[5], row[9], row[6], row[7], row[8]))
                     count+=1        
 
+                invoice_total_box_entry.configure(state="normal") 
+                invoice_total_box_entry.delete(0,'end')
                 invoice_total_box_entry.insert(0, total_figure)
+                invoice_total_box_entry.configure(state="readonly") 
             else:
                 Message("Please choose an item to delete")
             conn.commit()
@@ -1559,7 +1590,7 @@ class Vendors:
         if vendor_values: 
             # Create the window
             vendor_invoice_history_window = tk.Toplevel()
-            vendor_invoice_history_window.title("Vendor History")
+            vendor_invoice_history_window.title("Invoice History")
             vendor_invoice_history_window.geometry("1024x640")
             vendor_invoice_history_window.attributes('-topmost', 'true') 
             
@@ -1609,11 +1640,11 @@ class Vendors:
             invoice_history_treeview_scroll.pack(side="right", fill="y") 
 
             # Add the Treeview to the frame
-            vendor_invoice_history_tree = ttk.Treeview(invoice_history_treeview_frame, yscrollcommand=invoice_history_treeview_scroll.set, selectmode="extended") 
-            vendor_invoice_history_tree.pack(fill="both", expand="y")  
+            self.vendor_invoice_history_tree = ttk.Treeview(invoice_history_treeview_frame, yscrollcommand=invoice_history_treeview_scroll.set, selectmode="extended") 
+            self.vendor_invoice_history_tree.pack(fill="both", expand="y")  
 
             # Create the columns in the Treeview
-            vendor_invoice_history_tree['columns'] = (
+            self.vendor_invoice_history_tree['columns'] = (
             "ID",
             "Date", 
             "Invoice Number", 
@@ -1621,20 +1652,20 @@ class Vendors:
             )
 
             # Provide the headings for each column
-            vendor_invoice_history_tree.column("#0", width=0, stretch="no")
-            vendor_invoice_history_tree.heading("#0", text="")
+            self.vendor_invoice_history_tree.column("#0", width=0, stretch="no")
+            self.vendor_invoice_history_tree.heading("#0", text="")
             
-            vendor_invoice_history_tree.column("ID", width=0, stretch="no")
-            vendor_invoice_history_tree.heading("ID", text="ID")
+            self.vendor_invoice_history_tree.column("ID", width=0, stretch="no")
+            self.vendor_invoice_history_tree.heading("ID", text="ID")
             
-            vendor_invoice_history_tree.column("Date") 
-            vendor_invoice_history_tree.heading("Date", text="Date")  
+            self.vendor_invoice_history_tree.column("Date") 
+            self.vendor_invoice_history_tree.heading("Date", text="Date")  
             
-            vendor_invoice_history_tree.column("Invoice Number") 
-            vendor_invoice_history_tree.heading("Invoice Number", text="Invoice Number")  
+            self.vendor_invoice_history_tree.column("Invoice Number") 
+            self.vendor_invoice_history_tree.heading("Invoice Number", text="Invoice Number")  
             
-            vendor_invoice_history_tree.column("Total") 
-            vendor_invoice_history_tree.heading("Total", text="Total")  
+            self.vendor_invoice_history_tree.column("Total") 
+            self.vendor_invoice_history_tree.heading("Total", text="Total")  
 
             # Add the data to the treeview
             # Fetch data from database
@@ -1646,7 +1677,7 @@ class Vendors:
             count = 0
 
             for row in record:
-                vendor_invoice_history_tree.insert(parent='', index='end', iid=count, text='', values=(row[1], row[2], row[3], row[4]))
+                self.vendor_invoice_history_tree.insert(parent='', index='end', iid=count, text='', values=(row[1], row[2], row[3], row[4]))
                 count+=1        
         
         # If a supplier isn't selected tell the user to select a supplier
@@ -1658,7 +1689,152 @@ class Vendors:
         conn.close()
     
     def view_invoice(self):
-        pass
+        # Connect to the database
+        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        cur = conn.cursor()
+
+        # Select vendor
+        selected_vendor = self.vendor_treeview.focus()
+        values_vendor = self.vendor_treeview.item(selected_vendor, 'values') 
+
+        # Select an invoice
+        selected_invoice = self.vendor_invoice_history_tree.focus()
+        values_invoice = self.vendor_invoice_history_tree.item(selected_invoice, 'values') 
+
+        # If an invoice is selected then open a window showing the invoice details
+        if values_invoice:
+            # Create the window
+            vendor_invoice_window = tk.Toplevel()
+            vendor_invoice_window.title("Invoice")
+            vendor_invoice_window.geometry("1024x800")
+            vendor_invoice_window.attributes('-topmost', 'true') 
+
+            # Create a frame in the window for the supplier address
+            vendor_address_frame = tk.Frame(vendor_invoice_window)
+            vendor_address_frame.pack(fill="both", padx=10, pady=5)  
+
+            # Add the supplier address to the invoice
+            vendor_name_label = tk.Label(vendor_address_frame, text=values_vendor[1])
+            vendor_name_label.grid(sticky="w", row=1, column=1, padx=10)
+
+            vendor_company_label = tk.Label(vendor_address_frame, text=values_vendor[2])
+            vendor_company_label.grid(sticky="w", row=2, column=1, padx=10)
+    
+            vendor_street_label = tk.Label(vendor_address_frame, text=values_vendor[3])
+            vendor_street_label.grid(sticky="w", row=3, column=1, padx=10)
+    
+            vendor_town_label = tk.Label(vendor_address_frame, text=values_vendor[4])
+            vendor_town_label.grid(sticky="w", row=4, column=1, padx=10)
+    
+            vendor_city_label = tk.Label(vendor_address_frame, text=values_vendor[5])
+            vendor_city_label.grid(sticky="w", row=5, column=1, padx=10)
+    
+            vendor_county_label = tk.Label(vendor_address_frame, text=values_vendor[6])
+            vendor_county_label.grid(sticky="w", row=6, column=1, padx=10)
+    
+            vendor_postcode_label = tk.Label(vendor_address_frame, text=values_vendor[7])
+            vendor_postcode_label.grid(sticky="w", row=7, column=1, padx=10)
+
+            # Add the date
+            date_frame = tk.Frame(vendor_invoice_window)
+            date_frame.pack(fill="both", padx=10, pady=15) 
+
+            date_label = tk.Label(date_frame, text="Date")
+            date_label.grid(sticky="w", row=8, column=1, padx=10, pady=0)
+            date = tk.Entry(date_frame)
+            date.insert(0, values_invoice[1])
+            date.configure(state="readonly")
+            date.grid(sticky="w", row=9, column=1, padx=10)
+
+            # Add the invoice number
+            invoice_number_frame = tk.Frame(vendor_invoice_window)
+            invoice_number_frame.pack(fill="both", padx=10, pady=15)
+
+            vendor_invoice_number_label = tk.Label(invoice_number_frame, text="Invoice number")
+            vendor_invoice_number_label.grid(sticky="w", row=9, column=1, padx=10)
+            vendor_invoice_number_entry = tk.Entry(invoice_number_frame, width=15, background="white")
+            vendor_invoice_number_entry.insert(0, values_invoice[2])
+            vendor_invoice_number_entry.configure(state="readonly")
+            vendor_invoice_number_entry.grid(sticky="w", row=10, column=1, padx=10, pady=0)
+
+            # Add the Treeview to the invoice
+            # Create a frame for the Treeview widget
+            vendor_invoice_treeview_frame = tk.Frame(vendor_invoice_window)
+            vendor_invoice_treeview_frame.pack(fill="both", expand=1, padx=10)
+
+            # Add a scrollbar to the frame
+            vendor_invoice_treeview_scroll = tk.Scrollbar(vendor_invoice_treeview_frame)
+            vendor_invoice_treeview_scroll.pack(side="right", fill="y") 
+
+            # Add the Treeview to the frame
+            vendor_invoice_treeview = ttk.Treeview(vendor_invoice_treeview_frame, yscrollcommand=vendor_invoice_treeview_scroll.set, selectmode="extended") 
+            vendor_invoice_treeview.pack(fill="both", expand="yes")  
+
+            # Add the invoice total box            
+            invoice_total_box_entry = tk.Entry(vendor_invoice_treeview_frame, width=15, state="readonly")
+            invoice_total_box_entry.pack(side="right", padx=10, pady=5)
+            invoice_total_box_label = tk.Label(vendor_invoice_treeview_frame, text="Total")
+            invoice_total_box_label.pack(side="right", padx=0, pady=5)
+
+            # Create the columns in the Treeview
+            vendor_invoice_treeview['columns'] = (
+            "id",
+            "Description", 
+            "Account",
+            "Quantity", 
+            "Unit Price", 
+            "Sub Total"
+            )
+
+            # Provide the headings for each column
+            vendor_invoice_treeview.column("#0", width=0, stretch="no")
+            vendor_invoice_treeview.heading("#0", text="")
+            
+            vendor_invoice_treeview.column("id", width=0, stretch="no")
+            vendor_invoice_treeview.heading("id", text="id")
+
+            vendor_invoice_treeview.column("Description", minwidth=500) 
+            vendor_invoice_treeview.heading("Description", text="Description")   
+
+            vendor_invoice_treeview.column("Account", minwidth=100) 
+            vendor_invoice_treeview.heading("Account", text="Account") 
+            
+            vendor_invoice_treeview.column("Quantity", minwidth=100) 
+            vendor_invoice_treeview.heading("Quantity", text="Quantity")   
+            
+            vendor_invoice_treeview.column("Unit Price", minwidth=100) 
+            vendor_invoice_treeview.heading("Unit Price", text="Unit Price")   
+            
+            vendor_invoice_treeview.column("Sub Total", minwidth=100) 
+            vendor_invoice_treeview.heading("Sub Total", text="Total")
+
+            # Populate the treeview
+            # Get data from the database that has the same invoice number as the one given in the invoice
+            cur.execute("SELECT rowid, * FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
+            record = cur.fetchall()  
+
+            # Get the total from the invoice summmary table
+            cur.execute("SELECT total FROM vendor_invoice_summary WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
+            record_total = cur.fetchone()
+
+            # Add the fetched data to the treeview and total box
+            global count
+            self.count = 0
+
+            for row in record:
+                vendor_invoice_treeview.insert(parent='', index='end', iid=self.count, text='', values=(row[0], row[5], row[9], row[6], row[7], row[8]))
+                self.count+=1   
+
+            invoice_total_box_entry.configure(state="normal")     
+            invoice_total_box_entry.insert(0, record_total)
+            invoice_total_box_entry.configure(state="readonly")
+
+        else:
+            pass
+  
+        # Disconnect from the database
+        conn.commit()
+        conn.close() 
 
 class Chart_of_accounts:
     
@@ -2269,42 +2445,42 @@ class Settings:
         # Add the entry boxes
         company_label = tk.Label(business_address_frame, text="Company")
         company_label.grid(row=1, column=1, padx=10, pady=5)
-        company_entry = tk.Entry(business_address_frame, width=15)
+        company_entry = tk.Entry(business_address_frame, width=15, background="white")
         company_entry.grid(row=1, column=2, padx=10, pady=5)
         
         street_label = tk.Label(business_address_frame, text="Street")
         street_label.grid(row=2, column=1, padx=10, pady=5)
-        street_entry = tk.Entry(business_address_frame, width=15)
+        street_entry = tk.Entry(business_address_frame, width=15, background="white")
         street_entry.grid(row=2, column=2, padx=10, pady=5)
     
         town_label = tk.Label(business_address_frame, text="Town")
         town_label.grid(row=3, column=1, padx=10, pady=5)
-        town_entry = tk.Entry(business_address_frame, width=15)
+        town_entry = tk.Entry(business_address_frame, width=15, background="white")
         town_entry.grid(row=3, column=2, padx=10, pady=5)
         
         city_label = tk.Label(business_address_frame, text="City")
         city_label.grid(row=4, column=1, padx=10, pady=5)
-        city_entry = tk.Entry(business_address_frame, width=15)
+        city_entry = tk.Entry(business_address_frame, width=15, background="white")
         city_entry.grid(row=4, column=2, padx=10, pady=5)
         
         county_label = tk.Label(business_address_frame, text="County")
         county_label.grid(row=5, column=1, padx=10, pady=5)
-        county_entry = tk.Entry(business_address_frame, width=15)
+        county_entry = tk.Entry(business_address_frame, width=15, background="white")
         county_entry.grid(row=5, column=2, padx=10, pady=5)
         
         postcode_label = tk.Label(business_address_frame, text="Postcode")
         postcode_label.grid(row=6, column=1, padx=10, pady=5)
-        postcode_entry = tk.Entry(business_address_frame, width=15)
+        postcode_entry = tk.Entry(business_address_frame, width=15, background="white")
         postcode_entry.grid(row=6, column=2, padx=10, pady=5)
         
         email_label = tk.Label(business_address_frame, text="Email")
         email_label.grid(row=7, column=1, padx=10, pady=5)
-        email_entry = tk.Entry(business_address_frame, width=15)
+        email_entry = tk.Entry(business_address_frame, width=15, background="white")
         email_entry.grid(row=7, column=2, padx=10, pady=5)
         
         phone_label = tk.Label(business_address_frame, text="Phone")
         phone_label.grid(row=8, column=1, padx=10, pady=5)
-        phone_entry = tk.Entry(business_address_frame, width=15)
+        phone_entry = tk.Entry(business_address_frame, width=15, background="white")
         phone_entry.grid(row=8, column=2, padx=10, pady=5)
 
         def populate_business_address():
@@ -2471,12 +2647,16 @@ class Message:
         close_button = tk.Button(message_window, text="Close", command=message_window.destroy)
         close_button.pack(side="bottom", pady=10)
 
+
 customers = Customers()
 vendors = Vendors()
 chart_of_accounts = Chart_of_accounts()
-Settings()
+settings = Settings()
 menu_bar = Menu_bar()
 right_click = Right_click()
+double_click = Double_click()
+
+ 
 
 root.mainloop()
 
@@ -2484,9 +2664,5 @@ root.mainloop()
 
 ############## Get vendor invoice working fully #####################
 #####edit invoice
-#####view invoice
-#####double click vendor to open invoice history
-#####double click invoice in history to open itemised invoice
 
-####posted column
-####paid column
+#####double click invoice in history to open itemised invoice
