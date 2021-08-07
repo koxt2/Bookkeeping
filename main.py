@@ -1222,6 +1222,7 @@ class Vendors:
             # Add the date to the invoice
             cal = tkcal.DateEntry(vendor_address_frame, showweeknumbers=False)
             cal.grid(sticky="w", row=8, column=1, padx=10, pady=15)
+            cal._top_cal.overrideredirect(False)
 
             # Add the invoice number
             vendor_invoice_number_label = tk.Label(vendor_address_frame, text="Invoice number")
