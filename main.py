@@ -228,6 +228,7 @@ class Right_click:
 class Double_click:
     def __init__(self):
         self.vendors_double_click()
+        #self.invoice_double_click()
 
     def vendors_double_click(self):
         
@@ -237,7 +238,7 @@ class Double_click:
         
         # Bind a double click
         vendors.vendor_treeview.bind("<Double-Button-1>", vendor_clicked)  
-        
+    
 class Customers:
 
     def __init__(self):
@@ -816,10 +817,10 @@ class Vendors:
                 )
             
             # Provide the headings for each column
-            self.vendor_treeview.column("#0", width=10, stretch="no")
+            self.vendor_treeview.column("#0", width=0, stretch="no")
             self.vendor_treeview.heading("#0", text="")
             
-            self.vendor_treeview.column("ID", width=10, stretch="no")
+            self.vendor_treeview.column("ID", width=0, stretch="no")
             self.vendor_treeview.heading("ID", text="ID")
             
             self.vendor_treeview.column("Name", minwidth=25, width=50) 
@@ -849,12 +850,19 @@ class Vendors:
             self.vendor_treeview.column("Phone", minwidth=25, width=50) 
             self.vendor_treeview.heading("Phone", text="Phone")  
         
+            def vendor_clicked(event):
+                # Call the method
+                vendors.invoice_history()
+            
+            # Bind a double click
+            self.vendor_treeview.bind("<Double-Button-1>", vendor_clicked)  
+        
         vendor_database_table()
         vendor_tab()
         vendor_ribbon()
         vendor_treeview()
         self.populate_vendor_tree()
-
+        
     def populate_vendor_tree(self):  
         # Connect to the database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
@@ -1203,7 +1211,7 @@ class Vendors:
             vendor_invoice_window = tk.Toplevel()
             vendor_invoice_window.title("Add Vendor Invoice")
             vendor_invoice_window.geometry("1024x800")
-            vendor_invoice_window.attributes('-topmost', 'true') 
+            #vendor_invoice_window.attributes('-topmost', 'true') 
             
             # Add the vendor address, date and invoice number to the invoice
             # Create a frame in the window for the supplier address
@@ -1317,6 +1325,7 @@ class Vendors:
             for account in accounts:
                 for record in account:
                     expense_accounts.append(record)
+            print(expense_accounts)
 
             invoice_item_id_label = tk.Label(vendor_invoice_entry_frame, text="id")
             #invoice_item_id_label.grid(row=1, column=1, padx=10)
@@ -1679,6 +1688,12 @@ class Vendors:
         else:
             Message("Please select a supplier first")
 
+        def invoice_clicked(event):
+            # Call the method
+            self.view_invoice()
+
+        self.vendor_invoice_history_tree.bind("<Double-Button-1>", invoice_clicked)
+        
         # Disconnect from the database
         conn.commit()
         conn.close()
@@ -1701,7 +1716,7 @@ class Vendors:
             # Create the window
             vendor_invoice_window = tk.Toplevel()
             vendor_invoice_window.title("Invoice")
-            vendor_invoice_window.geometry("1024x800")
+            vendor_invoice_window.geometry("1024x600")
             vendor_invoice_window.attributes('-topmost', 'true') 
 
             # Create a frame in the window for the supplier address
@@ -1767,9 +1782,9 @@ class Vendors:
 
             # Add the invoice total box            
             invoice_total_box_entry = tk.Entry(vendor_invoice_treeview_frame, width=15, state="readonly")
-            invoice_total_box_entry.pack(side="right", padx=10, pady=5)
+            invoice_total_box_entry.pack(side="right", padx=10, pady=10)
             invoice_total_box_label = tk.Label(vendor_invoice_treeview_frame, text="Total")
-            invoice_total_box_label.pack(side="right", padx=0, pady=5)
+            invoice_total_box_label.pack(side="right", padx=0, pady=10)
 
             # Create the columns in the Treeview
             vendor_invoice_treeview['columns'] = (
