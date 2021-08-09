@@ -1,11 +1,8 @@
 # Import modules
 import tkinter as tk
 from tkinter import ttk
-
 from ttkthemes import ThemedTk
-
 import sqlite3
-
 import tkcalendar as tkcal
 
 # Create root
@@ -13,12 +10,12 @@ root = ThemedTk(theme='breeze')
 root.title("Bookkeeping")
 root.geometry("1920x1080")
 
-# Create database
-conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
-
 # Create Tkinter Notebook
 main_window = ttk.Notebook(root)
 main_window.pack(fill="both", expand="yes")
+
+# Create database
+conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
 
 class Menu_bar:
     def __init__(self):
@@ -126,119 +123,6 @@ class Menu_bar:
 
         chart_of_accounts.accounts_treeview.bind("<ButtonRelease-1>", enable_buttons)
 
-class Right_click:
-    def __init__(self):
-        self.right_click_customer()
-        self.right_click_vendor()
-        self.right_click_accounts()
-        
-    def right_click_customer(self):
-        # Create the menu
-        right_click_customer = tk.Menu(customers.customer_treeview, tearoff="false")
-        
-        # Create the menu items
-        right_click_customer.add_command(label="New Customer", command=customers.new_customer)
-        right_click_customer.add_command(label="Edit Customer", command=customers.edit_customer, state="disabled")
-        right_click_customer.add_command(label="Delete Customer", command=customers.delete_customer, state="disabled")
-
-        def popup(event):
-            # Create a toggle to determine if a customer is selected
-            selected_customer = customers.customer_treeview.focus()
-            values_customer = customers.customer_treeview.item(selected_customer, 'values')
-            
-            # If a customer is selected change the state of menu items
-            if values_customer:
-                right_click_customer.entryconfig("Edit Customer", state="normal")
-                right_click_customer.entryconfig("Delete Customer", state="normal")
-            else:
-                print("grrr")
-            
-            # Pop-up the menu 
-            right_click_customer.tk_popup(event.x_root, event.y_root)
-        
-        customers.customer_treeview.bind("<Control-Button-1>", popup)
-        customers.customer_treeview.bind("<ButtonRelease-3>", popup)
-
-    def right_click_vendor(self):
-        # Create the menu
-        right_click_vendor = tk.Menu(vendors.vendor_treeview, tearoff="false")
-        
-        # Create the menu items
-        right_click_vendor.add_command(label="New Vendor", command=vendors.new_vendor, state="normal")
-        right_click_vendor.add_command(label="Edit Vendor", command=vendors.edit_vendor, state="disabled")
-        right_click_vendor.add_command(label="Delete Vendor", command=vendors.delete_vendor, state="disabled")
-        right_click_vendor.add_separator()
-        right_click_vendor.add_command(label="New Vendor Invoice", command=vendors.new_vendor_invoice, state="disabled")
-        right_click_vendor.add_command(label="Invoice History", command=vendors.invoice_history, state="disabled")
-
-        def popup(event):
-            # Create a toggle to determine if a vendor is selected
-            selected_vendor = vendors.vendor_treeview.focus()
-            values_vendor = vendors.vendor_treeview.item(selected_vendor, 'values')
-            
-            # If a vendor is selected change the state of menu items
-            if values_vendor:
-                right_click_vendor.entryconfig("Edit Vendor", state="normal")
-                right_click_vendor.entryconfig("Delete Vendor", state="normal")
-                right_click_vendor.entryconfig("New Vendor Invoice", state="normal")
-                right_click_vendor.entryconfig("Invoice History", state="normal")
-            else:
-                pass
-            
-            # Pop-up the menu 
-            right_click_vendor.tk_popup(event.x_root, event.y_root)
-        
-        vendors.vendor_treeview.bind("<Control-Button-1>", popup)
-        vendors.vendor_treeview.bind("<ButtonRelease-3>", popup)
-        
-    def right_click_accounts(self):
-        # Create the menu
-        right_click_accounts = tk.Menu(chart_of_accounts.accounts_treeview, tearoff="false")
-
-        # Add menu items
-        right_click_accounts.add_command(label="New Account", command=chart_of_accounts.new_parent_account)
-        right_click_accounts.add_command(label="New Child Account", command=chart_of_accounts.new_child_account, state="disabled")
-        right_click_accounts.add_command(label="Edit Account", command=chart_of_accounts.edit_account, state="disabled")
-        right_click_accounts.add_command(label="Delete Account", command=chart_of_accounts.delete_account, state="disabled")
-
-        # Enable certain items if an account is selected in the treeview
-        def popup(event):
-            # Create a toggle to determine if a vendor is selected
-            selected_account = chart_of_accounts.accounts_treeview.focus()
-            values_accounts = chart_of_accounts.accounts_treeview.item(selected_account, 'values')
-
-            # If an account is selected change the state of menu items
-            if values_accounts:
-                if values_accounts[6] == "YES":
-                    right_click_accounts.entryconfig("New Child Account", state="disabled")
-                    right_click_accounts.entryconfig("Edit Account", state="normal")
-                    right_click_accounts.entryconfig("Delete Account", state="normal")
-                
-                elif values_accounts[6] == "NO":
-                    right_click_accounts.entryconfig("New Child Account", state="normal")
-                    right_click_accounts.entryconfig("Edit Account", state="normal")
-                    right_click_accounts.entryconfig("Delete Account", state="normal")
-            else:
-                pass
-            # Pop-up the menu 
-            right_click_accounts.tk_popup(event.x_root, event.y_root)
-
-        chart_of_accounts.accounts_treeview.bind("<ButtonRelease-3>", popup)
-
-class Double_click:
-    def __init__(self):
-        self.vendors_double_click()
-        #self.invoice_double_click()
-
-    def vendors_double_click(self):
-        
-        def vendor_clicked(event):
-            # Call the method
-            vendors.invoice_history()
-        
-        # Bind a double click
-        vendors.vendor_treeview.bind("<Double-Button-1>", vendor_clicked)  
-    
 class Customers:
 
     def __init__(self):
@@ -303,6 +187,30 @@ class Customers:
             delete_customer_contact_label.grid(padx=10, row=2, column=3)
 
         def customer_treeview():
+
+            def right_click_customer(event):
+                # Create a toggle to determine if a customer is selected
+                selected_customer = customers.customer_treeview.focus()
+                values_customer = customers.customer_treeview.item(selected_customer, 'values')
+
+                # Create the menu
+                right_click_customer = tk.Menu(customers.customer_treeview, tearoff="false")
+
+                # Create the menu items
+                right_click_customer.add_command(label="New Customer", command=customers.new_customer)
+                right_click_customer.add_command(label="Edit Customer", command=customers.edit_customer, state="disabled")
+                right_click_customer.add_command(label="Delete Customer", command=customers.delete_customer, state="disabled")                  
+
+                # If a customer is selected change the state of menu items
+                if values_customer:
+                    right_click_customer.entryconfig("Edit Customer", state="normal")
+                    right_click_customer.entryconfig("Delete Customer", state="normal")
+                else:
+                    print("grrr")
+
+                # Pop-up the menu 
+                right_click_customer.tk_popup(event.x_root, event.y_root)
+
             # Create a frame for the customer treeview
             self.customer_treeview_frame = tk.Frame(self.tab)
             self.customer_treeview_frame.pack(fill="both", padx=10, pady=10, expand="yes")
@@ -362,6 +270,9 @@ class Customers:
             
             self.customer_treeview.column("Phone", minwidth=25, width=50) 
             self.customer_treeview.heading("Phone", text="Phone") 
+
+            self.customer_treeview.bind("<Control-Button-1>", right_click_customer)
+            self.customer_treeview.bind("<ButtonRelease-3>", right_click_customer)
 
         customer_database_table()
         customer_tab()
@@ -790,6 +701,39 @@ class Vendors:
             vendor_invoice_history_label.grid(padx=10, row=2, column=5)
             
         def vendor_treeview():
+            
+            def vendor_double_clicked(event):
+                # Call the method
+                vendors.invoice_history()
+
+            def right_click_vendor(event):
+                # Create a toggle to determine if a vendor is selected
+                selected_vendor = vendors.vendor_treeview.focus()
+                values_vendor = vendors.vendor_treeview.item(selected_vendor, 'values')
+
+                # Create the menu
+                right_click_vendor = tk.Menu(vendors.vendor_treeview, tearoff="false")
+
+                # Create the menu items
+                right_click_vendor.add_command(label="New Vendor", command=vendors.new_vendor, state="normal")
+                right_click_vendor.add_command(label="Edit Vendor", command=vendors.edit_vendor, state="disabled")
+                right_click_vendor.add_command(label="Delete Vendor", command=vendors.delete_vendor, state="disabled")
+                right_click_vendor.add_separator()
+                right_click_vendor.add_command(label="New Vendor Invoice", command=vendors.new_vendor_invoice, state="disabled")
+                right_click_vendor.add_command(label="Invoice History", command=vendors.invoice_history, state="disabled")
+
+                # If a vendor is selected change the state of menu items
+                if values_vendor:
+                    right_click_vendor.entryconfig("Edit Vendor", state="normal")
+                    right_click_vendor.entryconfig("Delete Vendor", state="normal")
+                    right_click_vendor.entryconfig("New Vendor Invoice", state="normal")
+                    right_click_vendor.entryconfig("Invoice History", state="normal")
+                else:
+                    pass
+                
+                # Pop-up the menu 
+                right_click_vendor.tk_popup(event.x_root, event.y_root)
+
             # Create a frame for the vendor treeview
             self.vendor_treeview_frame = tk.Frame(self.tab)
             self.vendor_treeview_frame.pack(fill="both", padx=10, pady=10, expand="yes")
@@ -850,12 +794,12 @@ class Vendors:
             self.vendor_treeview.column("Phone", minwidth=25, width=50) 
             self.vendor_treeview.heading("Phone", text="Phone")  
         
-            def vendor_clicked(event):
-                # Call the method
-                vendors.invoice_history()
-            
             # Bind a double click
-            self.vendor_treeview.bind("<Double-Button-1>", vendor_clicked)  
+            self.vendor_treeview.bind("<Double-Button-1>", vendor_double_clicked)  
+
+            # Bind a right click
+            self.vendor_treeview.bind("<Control-Button-1>", right_click_vendor)
+            self.vendor_treeview.bind("<ButtonRelease-3>", right_click_vendor)
         
         vendor_database_table()
         vendor_tab()
@@ -1582,6 +1526,10 @@ class Vendors:
             conn.close()
 
     def invoice_history(self):
+        def invoice_clicked(event):
+            # Call the method
+            self.view_invoice()
+
         # Connect to the database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
@@ -1687,10 +1635,6 @@ class Vendors:
         # If a supplier isn't selected tell the user to select a supplier
         else:
             Message("Please select a supplier first")
-
-        def invoice_clicked(event):
-            # Call the method
-            self.view_invoice()
 
         self.vendor_invoice_history_tree.bind("<Double-Button-1>", invoice_clicked)
         
@@ -1922,6 +1866,39 @@ class Chart_of_accounts:
             delete_account_label.grid(padx=10, row=2, column=4)
             
         def accounts_treeview():
+
+            def right_click_accounts(event):
+                # Create a toggle to determine if a vendor is selected
+                selected_account = chart_of_accounts.accounts_treeview.focus()
+                values_accounts = chart_of_accounts.accounts_treeview.item(selected_account, 'values')
+
+                # Create the menu
+                right_click_accounts = tk.Menu(chart_of_accounts.accounts_treeview, tearoff="false")
+
+                # Add menu items
+                right_click_accounts.add_command(label="New Account", command=chart_of_accounts.new_parent_account)
+                right_click_accounts.add_command(label="New Child Account", command=chart_of_accounts.new_child_account, state="disabled")
+                right_click_accounts.add_command(label="Edit Account", command=chart_of_accounts.edit_account, state="disabled")
+                right_click_accounts.add_command(label="Delete Account", command=chart_of_accounts.delete_account, state="disabled")
+
+                # If an account is selected change the state of menu items
+                if values_accounts:
+                    if values_accounts[6] == "YES":
+                        right_click_accounts.entryconfig("New Child Account", state="disabled")
+                        right_click_accounts.entryconfig("Edit Account", state="normal")
+                        right_click_accounts.entryconfig("Delete Account", state="normal")
+
+                    elif values_accounts[6] == "NO":
+                        right_click_accounts.entryconfig("New Child Account", state="normal")
+                        right_click_accounts.entryconfig("Edit Account", state="normal")
+                        right_click_accounts.entryconfig("Delete Account", state="normal")
+                else:
+                    pass
+                
+                # Pop-up the menu 
+                right_click_accounts.tk_popup(event.x_root, event.y_root)
+
+                
             # Create a frame for the Treeview
             self.accounts_treeview_frame = tk.Frame(self.tab)
             self.accounts_treeview_frame.pack(side="bottom", fill="both", padx=10, expand=1)
@@ -1961,6 +1938,8 @@ class Chart_of_accounts:
             
             self.accounts_treeview.column("Child", width=0, stretch="false")           
             self.accounts_treeview.heading("Child", text="Child") 
+
+            self.accounts_treeview.bind("<ButtonRelease-3>", right_click_accounts)
         
         accounts_database_table()
         accounts_tab()
@@ -2663,8 +2642,8 @@ vendors = Vendors()
 chart_of_accounts = Chart_of_accounts()
 settings = Settings()
 menu_bar = Menu_bar()
-right_click = Right_click()
-double_click = Double_click()
+
+
 
  
 
@@ -2675,6 +2654,3 @@ root.mainloop()
 ############## Get vendor invoice working fully #####################
 #####edit invoice
 
-
-
-#####double click invoice in history to open itemised invoice
