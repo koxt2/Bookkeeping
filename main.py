@@ -433,7 +433,6 @@ class Customers:
 
             # Regenerate menu
             Menu_bar()   
-            Right_click()    
 
     def edit_customer (self):
         # Select the Customer to edit
@@ -576,7 +575,6 @@ class Customers:
 
             # Regenerate menu and right click
             Menu_bar()
-            Right_click()
 
     def delete_customer (self):
         # Connect to the database
@@ -604,7 +602,6 @@ class Customers:
 
         # Regenerate menu
         Menu_bar()
-        Right_click()
         
 class Vendors:
 
@@ -963,7 +960,6 @@ class Vendors:
 
             # Regenerate menu
             Menu_bar()    
-            Right_click()
 
     def edit_vendor (self):
         # Select the vendor to edit
@@ -1110,7 +1106,6 @@ class Vendors:
 
             # Regenerate menu
             Menu_bar()    
-            Right_click()
 
     def delete_vendor (self):
         # Connect to the database
@@ -1138,7 +1133,6 @@ class Vendors:
 
         # Regenerate menu
         Menu_bar()    
-        Right_click()
 
     def new_vendor_invoice(self):
         # Connect to database
@@ -1375,6 +1369,9 @@ class Vendors:
                 parent_account = cur.fetchall()
                 cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_number=?', (sub_total, parent_account[0][0]),)
 
+                # Add the invoice item value to the Accounts Receivable database
+                cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_name=?', (sub_total, 'Accounts Receivable (Debtors)'))
+
                 # Add up all the items in an invoice to give a total invoice figure
                 cur.execute("SELECT SUM(total) FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
                 self.figure = cur.fetchall()
@@ -1461,6 +1458,7 @@ class Vendors:
                 invoice_total_box_entry.configure(state="normal")     
                 invoice_total_box_entry.insert(0, record_total)
                 invoice_total_box_entry.configure(state="readonly")
+            
             # Disconnect from the database
             conn.commit()
             conn.close() 
@@ -1526,6 +1524,7 @@ class Vendors:
             conn.close()
 
     def invoice_history(self):
+        
         def invoice_clicked(event):
             # Call the method
             self.view_invoice()
@@ -1819,6 +1818,17 @@ class Chart_of_accounts:
                 type TEXT
                 )""")
 
+            cur.execute("SELECT * FROM parent_accounts WHERE account_name = 'Accounts Receivable (Debtors)'")
+            accounts = cur.fetchall()
+
+            if accounts:
+                pass
+            else:
+                # Add the accounts payable and receivable entries
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (1000, 'Accounts Receivable (Debtors)', 0.00, 'Income'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (2000, 'Accounts Payable (Creditors)', 0.00, 'Expenses'))
+                conn.commit()
+        
         def accounts_tab():
             # Create the tab
             self.tab = tk.Frame(main_window)
@@ -2098,8 +2108,7 @@ class Chart_of_accounts:
 
             # Regenerate Menu bar
             Menu_bar()
-            Right_click()
-        
+                    
     def new_child_account(self):
         # Select a parent account to create a child from...
         selected_account = self.accounts_treeview.focus()
@@ -2206,7 +2215,6 @@ class Chart_of_accounts:
 
             # Regenerate Menu bar
             Menu_bar()
-            Right_click()
     
     def edit_account(self):
         # Select an account to edit
@@ -2332,7 +2340,6 @@ class Chart_of_accounts:
 
             # Regenerate Menu bar
             Menu_bar()
-            Right_click()
 
     def delete_account(self):
         # Connect to the database
@@ -2387,7 +2394,6 @@ class Chart_of_accounts:
 
         # Regenerate Menu bar
         Menu_bar()
-        Right_click()
 
 class Settings:
 
@@ -2653,4 +2659,6 @@ root.mainloop()
 
 ############## Get vendor invoice working fully #####################
 #####edit invoice
+
+######## Check CoA updates. It doesnt seem to be updating##############
 
