@@ -206,7 +206,7 @@ class Customers:
                     right_click_customer.entryconfig("Edit Customer", state="normal")
                     right_click_customer.entryconfig("Delete Customer", state="normal")
                 else:
-                    print("grrr")
+                    pass
 
                 # Pop-up the menu 
                 right_click_customer.tk_popup(event.x_root, event.y_root)
@@ -1263,7 +1263,6 @@ class Vendors:
             for account in accounts:
                 for record in account:
                     expense_accounts.append(record)
-            print(expense_accounts)
 
             invoice_item_id_label = tk.Label(vendor_invoice_entry_frame, text="id")
             #invoice_item_id_label.grid(row=1, column=1, padx=10)
@@ -1369,8 +1368,8 @@ class Vendors:
                 parent_account = cur.fetchall()
                 cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_number=?', (sub_total, parent_account[0][0]),)
 
-                # Add the invoice item value to the Accounts Receivable database
-                cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_name=?', (sub_total, 'Accounts Receivable (Debtors)'))
+                # Add the invoice item value to the Accounts Payable database
+                cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_name=?', (sub_total, 'Accounts Payable (Creditors)'))
 
                 # Add up all the items in an invoice to give a total invoice figure
                 cur.execute("SELECT SUM(total) FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
@@ -1455,13 +1454,17 @@ class Vendors:
                 for row in record:
                     vendor_invoice_treeview.insert(parent='', index='end', iid=self.count, text='', values=(row[0], row[5], row[9], row[6], row[7], row[8]))
                     self.count+=1   
-                invoice_total_box_entry.configure(state="normal")     
+                invoice_total_box_entry.configure(state="normal") 
+                invoice_total_box_entry.delete(0,'end')    
                 invoice_total_box_entry.insert(0, record_total)
                 invoice_total_box_entry.configure(state="readonly")
             
             # Disconnect from the database
             conn.commit()
             conn.close() 
+
+            # Re-populate the Chart of Accounts Treeview      
+            chart_of_accounts.populate_accounts_tree()
 
         def delete_invoice_item():
 
@@ -1518,10 +1521,15 @@ class Vendors:
                 invoice_total_box_entry.delete(0,'end')
                 invoice_total_box_entry.insert(0, total_figure)
                 invoice_total_box_entry.configure(state="readonly") 
+            
             else:
                 Message("Please choose an item to delete")
+            
             conn.commit()
             conn.close()
+
+            # Re-populate the Chart of Accounts Treeview      
+            chart_of_accounts.populate_accounts_tree()
 
     def invoice_history(self):
         
@@ -2660,5 +2668,6 @@ root.mainloop()
 ############## Get vendor invoice working fully #####################
 #####edit invoice
 
-######## Check CoA updates. It doesnt seem to be updating##############
+#### Move the commits ####
+### Save button? ###
 
