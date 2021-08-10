@@ -613,7 +613,7 @@ class Vendors:
             conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
-            # Create the database table
+            # Create the database tables
             cur.execute("""CREATE TABLE IF NOT EXISTS vendors (   
                 id INTEGER, 
                 name TEXT, 
@@ -640,11 +640,15 @@ class Vendors:
                 )""")
         
             cur.execute("""CREATE TABLE IF NOT EXISTS vendor_invoice_summary (   
-            vendor_rowid INTEGER,
-            date INTEGER,
-            invoice_number TEXT,            
-            total FLOAT 
-            )""")
+                vendor_rowid INTEGER,
+                date INTEGER,
+                invoice_number TEXT,            
+                total FLOAT 
+                )""")
+
+            # Close connection
+            conn.commit()
+            conn.close() 
 
         def vendor_tab():
             # Create the tab
@@ -1184,7 +1188,7 @@ class Vendors:
 
             date_label = tk.Label(date_frame, text="Date")
             date_label.grid(sticky="w", row=8, column=1, padx=10)
-            cal = tkcal.DateEntry(date_frame, showweeknumbers=False)
+            cal = tkcal.DateEntry(date_frame, showweeknumbers=False, date_pattern='yyyy-mm-dd')
             cal.grid(sticky="w", row=9, column=1, padx=10)
 
             cal._top_cal.overrideredirect(False)
@@ -1391,6 +1395,7 @@ class Vendors:
                         vendor_invoices.append(invoice)
 
                 # Create a summary of all the invoice items... add together the price of all the items that have the same invoice number and add as a row to the invoice summary table
+                # Also, add the data to the ledger
                 # If the invoice being added is already in the summary database then update the invoice
                 if vendor_invoice_number_entry.get() in vendor_invoices:
                     cur.execute("""UPDATE vendor_invoice_summary SET
@@ -1410,6 +1415,27 @@ class Vendors:
                         'vendor_rowid' : values_vendor[0]
                         })   
 
+                    cur.execute("""UPDATE ledger SET
+                        vendor_rowid = :vendor_rowid, 
+                        date = :date,
+                        account = :account,
+                        invoice_number = :invoice_number, 
+                        income_value = :invoice_value, 
+                        expense_value = expense_value,
+                        paid = :paid
+
+                        WHERE invoice_number = :invoice_number AND vendor_rowid = :vendor_rowid""", 
+
+                        {
+                        'vendor_rowid' :values_vendor[0], 
+                        'date' :cal.get(),
+                        'account' :invoice_item_account_combo.get(),
+                        'invoice_number' :vendor_invoice_number_entry.get(),
+                        'income_value' :0,
+                        'expense_value' :total_figure,
+                        'paid' : 'NO'
+                        })   
+
                 # If the invoice number being added isn't in the sumamry table then add as a new row
                 else:
                     cur.execute("""INSERT INTO vendor_invoice_summary (
@@ -1425,6 +1451,27 @@ class Vendors:
                     vendor_invoice_number_entry.get(),
                     total_figure
                     ])
+
+                    cur.execute("""INSERT INTO ledger SET
+                        vendor_rowid = :vendor_rowid, 
+                        date = :date,
+                        account = :account,
+                        invoice_number = :invoice_number, 
+                        income_value = :invoice_value, 
+                        expense_value = expense_value,
+                        paid = :paid
+
+                        WHERE invoice_number = :invoice_number AND vendor_rowid = :vendor_rowid""", 
+
+                        {
+                        'vendor_rowid' :values_vendor[0], 
+                        'date' :cal.get(),
+                        'account' :invoice_item_account_combo.get(),
+                        'invoice_number' :vendor_invoice_number_entry.get(),
+                        'income_value' :0,
+                        'expense_value' :total_figure,
+                        'paid' :'NO'
+                        })
 
                 # Re-populate the invoice treeview
                 # Clear the entry boxes
@@ -2403,6 +2450,31 @@ class Chart_of_accounts:
         # Regenerate Menu bar
         Menu_bar()
 
+class Ledger:
+    def __init__(self):
+        def ledger_database_table():
+            # Connect to the database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
+
+            # Create database table
+            cur.execute("""CREATE TABLE IF NOT EXISTS ledger (
+                vendor_rowid INTEGER,
+                date INTEGER, 
+                account TEXT,
+                invoice_number INTEGER, 
+                income_value FLOAT, 
+                expense_value FLOAT,
+                paid TEXT
+                )""")
+            
+            # Close connection
+            conn.commit()
+            conn.close() 
+        
+        ledger_database_table()
+
+
 class Settings:
 
     def __init__(self):
@@ -2654,20 +2726,8 @@ class Message:
 customers = Customers()
 vendors = Vendors()
 chart_of_accounts = Chart_of_accounts()
+ledger = Ledger()
 settings = Settings()
 menu_bar = Menu_bar()
 
-
-
- 
-
 root.mainloop()
-
-
-
-############## Get vendor invoice working fully #####################
-#####edit invoice
-
-#### Move the commits ####
-### Save button? ###
-
