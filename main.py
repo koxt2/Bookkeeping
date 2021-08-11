@@ -2826,3 +2826,12 @@ settings = Settings()
 menu_bar = Menu_bar()
 
 root.mainloop()
+
+#### Stop using an existing invoice number from editting the invoice ####
+#### Add edit invoice feature ####
+#### Update right click options ####
+#### Update ribbons ####
+
+
+#### Import csv ####
+
