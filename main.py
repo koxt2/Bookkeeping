@@ -6,7 +6,7 @@ import sqlite3
 import tkcalendar as tkcal
 
 # Create root
-root = ThemedTk(theme='breeze')
+root = ThemedTk(theme='alt')
 root.title("Bookkeeping")
 root.geometry("1920x1080")
 
@@ -1420,8 +1420,8 @@ class Vendors:
                         date = :date,
                         account = :account,
                         invoice_number = :invoice_number, 
-                        income_value = :invoice_value, 
-                        expense_value = expense_value,
+                        income_value = :income_value, 
+                        expense_value = :expense_value,
                         paid = :paid
 
                         WHERE invoice_number = :invoice_number AND vendor_rowid = :vendor_rowid""", 
@@ -1442,7 +1442,8 @@ class Vendors:
                     vendor_rowid, 
                     date, 
                     invoice_number,
-                    total) 
+                    total
+                    ) 
 
                     VALUES (?, ?, ?, ?)""",[
 
@@ -1452,26 +1453,26 @@ class Vendors:
                     total_figure
                     ])
 
-                    cur.execute("""INSERT INTO ledger SET
-                        vendor_rowid = :vendor_rowid, 
-                        date = :date,
-                        account = :account,
-                        invoice_number = :invoice_number, 
-                        income_value = :invoice_value, 
-                        expense_value = expense_value,
-                        paid = :paid
+                    cur.execute("""INSERT INTO ledger (
+                        vendor_rowid, 
+                        date,
+                        account,
+                        invoice_number, 
+                        income_value, 
+                        expense_value,
+                        paid
+                        )
 
-                        WHERE invoice_number = :invoice_number AND vendor_rowid = :vendor_rowid""", 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)""",[
 
-                        {
-                        'vendor_rowid' :values_vendor[0], 
-                        'date' :cal.get(),
-                        'account' :invoice_item_account_combo.get(),
-                        'invoice_number' :vendor_invoice_number_entry.get(),
-                        'income_value' :0,
-                        'expense_value' :total_figure,
-                        'paid' :'NO'
-                        })
+                        values_vendor[0], 
+                        cal.get(),
+                        invoice_item_account_combo.get(),
+                        vendor_invoice_number_entry.get(),
+                        0,
+                        total_figure,
+                        'NO'
+                        ])
 
                 # Re-populate the invoice treeview
                 # Clear the entry boxes
@@ -1512,6 +1513,9 @@ class Vendors:
 
             # Re-populate the Chart of Accounts Treeview      
             chart_of_accounts.populate_accounts_tree()
+
+            # Re-populate ledger
+            ledger.populate_ledger_tree()
 
         def delete_invoice_item():
 
@@ -2451,6 +2455,7 @@ class Chart_of_accounts:
         Menu_bar()
 
 class Ledger:
+    
     def __init__(self):
         def ledger_database_table():
             # Connect to the database
@@ -2459,6 +2464,7 @@ class Ledger:
 
             # Create database table
             cur.execute("""CREATE TABLE IF NOT EXISTS ledger (
+                id INTEGER,
                 vendor_rowid INTEGER,
                 date INTEGER, 
                 account TEXT,
@@ -2472,8 +2478,97 @@ class Ledger:
             conn.commit()
             conn.close() 
         
-        ledger_database_table()
+        def ledger_tab():
+            # Create the tab
+            self.tab = tk.Frame(main_window)
+            self.tab.pack(fill="both", expand="yes")
 
+            # Add the tab to the notebook and provide a heading
+            main_window.add(self.tab, text="Ledger")
+
+        def ledger_treeview():
+            # Create a frame for the Treeview
+            self.ledger_treeview_frame = tk.Frame(self.tab)
+            self.ledger_treeview_frame.pack(side="bottom", fill="both", padx=10, expand=1)
+
+            # Create a scrollbar for the Treeview
+            self.ledger_treeview_scroll = tk.Scrollbar(self.ledger_treeview_frame)
+            self.ledger_treeview_scroll.pack(side="right", fill="y") 
+
+            # Create the Treeview
+            self.ledger_treeview = ttk.Treeview(self.ledger_treeview_frame, yscrollcommand=self.ledger_treeview_scroll.set, selectmode="extended") 
+            self.ledger_treeview.pack(fill="both", expand="yes")        
+            
+            # Create the Treeview columns
+            self.ledger_treeview['columns'] = ("ID", "Vendor_rowid", "Date", "Account", "Invoice_number", "Income_value", "Expense_value", "Paid")
+            
+            # Create the Treeview column headings
+            self.ledger_treeview.column("#0", width=0, stretch="false")
+            self.ledger_treeview.heading("#0", text="")
+
+            self.ledger_treeview.column("ID", width=0, stretch="false") 
+            self.ledger_treeview.heading("ID", text="ID")  
+            
+            self.ledger_treeview.column("Vendor_rowid", width=0, stretch="false")
+            self.ledger_treeview.heading("Vendor_rowid", text="Vendor rowid")
+            
+            self.ledger_treeview.column("Date", minwidth=100, width=100, stretch="false")            
+            self.ledger_treeview.heading("Date", text="Date")
+            
+            self.ledger_treeview.column("Account", minwidth=100, width=100, stretch="false")
+            self.ledger_treeview.heading("Account", text="Account") 
+            
+            self.ledger_treeview.column("Invoice_number", minwidth=100, width=100, stretch="false")            
+            self.ledger_treeview.heading("Invoice_number", text="Invoice Number")          
+            
+            self.ledger_treeview.column("Income_value", minwidth=100, width=100, stretch="false")          
+            self.ledger_treeview.heading("Income_value", text="Income value")    
+            
+            self.ledger_treeview.column("Expense_value", minwidth=100, width=100, stretch="false")           
+            self.ledger_treeview.heading("Expense_value", text="Expense value")
+
+            self.ledger_treeview.column("Paid", minwidth=100, width=100, stretch="false")           
+            self.ledger_treeview.heading("Paid", text="Paid")
+
+        ledger_database_table()
+        ledger_tab()
+        ledger_treeview()
+        self.populate_ledger_tree()
+
+    def populate_ledger_tree(self):  
+        # Connect to the database
+        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        cur = conn.cursor()
+
+        # Clear the treeview
+        for record in self.ledger_treeview.get_children():
+            self.ledger_treeview.delete(record)
+
+        # Select the rowid and everything in the table and fetch 
+        cur.execute("SELECT rowid, * FROM ledger")
+        ledger_record = cur.fetchall()    
+        print(ledger_record)
+
+        # For each row in the table, add the data to the Treeview columns
+        global count
+        count = 0
+        for row in ledger_record:
+            self.ledger_treeview.insert(parent='', index='end', iid=count, text='', values=(  
+                row[1], # row_id
+                row[2], # vendor_rowid
+                row[3], # date
+                row[4], # account
+                row[5], # invoice_number
+                row[6], # income_value
+                row[7], # expense_value
+                row[8], # paid
+                ))
+
+            count+=1    
+
+        # Close connection
+        conn.commit()
+        conn.close()
 
 class Settings:
 
