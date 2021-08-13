@@ -6,7 +6,7 @@ import sqlite3
 import tkcalendar as tkcal
 
 # Create root
-root = ThemedTk(theme='alt')
+root = ThemedTk(theme='plastik')
 root.title("Bookkeeping")
 root.geometry("1920x1080")
 
@@ -1329,14 +1329,14 @@ class Vendors:
                 Message("Please set an invoice number")
 
             # Check the invoice number isn't being used already
-            #elif vendor_invoice_number_entry.get() in vendor_invoices:
-            #        Message("""That invoice number is already in use. 
-            #        Please choose a different number""")
+            elif vendor_invoice_number_entry.get() in vendor_invoices:
+                Message("""That invoice number is already in use. 
+                    Please choose a different number""")
                 
             # If the invoice has an invoice number and isn't being used, add to the database
             else:
                 # Work out the sub_total of the item being added (quantity*unit price)
-                sub_total = float(invoice_item_quantity_entry.get()) * float(invoice_item_unit_price_entry.get())
+                sub_total = round(float(invoice_item_quantity_entry.get()) * float(invoice_item_unit_price_entry.get()),2)
 
                 # Add the item to the invoice database
                 cur.execute("""INSERT INTO vendor_invoices (
@@ -2065,7 +2065,7 @@ class Chart_of_accounts:
         # Create window and add a frame
         new_account_window = tk.Toplevel()
         new_account_window.title("Add New Account")
-        new_account_window.attributes('-topmost', 'True')
+        new_account_window.attributes('-topmost')
             
         new_account_window_frame = tk.Frame(new_account_window)
         new_account_window_frame.pack(fill="both", expand=1, pady=10)      
@@ -2547,7 +2547,6 @@ class Ledger:
         # Select the rowid and everything in the table and fetch 
         cur.execute("SELECT rowid, * FROM ledger")
         ledger_record = cur.fetchall()    
-        print(ledger_record)
 
         # For each row in the table, add the data to the Treeview columns
         global count
@@ -2827,7 +2826,6 @@ menu_bar = Menu_bar()
 
 root.mainloop()
 
-#### Stop using an existing invoice number from editting the invoice ####
 #### Add edit invoice feature ####
 #### Update right click options ####
 #### Update ribbons ####
