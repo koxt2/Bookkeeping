@@ -2830,6 +2830,8 @@ root.mainloop()
 #### Update right click options ####
 #### Update ribbons ####
 
+#### Process payment ####
+
 
 #### Import csv ####
 
