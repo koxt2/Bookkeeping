@@ -6,7 +6,7 @@ import sqlite3
 import tkcalendar as tkcal
 
 # Create root
-root = ThemedTk(theme='plastik')
+root = ThemedTk(theme='elegance')
 root.title("Bookkeeping")
 root.geometry("1920x1080")
 
@@ -639,13 +639,6 @@ class Vendors:
                 account TEXT
                 )""")
         
-            cur.execute("""CREATE TABLE IF NOT EXISTS vendor_invoice_summary (   
-                vendor_rowid INTEGER,
-                date INTEGER,
-                invoice_number TEXT,            
-                total FLOAT 
-                )""")
-
             # Close connection
             conn.commit()
             conn.close() 
@@ -844,6 +837,7 @@ class Vendors:
         conn.commit()
         conn.close() 
 
+    
     def new_vendor(self):
         # Create a new window and make it sit on top all all other windows
         new_vendor_window = tk.Toplevel()
@@ -1138,6 +1132,7 @@ class Vendors:
         # Regenerate menu
         Menu_bar()    
 
+    
     def new_vendor_invoice(self):
         # Connect to database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
@@ -1260,7 +1255,7 @@ class Vendors:
 
             # Add the entry boxes
             # Create a list of the all the accounts for the account type Expenses
-            cur.execute("SELECT account_name FROM child_accounts WHERE type = 'Expenses'")
+            cur.execute("SELECT account_name FROM child_accounts WHERE type = 'Expense'")
             accounts = cur.fetchall()
 
             expense_accounts = []
@@ -1329,11 +1324,11 @@ class Vendors:
                 Message("Please set an invoice number")
 
             # Check the invoice number isn't being used already
-            elif vendor_invoice_number_entry.get() in vendor_invoices:
-                Message("""That invoice number is already in use. 
-                    Please choose a different number""")
+            # elif vendor_invoice_number_entry.get() in vendor_invoices:
+            #    Message("""That invoice number is already in use. 
+            #        Please choose a different number""")
                 
-            # If the invoice has an invoice number and isn't being used, add to the database
+            # If the invoice has an invoice number add to the database
             else:
                 # Work out the sub_total of the item being added (quantity*unit price)
                 sub_total = round(float(invoice_item_quantity_entry.get()) * float(invoice_item_unit_price_entry.get()),2)
@@ -1375,46 +1370,15 @@ class Vendors:
                 # Add the invoice item value to the Accounts Payable database
                 cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_name=?', (sub_total, 'Accounts Payable (Creditors)'))
 
+                # Add the invoice to the ledger
                 # Add up all the items in an invoice to give a total invoice figure
                 cur.execute("SELECT SUM(total) FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
                 self.figure = cur.fetchall()
                 for figure in self.figure:
                     for value in figure:
-                        total_figure = value           
-
-                # Create a summary of the invoice (invoice number, date, vendor and total of items added)
-                # Create a list of invoice numbers
-                # Select all the invoice numbers from the database
-                cur.execute("SELECT invoice_number FROM vendor_invoice_summary WHERE vendor_rowid = " + values_vendor[0])
-                records = cur.fetchall()
-
-                # Add all the invoice numbers to a list called "vendor_invoices"
-                vendor_invoices = []
-                for record in records:
-                    for invoice in record:
-                        vendor_invoices.append(invoice)
-
-                # Create a summary of all the invoice items... add together the price of all the items that have the same invoice number and add as a row to the invoice summary table
-                # Also, add the data to the ledger
-                # If the invoice being added is already in the summary database then update the invoice
+                        total_figure = value
+                
                 if vendor_invoice_number_entry.get() in vendor_invoices:
-                    cur.execute("""UPDATE vendor_invoice_summary SET
-                        vendor_rowid = :vendor_rowid, 
-                        date = :date, 
-                        invoice_number = :invoice_number, 
-                        total = :total
-
-                        WHERE invoice_number = :invoice_number AND vendor_rowid = :vendor_rowid""", 
-
-                        {
-                        'vendor_rowid' : values_vendor[0], 
-                        'date' : cal.get(),
-                        'invoice_number' : vendor_invoice_number_entry.get(),
-                        'total' : total_figure,
-                        'invoice_number' : vendor_invoice_number_entry.get(),
-                        'vendor_rowid' : values_vendor[0]
-                        })   
-
                     cur.execute("""UPDATE ledger SET
                         vendor_rowid = :vendor_rowid, 
                         date = :date,
@@ -1429,50 +1393,41 @@ class Vendors:
                         {
                         'vendor_rowid' :values_vendor[0], 
                         'date' :cal.get(),
-                        'account' :invoice_item_account_combo.get(),
+                        'account' :values_vendor[1],
                         'invoice_number' :vendor_invoice_number_entry.get(),
                         'income_value' :0,
                         'expense_value' :total_figure,
                         'paid' : 'NO'
-                        })   
-
-                # If the invoice number being added isn't in the sumamry table then add as a new row
-                else:
-                    cur.execute("""INSERT INTO vendor_invoice_summary (
-                    vendor_rowid, 
-                    date, 
-                    invoice_number,
-                    total
-                    ) 
-
-                    VALUES (?, ?, ?, ?)""",[
-
-                    values_vendor[0],
-                    cal.get(),
-                    vendor_invoice_number_entry.get(),
-                    total_figure
-                    ])
-
+                        })
+                
+                else:                
                     cur.execute("""INSERT INTO ledger (
-                        vendor_rowid, 
-                        date,
-                        account,
-                        invoice_number, 
-                        income_value, 
-                        expense_value,
-                        paid
-                        )
+                            vendor_rowid, 
+                            date,
+                            account,
+                            invoice_number, 
+                            income_value, 
+                            expense_value,
+                            paid
+                            )
 
-                        VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
 
-                        values_vendor[0], 
-                        cal.get(),
-                        invoice_item_account_combo.get(),
-                        vendor_invoice_number_entry.get(),
-                        0,
-                        total_figure,
-                        'NO'
-                        ])
+                            values_vendor[0], 
+                            cal.get(),
+                            values_vendor[1],
+                            vendor_invoice_number_entry.get(),
+                            0,
+                            total_figure,
+                            'NO'
+                            ])
+
+                
+                           
+
+                
+
+                    
 
                 # Re-populate the invoice treeview
                 # Clear the entry boxes
@@ -1491,9 +1446,11 @@ class Vendors:
                 cur.execute("SELECT rowid, * FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
                 record = cur.fetchall()    
 
-                # Get the total from the invoice summmary table
-                cur.execute("SELECT total FROM vendor_invoice_summary WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
-                record_total = cur.fetchone()
+                cur.execute("SELECT SUM(total) FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
+                self.figure = cur.fetchall()
+                for figure in self.figure:
+                    for value in figure:
+                        total_figure = value 
                 
                 # Add the fetched data to the treeview and total box
                 global count
@@ -1504,7 +1461,7 @@ class Vendors:
                     self.count+=1   
                 invoice_total_box_entry.configure(state="normal") 
                 invoice_total_box_entry.delete(0,'end')    
-                invoice_total_box_entry.insert(0, record_total)
+                invoice_total_box_entry.insert(0, total_figure)
                 invoice_total_box_entry.configure(state="readonly")
             
             # Disconnect from the database
@@ -1526,8 +1483,8 @@ class Vendors:
             # Make the selected item in Treeview the focus and make it a variable called 'selected'
             # Pull the values in 'selected' from the 'values' part of the database
             selected_item = vendor_invoice_treeview.focus()
-            invoice_item = vendor_invoice_treeview.item(selected_item, 'values') 
-
+            invoice_item = vendor_invoice_treeview.item(selected_item, 'values')
+            
             # If an item is selected then delete it from the database
             if invoice_item:
                 # Select the rowid and data from the database table and fetch everything
@@ -1540,25 +1497,34 @@ class Vendors:
                 # Delete the database row(rowid) that has the same rowid as the one selected in the Treeview
                 cur.execute("DELETE FROM vendor_invoices WHERE rowid = " + invoice_item[0])
 
-                # Delete the item value from the account database
-                cur.execute('UPDATE child_accounts SET total=total-? WHERE account_name=?',(sub_total, invoice_item[2],))
+                # Delete the item value from the parent account database
+                cur.execute('UPDATE parent_accounts SET total=total-? WHERE account_name=?',(sub_total, "Accounts Payable (Creditors)"))
 
-                # Update the invoice summary
-                cur.execute('UPDATE vendor_invoice_summary SET total=total-? WHERE vendor_rowid=? AND invoice_number=?', (sub_total, values_vendor[0], vendor_invoice_number_entry.get(),))
+                cur.execute("SELECT parent FROM child_accounts WHERE account_name=?", (invoice_item[2],))
+                parent_account = cur.fetchall()
+                cur.execute('UPDATE parent_accounts SET total=total-? WHERE account_number=?', (sub_total, parent_account[0][0]))
+                
+                # Delete the item value from the child account database
+                cur.execute('UPDATE child_accounts SET total=total-? WHERE account_name=?',(sub_total, invoice_item[2]))
+
+                # Delete the item value from the ledger
+                cur.execute('UPDATE ledger SET expense_value=expense_value-? WHERE invoice_number=?', (sub_total, vendor_invoice_number_entry.get()))
 
                 # Re-populate the invoice treeview
                 # Clear the treeview and total box
                 for record in vendor_invoice_treeview.get_children():
                     vendor_invoice_treeview.delete(record)
                 
-                
                 # Get data from the database that has the same invoice number as the one given in the invoice
                 cur.execute("SELECT rowid, * FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
                 record = cur.fetchall()  
 
                 # Add up all the items in an invoice to give a total invoice figure
-                cur.execute("SELECT total FROM vendor_invoice_summary WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
-                total_figure = cur.fetchall()
+                cur.execute("SELECT SUM(total) FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
+                self.figure = cur.fetchall()
+                for figure in self.figure:
+                    for value in figure:
+                        total_figure = value 
                 
                 # Add the fetched data to the treeview and total box
                 global count
@@ -1581,6 +1547,9 @@ class Vendors:
 
             # Re-populate the Chart of Accounts Treeview      
             chart_of_accounts.populate_accounts_tree()
+
+            # Re-populate ledger treeview
+            ledger.populate_ledger_tree()
 
     def invoice_history(self):
         
@@ -1679,15 +1648,15 @@ class Vendors:
 
             # Add the data to the treeview
             # Fetch data from database
-            cur.execute("SELECT rowid, * FROM Vendor_invoice_summary WHERE vendor_rowid = " + vendor_values[0])
+            cur.execute("SELECT rowid, *, SUM(total) FROM vendor_invoices WHERE vendor_rowid = " + vendor_values[0] + " GROUP BY invoice_number")
             record = cur.fetchall()   
-
+            
             # Add the fetched data to the treeview
             global count
             count = 0
 
             for row in record:
-                self.vendor_invoice_history_tree.insert(parent='', index='end', iid=count, text='', values=(row[1], row[2], row[3], row[4]))
+                self.vendor_invoice_history_tree.insert(parent='', index='end', iid=count, text='', values=(row[1], row[4], row[2], row[10]))
                 count+=1        
         
         # If a supplier isn't selected tell the user to select a supplier
@@ -1818,16 +1787,19 @@ class Vendors:
             vendor_invoice_treeview.heading("Unit Price", text="Unit Price")   
             
             vendor_invoice_treeview.column("Sub Total", minwidth=100) 
-            vendor_invoice_treeview.heading("Sub Total", text="Total")
+            vendor_invoice_treeview.heading("Sub Total", text="Sub Total")
 
             # Populate the treeview
             # Get data from the database that has the same invoice number as the one given in the invoice
             cur.execute("SELECT rowid, * FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
             record = cur.fetchall()  
 
-            # Get the total from the invoice summmary table
-            cur.execute("SELECT total FROM vendor_invoice_summary WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
-            record_total = cur.fetchone()
+            # Calculate the total 
+            cur.execute("SELECT SUM(total) FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
+            self.figure = cur.fetchall()
+            for figure in self.figure:
+                for value in figure:
+                    total_figure = value 
 
             # Add the fetched data to the treeview and total box
             global count
@@ -1838,7 +1810,7 @@ class Vendors:
                 self.count+=1   
 
             invoice_total_box_entry.configure(state="normal")     
-            invoice_total_box_entry.insert(0, record_total)
+            invoice_total_box_entry.insert(0, total_figure)
             invoice_total_box_entry.configure(state="readonly")
 
         else:
@@ -1877,15 +1849,20 @@ class Chart_of_accounts:
                 type TEXT
                 )""")
 
-            cur.execute("SELECT * FROM parent_accounts WHERE account_name = 'Accounts Receivable (Debtors)'")
-            accounts = cur.fetchall()
-
-            if accounts:
+            cur.execute("SELECT * FROM parent_accounts WHERE account_name = 'Current Accounts'")
+            bank = cur.fetchall()
+            if bank:
                 pass
             else:
-                # Add the accounts payable and receivable entries
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (1000, 'Accounts Receivable (Debtors)', 0.00, 'Income'))
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (2000, 'Accounts Payable (Creditors)', 0.00, 'Expenses'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (1000, 'Current Accounts', 0.00, 'Bank'))
+                conn.commit()
+
+            cur.execute("SELECT * FROM parent_accounts WHERE account_name = 'Accounts Receivable (Debtors)'")
+            receivable = cur.fetchall()
+
+            if receivable:
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (1100, 'Accounts Receivable (Debtors)', 0.00, 'Income'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (2000, 'Accounts Payable (Creditors)', 0.00, 'Expense'))
                 conn.commit()
         
         def accounts_tab():
@@ -2103,7 +2080,7 @@ class Chart_of_accounts:
 
         new_account_type_label = tk.Label(new_account_window_frame, text="Type")
         new_account_type_label.grid(row=7, column=1, padx=10, pady=5)
-        new_account_type_entry = ttk.Combobox(new_account_window_frame, values=["Bank", "Cash", "Income", "Expenses"], width=15)
+        new_account_type_entry = ttk.Combobox(new_account_window_frame, values=["Bank", "Income", "Expense"], width=15)
         new_account_type_entry.set("Choose account type")
         new_account_type_entry.grid(row=7, column=2, padx=10, pady=5)
 
@@ -2124,10 +2101,10 @@ class Chart_of_accounts:
             cur = conn.cursor()
 
             # Pull the data from the entry boxes and store them in a list called 'inputted_data'. "NO" is to signal that this is not a child account.
-            inputted_data = [new_account_number_entry.get(), new_account_name_entry.get(), "NO", new_account_type_entry.get()]
+            inputted_data = [new_account_number_entry.get(), (new_account_name_entry.get()).title(), "NO", new_account_type_entry.get()]
 
-            # Make sure the new account has a number, andme and type. If not, provide a popup window asking for a number.    
-            if len(new_account_number_entry.get()) == 0 or len(new_account_name_entry.get()) == 0 or (new_account_type_entry.get() != "Bank" and new_account_type_entry.get() != "Cash" and new_account_type_entry.get() != "Income" and new_account_type_entry.get() != "Expenses"):
+            # Make sure the new account has a number, and and type. If not, provide a popup window asking for a number.    
+            if len(new_account_number_entry.get()) == 0 or len(new_account_name_entry.get()) == 0 or (new_account_type_entry.get() != "Bank" and new_account_type_entry.get() != "Income" and new_account_type_entry.get() != "Expense"):
                 Message("A new account must have an Account Number, Name and account type")  
 
             # If the new account has a name, number and type insert into database...
@@ -2139,10 +2116,24 @@ class Chart_of_accounts:
                     cur.execute("SELECT account_number FROM child_accounts WHERE account_number = " + new_account_number_entry.get() + "")
                     child_account_number_query = cur.fetchone()
 
+                    # Check to see if the account name is in use
+                    cur.execute("SELECT account_name FROM parent_accounts")
+                    account_name = cur.fetchall()  
+
+                    account_names = []
+                    for account in account_name:
+                        for record in account:
+                            account_names.append(record)
+                    
+
+
                     # If either of the lists exist (True), ie account number is in the database tell the user the account number is in use.
                     if parent_account_number_query or child_account_number_query:
                         Message("That account number is in use already")  
-
+                    
+                    elif (new_account_name_entry.get()).title() in account_names:
+                        Message("That account name is already in use")
+                    
                     # If false, (account number in entry box isn't in database) insert entry box data into database
                     else:
                         # Insert entry box data into database and close connection.
@@ -2241,7 +2232,7 @@ class Chart_of_accounts:
             cur = conn.cursor()
 
             # Pull the data from the entry boxes and store them in a list called 'inputted_data'. "YES" is to signal that it's a child account.
-            inputted_data = [child_account_number_entry.get(), child_account_name_entry.get(), parent_account_number_entry.get(), "YES", child_account_type_entry.get()]
+            inputted_data = [child_account_number_entry.get(), (child_account_name_entry.get()).title(), parent_account_number_entry.get(), "YES", child_account_type_entry.get()]
 
             # Make sure the new account has a number and name. If not, provide a popup window asking for a number and name. 
             if len(child_account_number_entry.get()) == 0 or len(child_account_name_entry.get()) == 0:
@@ -2256,9 +2247,21 @@ class Chart_of_accounts:
                 cur.execute("SELECT account_number FROM child_accounts WHERE account_number = " + child_account_number_entry.get() + "")
                 child_account_number_query = cur.fetchone()
 
+                # Check to see if the account name is in use
+                cur.execute("SELECT account_name FROM child_accounts")
+                account_name = cur.fetchall()  
+
+                account_names = []
+                for account in account_name:
+                    for record in account:
+                        account_names.append(record)
+
                 # If the list exists (True), ie account number is in the database tell the user the account number is in use.
                 if parent_account_number_query or child_account_number_query:
                     Message("That account number is already in use")
+                
+                elif (child_account_name_entry.get()).title() in account_names:
+                    Message("That account name is already in use")
 
                 # If the list doesn't exist (False), add the contents of the entry boxes to the database
                 else:
@@ -2386,7 +2389,7 @@ class Chart_of_accounts:
                 oid = :oid""", 
                 {
                 'account_number' : edit_account_number_entry.get(), 
-                'account_name' : edit_account_name_entry.get(), 
+                'account_name' : (edit_account_name_entry.get()).title(), 
                 'oid' : edit_account_id_entry.get()
                 })
 
@@ -2553,14 +2556,14 @@ class Ledger:
         count = 0
         for row in ledger_record:
             self.ledger_treeview.insert(parent='', index='end', iid=count, text='', values=(  
-                row[1], # row_id
-                row[2], # vendor_rowid
-                row[3], # date
-                row[4], # account
-                row[5], # invoice_number
-                row[6], # income_value
-                row[7], # expense_value
-                row[8], # paid
+                row[0], # row_id
+                row[1], # vendor_rowid
+                row[2], # date
+                row[3], # account
+                row[4], # invoice_number
+                row[5], # income_value
+                row[6], # expense_value
+                row[7], # paid
                 ))
 
             count+=1    
@@ -2667,20 +2670,8 @@ class Settings:
             email_entry.delete(0, 'end')
             phone_entry.delete(0, 'end')
 
-            # Create the business address table
-            cur.execute('''CREATE TABLE IF NOT EXISTS business_address (   
-            company TEXT, 
-            street TEXT, 
-            town TEXT, 
-            city TEXT, 
-            county TEXT, 
-            postcode TEXT, 
-            email TEXT, 
-            phone INTEGER
-            )''')
-
             # Select everything from the business address table
-            cur.execute("SELECT * FROM business_address WHERE rowid = 1")
+            cur.execute("SELECT * FROM settings WHERE rowid = 1")
             values_business_address = cur.fetchall()  
 
             # Insert the data from the table into the business address entry boxes
@@ -2732,7 +2723,7 @@ class Settings:
                 # Save the data from the entry boxes in the database
                 else:
                     # Add data to the database
-                    cur.execute('''INSERT INTO business_address (  
+                    cur.execute('''INSERT INTO settings (  
                         company, 
                         street, 
                         town, 
@@ -2764,7 +2755,7 @@ class Settings:
 
             # If a business address name has been entered then save the data from the entry boxes in the database
             else:
-                cur.execute("""UPDATE business_address SET 
+                cur.execute("""UPDATE settings SET 
                     company = :company, 
                     street = :street, 
                     town = :town, 
