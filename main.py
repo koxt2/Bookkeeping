@@ -6,7 +6,7 @@ import sqlite3
 import tkcalendar as tkcal
 
 # Create root
-root = ThemedTk(theme='elegance')
+root = ThemedTk(theme='plastik')
 root.title("Bookkeeping")
 root.geometry("1920x1080")
 
@@ -1861,6 +1861,8 @@ class Chart_of_accounts:
             receivable = cur.fetchall()
 
             if receivable:
+                pass
+            else:
                 cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (1100, 'Accounts Receivable (Debtors)', 0.00, 'Income'))
                 cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (2000, 'Accounts Payable (Creditors)', 0.00, 'Expense'))
                 conn.commit()
@@ -2557,13 +2559,13 @@ class Ledger:
         for row in ledger_record:
             self.ledger_treeview.insert(parent='', index='end', iid=count, text='', values=(  
                 row[0], # row_id
-                row[1], # vendor_rowid
-                row[2], # date
-                row[3], # account
-                row[4], # invoice_number
-                row[5], # income_value
-                row[6], # expense_value
-                row[7], # paid
+                row[2], # vendor_rowid
+                row[3], # date
+                row[4], # account
+                row[5], # invoice_number
+                row[6], # income_value
+                row[7], # expense_value
+                row[8], # paid
                 ))
 
             count+=1    
