@@ -1141,7 +1141,7 @@ class Vendors:
         # Select a vendor
         selected_vendor = self.vendor_treeview.focus()
         values_vendor = self.vendor_treeview.item(selected_vendor, 'values') 
-        
+    
         # If a vendor is selected open a window with a form to enter invoice details into
         if values_vendor: 
             # Create the window
@@ -1252,12 +1252,12 @@ class Vendors:
             # Create frame for the entry boxes and functional buttons
             vendor_invoice_entry_frame = tk.LabelFrame(vendor_invoice_window, text="Add item to invoice")
             vendor_invoice_entry_frame.pack(fill="both", padx=10, pady=10, expand=1)
-
+            
             # Add the entry boxes
             # Create a list of the all the accounts for the account type Expenses
-            cur.execute("SELECT account_name FROM child_accounts WHERE type = 'Expense'")
+            cur.execute("SELECT account_name FROM child_accounts WHERE type = 'Expenses'")
             accounts = cur.fetchall()
-
+           
             expense_accounts = []
             for account in accounts:
                 for record in account:
@@ -1319,6 +1319,28 @@ class Vendors:
                 for invoice in record:
                     vendor_invoices.append(invoice)
 
+            # Make a list of all the vendors entered into the ledger
+            cur.execute("SELECT description FROM ledger WHERE vendor_rowid = " + values_vendor[0])
+            records = cur.fetchall()   
+
+            vendor = []
+            for record in records:
+                for invoice in record:
+                    vendor.append(invoice)
+            
+            # Make a list of all the accounts entered into the ledger
+            cur.execute("SELECT account FROM ledger WHERE vendor_rowid = " + values_vendor[0])
+            records = cur.fetchall()
+
+            ledger_accounts = []
+            for record in records:
+                for invoice in record:
+                    ledger_accounts.append(invoice)
+
+        
+
+
+
             # Check the invoice has an invoice number. If not tell the user to set one
             if len(vendor_invoice_number_entry.get()) == 0:
                 Message("Please set an invoice number")
@@ -1366,7 +1388,7 @@ class Vendors:
                 cur.execute('SELECT parent FROM child_accounts WHERE account_name=?', (invoice_item_account_combo.get(),))
                 parent_account = cur.fetchall()
                 cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_number=?', (sub_total, parent_account[0][0]),)
-
+                
                 # Add the invoice item value to the Accounts Payable database
                 cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_name=?', (sub_total, 'Accounts Payable (Creditors)'))
 
@@ -1378,37 +1400,81 @@ class Vendors:
                     for value in figure:
                         total_figure = value
                 
-                if vendor_invoice_number_entry.get() in vendor_invoices:
+                if values_vendor[1] in vendor and vendor_invoice_number_entry.get() in vendor_invoices and invoice_item_account_combo.get() in ledger_accounts:
+                    # Update accounts payable in ledger
                     cur.execute("""UPDATE ledger SET
                         vendor_rowid = :vendor_rowid, 
                         date = :date,
+                        description = :description,
                         account = :account,
                         invoice_number = :invoice_number, 
-                        income_value = :income_value, 
-                        expense_value = :expense_value,
-                        paid = :paid
+                        
+                        credit = :credit
 
-                        WHERE invoice_number = :invoice_number AND vendor_rowid = :vendor_rowid""", 
+                        WHERE invoice_number = :invoice_number AND vendor_rowid = :vendor_rowid AND account = :account""", 
 
                         {
                         'vendor_rowid' :values_vendor[0], 
                         'date' :cal.get(),
-                        'account' :values_vendor[1],
+                        'description' :values_vendor[1],
+                        'account' :'Accounts Payable (Creditors)',
                         'invoice_number' :vendor_invoice_number_entry.get(),
-                        'income_value' :0,
-                        'expense_value' :total_figure,
-                        'paid' : 'NO'
+                        
+                        'credit' :total_figure
                         })
-                
-                else:                
+
+                    # Update child account in ledger
+                    cur.execute("""UPDATE ledger SET
+                        vendor_rowid = :vendor_rowid, 
+                        date = :date,
+                        description = :description,
+                        account = :account,
+                        invoice_number = :invoice_number, 
+                        debit = debit+:debit 
+                        
+
+                        WHERE invoice_number = :invoice_number AND vendor_rowid = :vendor_rowid AND account = :account""", 
+
+                        {
+                        'vendor_rowid' :values_vendor[0], 
+                        'date' :cal.get(),
+                        'description' :values_vendor[1],
+                        'account' :invoice_item_account_combo.get(),
+                        'invoice_number' :vendor_invoice_number_entry.get(),
+                        'debit' :sub_total
+                        
+                        })
+
+                elif values_vendor[1] in vendor and vendor_invoice_number_entry.get() in vendor_invoices:
+                    cur.execute("""UPDATE ledger SET
+                        vendor_rowid = :vendor_rowid, 
+                        date = :date,
+                        description = :description,
+                        account = :account,
+                        invoice_number = :invoice_number, 
+                        
+                        credit = :credit
+
+                        WHERE invoice_number = :invoice_number AND vendor_rowid = :vendor_rowid AND account = :account""", 
+
+                        {
+                        'vendor_rowid' :values_vendor[0], 
+                        'date' :cal.get(),
+                        'description' :values_vendor[1],
+                        'account' :'Accounts Payable (Creditors)',
+                        'invoice_number' :vendor_invoice_number_entry.get(),
+                        
+                        'credit' :total_figure
+                        })
+
                     cur.execute("""INSERT INTO ledger (
                             vendor_rowid, 
                             date,
+                            description,
                             account,
                             invoice_number, 
-                            income_value, 
-                            expense_value,
-                            paid
+                            debit,
+                            credit                            
                             )
 
                             VALUES (?, ?, ?, ?, ?, ?, ?)""",[
@@ -1416,13 +1482,56 @@ class Vendors:
                             values_vendor[0], 
                             cal.get(),
                             values_vendor[1],
+                            invoice_item_account_combo.get(),
                             vendor_invoice_number_entry.get(),
-                            0,
-                            total_figure,
-                            'NO'
+                            sub_total,
+                            ''
+                            ])
+                    
+                else:      
+                    # Add Accounts Payable to ledger          
+                    cur.execute("""INSERT INTO ledger (
+                            vendor_rowid, 
+                            date,
+                            description,
+                            account,
+                            invoice_number,  
+                            debit,
+                            credit
+                            )
+
+                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+
+                            values_vendor[0], 
+                            cal.get(),
+                            values_vendor[1],
+                            'Accounts Payable (Creditors)',
+                            vendor_invoice_number_entry.get(),
+                            '',
+                            total_figure
                             ])
 
-                
+                    # Add child account to ledger
+                    cur.execute("""INSERT INTO ledger (
+                            vendor_rowid, 
+                            date,
+                            description,
+                            account,
+                            invoice_number, 
+                            debit,
+                            credit                          
+                            )
+
+                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+
+                            values_vendor[0], 
+                            cal.get(),
+                            values_vendor[1],
+                            invoice_item_account_combo.get(),
+                            vendor_invoice_number_entry.get(),
+                            sub_total,
+                            ''
+                            ])
                            
 
                 
@@ -1468,6 +1577,14 @@ class Vendors:
             conn.commit()
             conn.close() 
 
+            # Lock the date
+            
+            cal.grid_forget()
+            date_entry = tk.Entry(date_frame)
+            date_entry.grid(sticky="w", row=9, column=1, padx=10)
+            date_entry.insert(0, cal.get())
+            date_entry.configure(state="readonly")
+            
             # Re-populate the Chart of Accounts Treeview      
             chart_of_accounts.populate_accounts_tree()
 
@@ -2472,11 +2589,11 @@ class Ledger:
                 id INTEGER,
                 vendor_rowid INTEGER,
                 date INTEGER, 
+                description TEXT,
                 account TEXT,
                 invoice_number INTEGER, 
-                income_value FLOAT, 
-                expense_value FLOAT,
-                paid TEXT
+                debit FLOAT, 
+                credit FLOAT
                 )""")
             
             # Close connection
@@ -2505,7 +2622,7 @@ class Ledger:
             self.ledger_treeview.pack(fill="both", expand="yes")        
             
             # Create the Treeview columns
-            self.ledger_treeview['columns'] = ("ID", "Vendor_rowid", "Date", "Account", "Invoice_number", "Income_value", "Expense_value", "Paid")
+            self.ledger_treeview['columns'] = ("ID", "Vendor_rowid", "Date", "Description", "Account", "Invoice_number", "Debit", "Credit")
             
             # Create the Treeview column headings
             self.ledger_treeview.column("#0", width=0, stretch="false")
@@ -2519,21 +2636,23 @@ class Ledger:
             
             self.ledger_treeview.column("Date", minwidth=100, width=100, stretch="false")            
             self.ledger_treeview.heading("Date", text="Date")
+
+            self.ledger_treeview.column("Description", minwidth=100, width=100, stretch="false")           
+            self.ledger_treeview.heading("Description", text="Description")
             
-            self.ledger_treeview.column("Account", minwidth=100, width=100, stretch="false")
+            self.ledger_treeview.column("Account", minwidth=200, width=200, stretch="false")
             self.ledger_treeview.heading("Account", text="Account") 
             
             self.ledger_treeview.column("Invoice_number", minwidth=100, width=100, stretch="false")            
             self.ledger_treeview.heading("Invoice_number", text="Invoice Number")          
             
-            self.ledger_treeview.column("Income_value", minwidth=100, width=100, stretch="false")          
-            self.ledger_treeview.heading("Income_value", text="Income value")    
+            self.ledger_treeview.column("Debit", minwidth=100, width=100, stretch="false")          
+            self.ledger_treeview.heading("Debit", text="Debit")    
             
-            self.ledger_treeview.column("Expense_value", minwidth=100, width=100, stretch="false")           
-            self.ledger_treeview.heading("Expense_value", text="Expense value")
+            self.ledger_treeview.column("Credit", minwidth=100, width=100, stretch="false")           
+            self.ledger_treeview.heading("Credit", text="Credit")
 
-            self.ledger_treeview.column("Paid", minwidth=100, width=100, stretch="false")           
-            self.ledger_treeview.heading("Paid", text="Paid")
+            
 
         ledger_database_table()
         ledger_tab()
@@ -2561,11 +2680,11 @@ class Ledger:
                 row[0], # row_id
                 row[2], # vendor_rowid
                 row[3], # date
-                row[4], # account
-                row[5], # invoice_number
-                row[6], # income_value
-                row[7], # expense_value
-                row[8], # paid
+                row[4], # description
+                row[5], # account
+                row[6], # invoice_number
+                row[7], # debit
+                row[8], # credit
                 ))
 
             count+=1    
