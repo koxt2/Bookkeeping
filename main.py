@@ -1255,7 +1255,7 @@ class Vendors:
             
             # Add the entry boxes
             # Create a list of the all the accounts for the account type Expenses
-            cur.execute("SELECT account_name FROM child_accounts WHERE type = 'Expenses'")
+            cur.execute("SELECT account_name FROM child_accounts WHERE type = 'Expense'")
             accounts = cur.fetchall()
            
             expense_accounts = []
@@ -1601,6 +1601,7 @@ class Vendors:
             # Pull the values in 'selected' from the 'values' part of the database
             selected_item = vendor_invoice_treeview.focus()
             invoice_item = vendor_invoice_treeview.item(selected_item, 'values')
+            print(invoice_item)
             
             # If an item is selected then delete it from the database
             if invoice_item:
@@ -1625,7 +1626,8 @@ class Vendors:
                 cur.execute('UPDATE child_accounts SET total=total-? WHERE account_name=?',(sub_total, invoice_item[2]))
 
                 # Delete the item value from the ledger
-                cur.execute('UPDATE ledger SET expense_value=expense_value-? WHERE invoice_number=?', (sub_total, vendor_invoice_number_entry.get()))
+                cur.execute('UPDATE ledger SET credit=credit-? WHERE vendor_rowid=? AND invoice_number=? AND account =?', (sub_total, values_vendor[0], vendor_invoice_number_entry.get(), "Accounts Payable (Creditors)"))
+                cur.execute('UPDATE ledger SET debit=debit-? WHERE vendor_rowid=? AND invoice_number=? AND account =?', (sub_total, values_vendor[0], vendor_invoice_number_entry.get(), invoice_item[2]))
 
                 # Re-populate the invoice treeview
                 # Clear the treeview and total box
@@ -1967,23 +1969,27 @@ class Chart_of_accounts:
                 )""")
 
             cur.execute("SELECT * FROM parent_accounts WHERE account_name = 'Current Accounts'")
-            bank = cur.fetchall()
-            if bank:
+            initial = cur.fetchall()
+            if initial:
                 pass
             else:
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (1000, 'Current Accounts', 0.00, 'Bank'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (1000, 'Current Accounts', 0.00, 'Asset'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (1100, 'Accounts Receivable (Debtors)', 0.00, 'Asset'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (2000, 'Accounts Payable (Creditors)', 0.00, 'Liability'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (4000, 'Income', 0.00, 'Sales'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (5000, 'Expenses', 0.00, 'Expense'))
                 conn.commit()
 
-            cur.execute("SELECT * FROM parent_accounts WHERE account_name = 'Accounts Receivable (Debtors)'")
-            receivable = cur.fetchall()
-
-            if receivable:
+            
+            cur.execute("SELECT * FROM parent_accounts WHERE account_name = 'Income'")
+            income = cur.fetchall()
+            if income:
                 pass
             else:
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (1100, 'Accounts Receivable (Debtors)', 0.00, 'Income'))
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (2000, 'Accounts Payable (Creditors)', 0.00, 'Expense'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (1100, 'Accounts Receivable (Debtors)', 0.00, 'Asset'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (2000, 'Accounts Payable (Creditors)', 0.00, 'Liability'))
                 conn.commit()
-        
+
         def accounts_tab():
             # Create the tab
             self.tab = tk.Frame(main_window)
