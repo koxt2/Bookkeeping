@@ -1213,6 +1213,7 @@ class Vendors:
             # Add the invoice total box            
             invoice_total_box_entry = tk.Entry(vendor_invoice_treeview_frame, width=15)
             invoice_total_box_entry.pack(side="right", padx=10, pady=5)
+            invoice_total_box_entry.configure(state="readonly")
             invoice_total_box_label = tk.Label(vendor_invoice_treeview_frame, text="Total")
             invoice_total_box_label.pack(side="right", padx=0, pady=5)
 
@@ -1246,7 +1247,7 @@ class Vendors:
             vendor_invoice_treeview.heading("Unit Price", text="Unit Price")   
             
             vendor_invoice_treeview.column("Sub Total", minwidth=100) 
-            vendor_invoice_treeview.heading("Sub Total", text="Total")
+            vendor_invoice_treeview.heading("Sub Total", text="Sub Total")
 
             # Add the invoice entry boxes and functional buttons to window
             # Create frame for the entry boxes and functional buttons
@@ -1336,10 +1337,6 @@ class Vendors:
             for record in records:
                 for invoice in record:
                     ledger_accounts.append(invoice)
-
-        
-
-
 
             # Check the invoice has an invoice number. If not tell the user to set one
             if len(vendor_invoice_number_entry.get()) == 0:
@@ -1533,11 +1530,6 @@ class Vendors:
                             ''
                             ])
                            
-
-                
-
-                    
-
                 # Re-populate the invoice treeview
                 # Clear the entry boxes
                 invoice_item_id_entry.delete(0,'end')
@@ -1578,13 +1570,19 @@ class Vendors:
             conn.close() 
 
             # Lock the date
-            
             cal.grid_forget()
             date_entry = tk.Entry(date_frame)
             date_entry.grid(sticky="w", row=9, column=1, padx=10)
             date_entry.insert(0, cal.get())
             date_entry.configure(state="readonly")
-            
+
+            # Lock the invoice number
+            vendor_invoice_number_entry.grid_forget()
+            invoice_number = tk.Entry(invoice_number_frame, width=15, background="white")
+            invoice_number.grid(sticky="w", row=10, column=1, padx=10, pady=2)
+            invoice_number.insert(0, vendor_invoice_number_entry.get())
+            invoice_number.configure(state="readonly")
+
             # Re-populate the Chart of Accounts Treeview      
             chart_of_accounts.populate_accounts_tree()
 
@@ -1601,7 +1599,6 @@ class Vendors:
             # Pull the values in 'selected' from the 'values' part of the database
             selected_item = vendor_invoice_treeview.focus()
             invoice_item = vendor_invoice_treeview.item(selected_item, 'values')
-            print(invoice_item)
             
             # If an item is selected then delete it from the database
             if invoice_item:
@@ -1973,11 +1970,11 @@ class Chart_of_accounts:
             if initial:
                 pass
             else:
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (1000, 'Current Accounts', 0.00, 'Asset'))
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (1100, 'Accounts Receivable (Debtors)', 0.00, 'Asset'))
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (2000, 'Accounts Payable (Creditors)', 0.00, 'Liability'))
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (4000, 'Income', 0.00, 'Sales'))
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (5000, 'Expenses', 0.00, 'Expense'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (1000, 'Current Accounts', 0.00, "NO", 'Asset'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (1100, 'Accounts Receivable (Debtors)', 0.00, "NO", 'Asset'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (2000, 'Accounts Payable (Creditors)', 0.00, "NO", 'Liability'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (4000, 'Income', 0.00, "NO", 'Sales'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (5000, 'Expenses', 0.00, "NO", 'Expense'))
                 conn.commit()
 
             
@@ -2203,9 +2200,10 @@ class Chart_of_accounts:
         new_child_account_status_entry = tk.Entry(new_account_window_frame, width=10)
         #new_child_account_status_entry.grid(row=6, column=2, padx=10, pady=5)
 
+        account_type = ["Asset", "Liability", "Capital", "Sales", "Expense"]
         new_account_type_label = tk.Label(new_account_window_frame, text="Type")
         new_account_type_label.grid(row=7, column=1, padx=10, pady=5)
-        new_account_type_entry = ttk.Combobox(new_account_window_frame, values=["Bank", "Income", "Expense"], width=15)
+        new_account_type_entry = ttk.Combobox(new_account_window_frame, values=account_type, width=15)
         new_account_type_entry.set("Choose account type")
         new_account_type_entry.grid(row=7, column=2, padx=10, pady=5)
 
@@ -2229,7 +2227,7 @@ class Chart_of_accounts:
             inputted_data = [new_account_number_entry.get(), (new_account_name_entry.get()).title(), "NO", new_account_type_entry.get()]
 
             # Make sure the new account has a number, and and type. If not, provide a popup window asking for a number.    
-            if len(new_account_number_entry.get()) == 0 or len(new_account_name_entry.get()) == 0 or (new_account_type_entry.get() != "Bank" and new_account_type_entry.get() != "Income" and new_account_type_entry.get() != "Expense"):
+            if len(new_account_number_entry.get()) == 0 or len(new_account_name_entry.get()) == 0 or new_account_type_entry.get() not in account_type:
                 Message("A new account must have an Account Number, Name and account type")  
 
             # If the new account has a name, number and type insert into database...
@@ -2658,7 +2656,25 @@ class Ledger:
             self.ledger_treeview.column("Credit", minwidth=100, width=100, stretch="false")           
             self.ledger_treeview.heading("Credit", text="Credit")
 
-            
+            # Ledger total box
+            # Create frame
+            ledger_total_frame = tk.Frame(self.ledger_treeview_frame)
+            ledger_total_frame.pack(fill="both", padx=390, pady=10)
+
+            # Create the boxes
+            debit_total_label = tk.Label(ledger_total_frame, text="Debit Total")
+            debit_total_label.grid(row=1, column=1, padx=10)
+            self.debit_total_entry = tk.Entry(ledger_total_frame, width=12)
+            self.debit_total_entry.grid(row=1, column=2)
+            #self.debit_total_entry.insert(0, "debit total")
+            #self.debit_total_entry.configure(state="readonly")
+
+            credit_total_label = tk.Label(ledger_total_frame, text="Credit Total")
+            credit_total_label.grid(row=2, column=1, padx=10)
+            self.credit_total_entry = tk.Entry(ledger_total_frame, width=12)
+            self.credit_total_entry.grid(row=2, column=3)
+            self.credit_total_entry.insert(0, "credit total")
+            self.credit_total_entry.configure(state="readonly")            
 
         ledger_database_table()
         ledger_tab()
@@ -2694,6 +2710,21 @@ class Ledger:
                 ))
 
             count+=1    
+        
+        # Add the debit and credit total to the window
+        cur.execute("SELECT SUM(debit) FROM ledger")
+        debit_total = cur.fetchone()
+        self.debit_total_entry.configure(state="normal")
+        self.debit_total_entry.delete(0, "end")
+        self.debit_total_entry.insert(0, debit_total)
+        self.debit_total_entry.configure(state="readonly")
+
+        cur.execute("SELECT SUM(credit) FROM ledger")
+        credit_total = cur.fetchone()
+        self.credit_total_entry.configure(state="normal")
+        self.credit_total_entry.delete(0, "end")
+        self.credit_total_entry.insert(0, credit_total)
+        self.credit_total_entry.configure(state="readonly")
 
         # Close connection
         conn.commit()
