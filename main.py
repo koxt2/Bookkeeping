@@ -146,6 +146,18 @@ class Customers:
                 phone INTEGER
                 )""") 
 
+            cur.execute("""CREATE TABLE IF NOT EXISTS customer_invoices (   
+                id INTEGER,
+                invoice_number TEXT,
+                customer_rowid INTEGER, 
+                date INTEGER, 
+                description TEXT, 
+                quantity FLOAT, 
+                unit_price FLOAT, 
+                total FLOAT,
+                account TEXT
+                )""")
+
             # Close connection
             conn.commit()
             conn.close() 
@@ -167,6 +179,7 @@ class Customers:
             self.new_customer_icon = tk.PhotoImage(file="images/new_contact.png")
             self.delete_customer_icon = tk.PhotoImage(file="images/delete_contact.png")
             self.edit_customer_icon = tk.PhotoImage(file="images/edit_contact.png")
+            self.customer_invoice_icon = tk.PhotoImage(file="images/invoice.png")
 
             # Add the new contact button to the frame
             new_customer_contact_button = tk.Button(customer_ribbon_frame, image=self.new_customer_icon, command=self.new_customer)
@@ -185,6 +198,12 @@ class Customers:
             delete_customer_contact_button.grid(padx=10, row=1, column=3)
             delete_customer_contact_label = tk.Label(customer_ribbon_frame, text="Delete Customer")
             delete_customer_contact_label.grid(padx=10, row=2, column=3)
+
+            # Add invoice button icon to the frame
+            new_customer_invoice_button = tk.Button(customer_ribbon_frame, image=self.customer_invoice_icon, command=self.new_customer_invoice)
+            new_customer_invoice_button.grid(padx=10, row=1, column=4)
+            new_customer_invoice_label = tk.Label(customer_ribbon_frame, text="Add Customer Invoice")
+            new_customer_invoice_label.grid(padx=10, row=2, column=4)
 
         def customer_treeview():
 
@@ -316,6 +335,7 @@ class Customers:
         conn.commit()
         conn.close() 
 
+    
     def new_customer(self):
         # Create a new window and make it sit on top all all other windows
         new_customer_window = tk.Toplevel()
@@ -602,7 +622,211 @@ class Customers:
 
         # Regenerate menu
         Menu_bar()
+
+    def new_customer_invoice(self):
+        # Connect to database
+        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        cur = conn.cursor()
+
+        # Select a vendor
+        selected_customer = self.customer_treeview.focus()
+        values_customer = self.customer_treeview.item(selected_customer, 'values') 
+
+        # If a customer is selected open a window with a form to enter invoice details into
+        if values_customer:
+            # Create the window
+            customer_invoice_window = tk.Toplevel()
+            customer_invoice_window.title("Add Customer Invoice")
+            customer_invoice_window.geometry("1024x800")
+            #customer_invoice_window.attributes('-topmost', 'true') 
+            
+            # Add the vendor address, date and invoice number to the invoice
+            # Create a frame in the window for the supplier address
+            customer_address_frame = tk.Frame(customer_invoice_window)
+            customer_address_frame.pack(fill="both", padx=10, pady=15)  
+
+            # Add the supplier address to the invoice
+            customer_name_label = tk.Label(customer_address_frame, text=values_customer[1])
+            customer_name_label.grid(sticky="w", row=1, column=1, padx=10)
+
+            customer_company_label = tk.Label(customer_address_frame, text=values_customer[2])
+            customer_company_label.grid(sticky="w", row=2, column=1, padx=10)
+    
+            customer_street_label = tk.Label(customer_address_frame, text=values_customer[3])
+            customer_street_label.grid(sticky="w", row=3, column=1, padx=10)
+    
+            customer_town_label = tk.Label(customer_address_frame, text=values_customer[4])
+            customer_town_label.grid(sticky="w", row=4, column=1, padx=10)
+    
+            customer_city_label = tk.Label(customer_address_frame, text=values_customer[5])
+            customer_city_label.grid(sticky="w", row=5, column=1, padx=10)
+    
+            customer_county_label = tk.Label(customer_address_frame, text=values_customer[6])
+            customer_county_label.grid(sticky="w", row=6, column=1, padx=10)
+    
+            customer_postcode_label = tk.Label(customer_address_frame, text=values_customer[7])
+            customer_postcode_label.grid(sticky="w", row=7, column=1, padx=10)
+
+            # Add the date to the invoice
+            date_frame = tk.Frame(customer_invoice_window)
+            date_frame.pack(fill="both", padx=10, pady=15) 
+
+            date_label = tk.Label(date_frame, text="Date")
+            date_label.grid(sticky="w", row=8, column=1, padx=10)
+            cal = tkcal.DateEntry(date_frame, showweeknumbers=False, date_pattern='yyyy-mm-dd')
+            cal.grid(sticky="w", row=9, column=1, padx=10)
+
+            cal._top_cal.overrideredirect(False)
+
+            # Add the invoice number
+            invoice_number_frame = tk.Frame(customer_invoice_window)
+            invoice_number_frame.pack(fill="both", padx=10, pady=15) 
+
+            customer_invoice_number_label = tk.Label(invoice_number_frame, text="Invoice number")
+            customer_invoice_number_label.grid(sticky="w", row=9, column=1, padx=10)
+            customer_invoice_number_entry = tk.Entry(invoice_number_frame, width=15, background="white")
+            customer_invoice_number_entry.grid(sticky="w", row=10, column=1, padx=10, pady=2)
+
+            # Add the Treeview to the invoice
+            # Create a frame for the Treeview widget
+            customer_invoice_treeview_frame = tk.Frame(customer_invoice_window)
+            customer_invoice_treeview_frame.pack(fill="both", expand=1, padx=10)
+
+            # Add a scrollbar to the frame
+            customer_invoice_treeview_scroll = tk.Scrollbar(customer_invoice_treeview_frame)
+            customer_invoice_treeview_scroll.pack(side="right", fill="y") 
+
+            # Add the Treeview to the frame
+            customer_invoice_treeview = ttk.Treeview(customer_invoice_treeview_frame, yscrollcommand=customer_invoice_treeview_scroll.set, selectmode="extended") 
+            customer_invoice_treeview.pack(fill="both", expand="yes")  
+
+            # Add the invoice total box            
+            invoice_total_box_entry = tk.Entry(customer_invoice_treeview_frame, width=15)
+            invoice_total_box_entry.pack(side="right", padx=10, pady=5)
+            invoice_total_box_entry.configure(state="readonly")
+            invoice_total_box_label = tk.Label(customer_invoice_treeview_frame, text="Total")
+            invoice_total_box_label.pack(side="right", padx=0, pady=5)
+
+            # Create the columns in the Treeview
+            customer_invoice_treeview['columns'] = (
+            "id",
+            "Description", 
+            "Account",
+            "Quantity", 
+            "Unit Price", 
+            "Sub Total"
+            )
+
+            # Provide the headings for each column
+            customer_invoice_treeview.column("#0", width=0, stretch="no")
+            customer_invoice_treeview.heading("#0", text="")
+            
+            customer_invoice_treeview.column("id", width=0, stretch="no")
+            customer_invoice_treeview.heading("id", text="id")
+
+            customer_invoice_treeview.column("Description", minwidth=500) 
+            customer_invoice_treeview.heading("Description", text="Description")   
+
+            customer_invoice_treeview.column("Account", minwidth=100) 
+            customer_invoice_treeview.heading("Account", text="Account") 
+            
+            customer_invoice_treeview.column("Quantity", minwidth=100) 
+            customer_invoice_treeview.heading("Quantity", text="Quantity")   
+            
+            customer_invoice_treeview.column("Unit Price", minwidth=100) 
+            customer_invoice_treeview.heading("Unit Price", text="Unit Price")   
+            
+            customer_invoice_treeview.column("Sub Total", minwidth=100) 
+            customer_invoice_treeview.heading("Sub Total", text="Sub Total")
         
+            # Add the invoice entry boxes and functional buttons to window
+            # Create frame for the entry boxes and functional buttons
+            customer_invoice_entry_frame = tk.LabelFrame(customer_invoice_window, text="Add item to invoice")
+            customer_invoice_entry_frame.pack(fill="both", padx=10, pady=10, expand=1)
+            
+            # Add the entry boxes
+            # Create a list of the all the accounts for the account type Expenses
+            cur.execute("SELECT account_name FROM child_accounts WHERE type = 'Sales'")
+            accounts = cur.fetchall()
+           
+            expense_accounts = []
+            for account in accounts:
+                for record in account:
+                    expense_accounts.append(record)
+
+            invoice_item_id_label = tk.Label(customer_invoice_entry_frame, text="id")
+            #invoice_item_id_label.grid(row=1, column=1, padx=10)
+            invoice_item_id_entry = tk.Entry(customer_invoice_entry_frame, width=15)
+            #invoice_item_id_entry.grid(row=2, column=1, padx=10)
+
+            invoice_item_description_label = tk.Label(customer_invoice_entry_frame, text="Description")
+            invoice_item_description_label.grid(row=1, column=2, padx=10)
+            invoice_item_description_entry = tk.Entry(customer_invoice_entry_frame, width=15, background="white")
+            invoice_item_description_entry.grid(row=2, column=2, padx=10)
+
+            invoice_item_quantity_label = tk.Label(customer_invoice_entry_frame, text="Quantity")
+            invoice_item_quantity_label.grid(row=1, column=3, padx=10)
+            invoice_item_quantity_entry = tk.Entry(customer_invoice_entry_frame, width=15, background="white")
+            invoice_item_quantity_entry.grid(row=2, column=3, padx=10)
+            
+            invoice_item_unit_price_label = tk.Label(customer_invoice_entry_frame, text="Unit Price")
+            invoice_item_unit_price_label.grid(row=1, column=4, padx=10)
+            invoice_item_unit_price_entry = tk.Entry(customer_invoice_entry_frame, width=15, background="white")
+            invoice_item_unit_price_entry.grid(row=2, column=4, padx=10)
+
+            invoice_item_account = tk.Label(customer_invoice_entry_frame, text="Sales Account")
+            invoice_item_account.grid(row=1, column=5, padx=10)
+            invoice_item_account_combo = ttk.Combobox(customer_invoice_entry_frame, value=expense_accounts, width=15, background="white")
+            invoice_item_account_combo.grid(row=2, column=5, padx=10)
+            
+            # Add the functional buttons
+            self.add_to_invoice_button = tk.Button(customer_invoice_entry_frame, text="Add to invoice", command=lambda:[add_invoice_item()])
+            self.add_to_invoice_button.grid(row=3, column=2, padx=10) 
+            
+            self.edit_button = tk.Button(customer_invoice_entry_frame, text="Edit selected item")
+            self.edit_button.grid(row=3, column=3, padx=10) 
+            
+            self.delete_button = tk.Button(customer_invoice_entry_frame, text="Delete item", command=lambda:[delete_invoice_item()])
+            self.delete_button.grid(row=3, column=4, padx=10)
+
+        else:
+            Message("Please select a customer first")
+        
+        def add_invoice_item():
+            # Connect to database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
+
+            # Make a list of all the invoice numbers in use already
+            cur.execute("SELECT invoice_number FROM customer_invoices WHERE customer_rowid = " + values_customer[0])
+            records = cur.fetchall()
+
+            customer_invoices = []
+            for record in records:
+                for invoice in record:
+                    customer_invoices.append(invoice)
+
+            # Make a list of all the vendors entered into the ledger
+            cur.execute("SELECT description FROM ledger WHERE customer_rowid = " + values_customer[0])
+            records = cur.fetchall()   
+
+            customer = []
+            for record in records:
+                for invoice in record:
+                    customer.append(invoice)
+            
+            # Make a list of all the accounts entered into the ledger
+            cur.execute("SELECT account FROM ledger WHERE vendor_rowid = " + values_vendor[0])
+            records = cur.fetchall()
+
+            ledger_accounts = []
+            for record in records:
+                for invoice in record:
+                    ledger_accounts.append(invoice)
+
+        # Close connection
+        conn.commit()
+        conn.close() 
 class Vendors:
 
     def __init__(self):
@@ -2626,7 +2850,7 @@ class Ledger:
             self.ledger_treeview.pack(fill="both", expand="yes")        
             
             # Create the Treeview columns
-            self.ledger_treeview['columns'] = ("ID", "Vendor_rowid", "Date", "Description", "Account", "Invoice_number", "Debit", "Credit")
+            self.ledger_treeview['columns'] = ("ID", "Vendor_rowid", "Date", "Invoice_number", "Description", "Account",  "Debit", "Credit")
             
             # Create the Treeview column headings
             self.ledger_treeview.column("#0", width=0, stretch="false")
@@ -2640,6 +2864,9 @@ class Ledger:
             
             self.ledger_treeview.column("Date", minwidth=100, width=100, stretch="false")            
             self.ledger_treeview.heading("Date", text="Date")
+
+            self.ledger_treeview.column("Invoice_number", minwidth=100, width=100, stretch="false")            
+            self.ledger_treeview.heading("Invoice_number", text="Invoice Number")       
 
             self.ledger_treeview.column("Description", minwidth=100, width=100, stretch="false")           
             self.ledger_treeview.heading("Description", text="Description")
@@ -2702,9 +2929,9 @@ class Ledger:
                 row[0], # row_id
                 row[2], # vendor_rowid
                 row[3], # date
+                row[6], # invoice_number
                 row[4], # description
                 row[5], # account
-                row[6], # invoice_number
                 row[7], # debit
                 row[8], # credit
                 ))
