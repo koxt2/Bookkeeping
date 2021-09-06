@@ -623,6 +623,7 @@ class Customers:
         # Regenerate menu
         Menu_bar()
 
+    
     def new_customer_invoice(self):
         # Connect to database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
@@ -816,7 +817,7 @@ class Customers:
                     customer.append(invoice)
             
             # Make a list of all the accounts entered into the ledger
-            cur.execute("SELECT account FROM ledger WHERE vendor_rowid = " + values_vendor[0])
+            cur.execute("SELECT account FROM ledger WHERE customer_rowid = " + values_customer[0])
             records = cur.fetchall()
 
             ledger_accounts = []
@@ -824,9 +825,253 @@ class Customers:
                 for invoice in record:
                     ledger_accounts.append(invoice)
 
-        # Close connection
-        conn.commit()
-        conn.close() 
+            # Check the invoice has an invoice number. If not tell the user to set one
+            if len(customer_invoice_number_entry.get()) == 0:
+                Message("Please set an invoice number")
+
+            else:
+                # Work out the sub_total of the item being added (quantity*unit price)
+                sub_total = round(float(invoice_item_quantity_entry.get()) * float(invoice_item_unit_price_entry.get()),2)
+
+                # Add the item to the invoice database
+                cur.execute("""INSERT INTO customer_invoices (
+                    id,
+                    invoice_number,
+                    customer_rowid, 
+                    date, 
+                    description, 
+                    quantity, 
+                    unit_price, 
+                    total,
+                    account
+                    ) 
+
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", [
+
+                    invoice_item_id_entry.get(),
+                    customer_invoice_number_entry.get(),
+                    values_customer[0],
+                    cal.get(),
+                    invoice_item_description_entry.get(), 
+                    invoice_item_quantity_entry.get(), 
+                    invoice_item_unit_price_entry.get(), 
+                    sub_total,
+                    invoice_item_account_combo.get()
+                    ])     
+
+                # Add the item value to the child account database
+                cur.execute('UPDATE child_accounts SET total = total+? WHERE account_name=?',(sub_total, invoice_item_account_combo.get(),))
+
+                # Add the item value to the parent account database
+                cur.execute('SELECT parent FROM child_accounts WHERE account_name=?', (invoice_item_account_combo.get(),))
+                parent_account = cur.fetchall()
+                cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_number=?', (sub_total, parent_account[0][0]),)
+                
+                # Add the invoice item value to the Accounts Payable database
+                cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_name=?', (sub_total, 'Accounts Receivable (Debtors)'))
+
+                # Add the invoice to the ledger
+                # Add up all the items in an invoice to give a total invoice figure
+                cur.execute("SELECT SUM(total) FROM customer_invoices WHERE invoice_number = " + customer_invoice_number_entry.get() + " AND customer_rowid = " + values_customer[0])
+                self.figure = cur.fetchall()
+                for figure in self.figure:
+                    for value in figure:
+                        total_figure = value
+                
+                if values_customer[1] in customer and customer_invoice_number_entry.get() in customer_invoices and invoice_item_account_combo.get() in ledger_accounts:
+                    # Update accounts payable in ledger
+                    cur.execute("""UPDATE ledger SET
+                        customer_rowid = :customer_rowid, 
+                        date = :date,
+                        description = :description,
+                        account = :account,
+                        invoice_number = :invoice_number, 
+                        
+                        credit = :credit
+
+                        WHERE invoice_number = :invoice_number AND customer_rowid = :customer_rowid AND account = :account""", 
+
+                        {
+                        'customer_rowid' :values_customer[0], 
+                        'date' :cal.get(),
+                        'description' :values_customer[1],
+                        'account' :'Accounts Receivable (Debtors)',
+                        'invoice_number' :customer_invoice_number_entry.get(),
+                        
+                        'credit' :total_figure
+                        })
+
+                    # Update child account in ledger
+                    cur.execute("""UPDATE ledger SET
+                        customer_rowid = :customer_rowid, 
+                        date = :date,
+                        description = :description,
+                        account = :account,
+                        invoice_number = :invoice_number, 
+                        debit = debit+:debit 
+                        
+
+                        WHERE invoice_number = :invoice_number AND customer_rowid = :customer_rowid AND account = :account""", 
+
+                        {
+                        'customer_rowid' :values_customer[0], 
+                        'date' :cal.get(),
+                        'description' :values_customer[1],
+                        'account' :invoice_item_account_combo.get(),
+                        'invoice_number' :customer_invoice_number_entry.get(),
+                        'debit' :sub_total
+                        
+                        })
+
+                elif values_customer[1] in customer and customer_invoice_number_entry.get() in customer_invoices:
+                    cur.execute("""UPDATE ledger SET
+                        customer_rowid = :customer_rowid, 
+                        date = :date,
+                        description = :description,
+                        account = :account,
+                        invoice_number = :invoice_number, 
+                        
+                        credit = :credit
+
+                        WHERE invoice_number = :invoice_number AND customer_rowid = :customer_rowid AND account = :account""", 
+
+                        {
+                        'customer_rowid' :values_customer[0], 
+                        'date' :cal.get(),
+                        'description' :values_customer[1],
+                        'account' :'Accounts Receivable (Debtors)',
+                        'invoice_number' :customer_invoice_number_entry.get(),
+                        
+                        'credit' :total_figure
+                        })
+
+                    cur.execute("""INSERT INTO ledger (
+                            customer_rowid, 
+                            date,
+                            description,
+                            account,
+                            invoice_number, 
+                            debit,
+                            credit                            
+                            )
+
+                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+
+                            values_customer[0], 
+                            cal.get(),
+                            values_customer[1],
+                            invoice_item_account_combo.get(),
+                            customer_invoice_number_entry.get(),
+                            sub_total,
+                            ''
+                            ])
+                    
+                else:      
+                    # Add Accounts Payable to ledger          
+                    cur.execute("""INSERT INTO ledger (
+                            customer_rowid, 
+                            date,
+                            description,
+                            account,
+                            invoice_number,  
+                            debit,
+                            credit
+                            )
+
+                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+
+                            values_customer[0], 
+                            cal.get(),
+                            values_customer[1],
+                            'Accounts Receivable (Debtors)',
+                            customer_invoice_number_entry.get(),
+                            '',
+                            total_figure
+                            ])
+
+                    # Add child account to ledger
+                    cur.execute("""INSERT INTO ledger (
+                            customer_rowid, 
+                            date,
+                            description,
+                            account,
+                            invoice_number, 
+                            debit,
+                            credit                          
+                            )
+
+                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+
+                            values_customer[0], 
+                            cal.get(),
+                            values_customer[1],
+                            invoice_item_account_combo.get(),
+                            customer_invoice_number_entry.get(),
+                            sub_total,
+                            ''
+                            ])
+                           
+                # Re-populate the invoice treeview
+                # Clear the entry boxes
+                invoice_item_id_entry.delete(0,'end')
+                invoice_item_description_entry.delete(0,'end')
+                invoice_item_quantity_entry.delete(0,'end')
+                invoice_item_unit_price_entry.delete(0,'end')
+                invoice_item_account_combo.delete(0,'end')
+
+                # Clear the treeview and total box
+                for record in customer_invoice_treeview.get_children():
+                    customer_invoice_treeview.delete(record)
+                invoice_total_box_entry.delete(0,'end')
+
+                # Get data from the database that has the same invoice number as the one given in the invoice
+                cur.execute("SELECT rowid, * FROM customer_invoices WHERE invoice_number = " + customer_invoice_number_entry.get() + " AND customer_rowid = " + values_customer[0])
+                record = cur.fetchall()    
+
+                cur.execute("SELECT SUM(total) FROM customer_invoices WHERE invoice_number = " + customer_invoice_number_entry.get() + " AND customer_rowid = " + values_customer[0])
+                self.figure = cur.fetchall()
+                for figure in self.figure:
+                    for value in figure:
+                        total_figure = value 
+                
+                # Add the fetched data to the treeview and total box
+                global count
+                self.count = 0
+
+                for row in record:
+                    customer_invoice_treeview.insert(parent='', index='end', iid=self.count, text='', values=(row[0], row[5], row[9], row[6], row[7], row[8]))
+                    self.count+=1   
+                invoice_total_box_entry.configure(state="normal") 
+                invoice_total_box_entry.delete(0,'end')    
+                invoice_total_box_entry.insert(0, total_figure)
+                invoice_total_box_entry.configure(state="readonly")
+            
+
+
+            # Close connection
+            conn.commit()
+            conn.close() 
+
+            # Lock the date
+            cal.grid_forget()
+            date_entry = tk.Entry(date_frame)
+            date_entry.grid(sticky="w", row=9, column=1, padx=10)
+            date_entry.insert(0, cal.get())
+            date_entry.configure(state="readonly")
+
+            # Lock the invoice number
+            customer_invoice_number_entry.grid_forget()
+            invoice_number = tk.Entry(invoice_number_frame, width=15, background="white")
+            invoice_number.grid(sticky="w", row=10, column=1, padx=10, pady=2)
+            invoice_number.insert(0, customer_invoice_number_entry.get())
+            invoice_number.configure(state="readonly")
+
+            # Re-populate the Chart of Accounts Treeview      
+            chart_of_accounts.populate_accounts_tree()
+
+            # Re-populate ledger
+            ledger.populate_ledger_tree()
+
 class Vendors:
 
     def __init__(self):
@@ -2821,7 +3066,8 @@ class Ledger:
                 account TEXT,
                 invoice_number INTEGER, 
                 debit FLOAT, 
-                credit FLOAT
+                credit FLOAT,
+                customer_rowid INTEGER
                 )""")
             
             # Close connection
