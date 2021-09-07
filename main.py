@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import ttk
 from ttkthemes import ThemedTk
+from tkinter import messagebox
 import sqlite3
 import tkcalendar as tkcal
 
@@ -164,7 +165,7 @@ class Customers:
 
         def customer_tab():
             # Create the tab
-            self.tab = tk.Frame(main_window)
+            self.tab = ttk.Frame(main_window)
             self.tab.pack(fill="both")
         
             # Add the tab to the notebook and provide a heading
@@ -172,7 +173,7 @@ class Customers:
         
         def customer_ribbon():       
             # Make a frame for the buttons
-            customer_ribbon_frame = tk.Frame(self.tab)
+            customer_ribbon_frame = ttk.Frame(self.tab)
             customer_ribbon_frame.pack(fill="x", padx=10, pady=10)
 
             # Assign an image to each button
@@ -182,27 +183,27 @@ class Customers:
             self.customer_invoice_icon = tk.PhotoImage(file="images/invoice.png")
 
             # Add the new contact button to the frame
-            new_customer_contact_button = tk.Button(customer_ribbon_frame, image=self.new_customer_icon, command=self.new_customer)
+            new_customer_contact_button = ttk.Button(customer_ribbon_frame, image=self.new_customer_icon, command=self.new_customer)
             new_customer_contact_button.grid(padx=10, row=1, column=1)
-            new_customer_contact_label = tk.Label(customer_ribbon_frame, text="Add New Customer")
+            new_customer_contact_label = ttk.Label(customer_ribbon_frame, text="Add New Customer")
             new_customer_contact_label.grid(padx=10, row=2, column=1)
 
             # Add the edit contact button to the frame
-            self.edit_customer_contact_button = tk.Button(customer_ribbon_frame, image=self.edit_customer_icon, command=self.edit_customer)
+            self.edit_customer_contact_button = ttk.Button(customer_ribbon_frame, image=self.edit_customer_icon, command=self.edit_customer)
             self.edit_customer_contact_button.grid(padx=10, row=1, column=2)
-            self.edit_customer_contact_label = tk.Label(customer_ribbon_frame, text="Edit Customer")
+            self.edit_customer_contact_label = ttk.Label(customer_ribbon_frame, text="Edit Customer")
             self.edit_customer_contact_label.grid(padx=10, row=2, column=2)
 
             # Add the delete contact button to the frame
-            delete_customer_contact_button = tk.Button(customer_ribbon_frame, image=self.delete_customer_icon, command=self.delete_customer)
+            delete_customer_contact_button = ttk.Button(customer_ribbon_frame, image=self.delete_customer_icon, command=self.delete_customer)
             delete_customer_contact_button.grid(padx=10, row=1, column=3)
-            delete_customer_contact_label = tk.Label(customer_ribbon_frame, text="Delete Customer")
+            delete_customer_contact_label = ttk.Label(customer_ribbon_frame, text="Delete Customer")
             delete_customer_contact_label.grid(padx=10, row=2, column=3)
 
             # Add invoice button icon to the frame
-            new_customer_invoice_button = tk.Button(customer_ribbon_frame, image=self.customer_invoice_icon, command=self.new_customer_invoice)
+            new_customer_invoice_button = ttk.Button(customer_ribbon_frame, image=self.customer_invoice_icon, command=self.new_customer_invoice)
             new_customer_invoice_button.grid(padx=10, row=1, column=4)
-            new_customer_invoice_label = tk.Label(customer_ribbon_frame, text="Add Customer Invoice")
+            new_customer_invoice_label = ttk.Label(customer_ribbon_frame, text="Add Customer Invoice")
             new_customer_invoice_label.grid(padx=10, row=2, column=4)
 
         def customer_treeview():
@@ -231,11 +232,11 @@ class Customers:
                 right_click_customer.tk_popup(event.x_root, event.y_root)
 
             # Create a frame for the customer treeview
-            self.customer_treeview_frame = tk.Frame(self.tab)
+            self.customer_treeview_frame = ttk.Frame(self.tab)
             self.customer_treeview_frame.pack(fill="both", padx=10, pady=10, expand="yes")
 
             # Add a scrollbar to the frame
-            self.customer_treeview_frame_scroll = tk.Scrollbar(self.customer_treeview_frame)
+            self.customer_treeview_frame_scroll = ttk.Scrollbar(self.customer_treeview_frame)
             self.customer_treeview_frame_scroll.pack(side="right", fill="y") 
 
             # Add a Treeview to the frame
@@ -343,66 +344,66 @@ class Customers:
         new_customer_window.attributes('-topmost', 'True')
 
         # Create a frame in the new window    
-        new_customer_window_frame = tk.Frame(new_customer_window)
-        new_customer_window_frame.pack(fill="both", expand=1, pady=10)      
+        new_customer_window_frame = ttk.Frame(new_customer_window)
+        new_customer_window_frame.pack(fill="both", expand=1)      
 
         # Add the entry boxes to the frame
-        new_id_label = tk.Label(new_customer_window_frame, text="ID")
+        new_id_label = ttk.Label(new_customer_window_frame, text="ID")
         #new_id_label.grid(row=1, column=1, padx=10, pady=5)
-        new_id_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
+        new_id_entry = ttk.Entry(new_customer_window_frame, width=15, background="white")
         #new_id_entry.grid(row=1, column=2, padx=10, pady=5)
 
-        new_name_label = tk.Label(new_customer_window_frame, text="Name")
+        new_name_label = ttk.Label(new_customer_window_frame, text="Name")
         new_name_label.grid(row=2, column=1, padx=10, pady=5)
-        new_name_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
+        new_name_entry = ttk.Entry(new_customer_window_frame, width=15, background="white")
         new_name_entry.grid(row=2, column=2, padx=10, pady=5)
 
-        new_company_label = tk.Label(new_customer_window_frame, text="Company")
+        new_company_label = ttk.Label(new_customer_window_frame, text="Company")
         new_company_label.grid(row=3, column=1, padx=10, pady=5)
-        new_company_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
+        new_company_entry = ttk.Entry(new_customer_window_frame, width=15, background="white")
         new_company_entry.grid(row=3, column=2, padx=10, pady=5)
 
-        new_street_label = tk.Label(new_customer_window_frame, text="Street")
+        new_street_label = ttk.Label(new_customer_window_frame, text="Street")
         new_street_label.grid(row=4, column=1, padx=10, pady=5)
-        new_street_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
+        new_street_entry = ttk.Entry(new_customer_window_frame, width=15, background="white")
         new_street_entry.grid(row=4, column=2, padx=10, pady=5)
 
-        new_town_label = tk.Label(new_customer_window_frame, text="Town")
+        new_town_label = ttk.Label(new_customer_window_frame, text="Town")
         new_town_label.grid(row=5, column=1, padx=10, pady=5)
-        new_town_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
+        new_town_entry = ttk.Entry(new_customer_window_frame, width=15, background="white")
         new_town_entry.grid(row=5, column=2, padx=10, pady=5)
 
-        new_city_label = tk.Label(new_customer_window_frame, text="City")
+        new_city_label = ttk.Label(new_customer_window_frame, text="City")
         new_city_label.grid(row=6, column=1, padx=10, pady=5)
-        new_city_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
+        new_city_entry = ttk.Entry(new_customer_window_frame, width=15, background="white")
         new_city_entry.grid(row=6, column=2, padx=10, pady=5)
 
-        new_county_label = tk.Label(new_customer_window_frame, text="County")
+        new_county_label = ttk.Label(new_customer_window_frame, text="County")
         new_county_label.grid(row=7, column=1, padx=10, pady=5)
-        new_county_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
+        new_county_entry = ttk.Entry(new_customer_window_frame, width=15, background="white")
         new_county_entry.grid(row=7, column=2, padx=10, pady=5)
 
-        new_postcode_label = tk.Label(new_customer_window_frame, text="Postcode")
+        new_postcode_label = ttk.Label(new_customer_window_frame, text="Postcode")
         new_postcode_label.grid(row=8, column=1, padx=10, pady=5)
-        new_postcode_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
+        new_postcode_entry = ttk.Entry(new_customer_window_frame, width=15, background="white")
         new_postcode_entry.grid(row=8, column=2, padx=10, pady=5)
 
-        new_email_label = tk.Label(new_customer_window_frame, text="Email")
+        new_email_label = ttk.Label(new_customer_window_frame, text="Email")
         new_email_label.grid(row=9, column=1, padx=10, pady=5)
-        new_email_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
+        new_email_entry = ttk.Entry(new_customer_window_frame, width=15, background="white")
         new_email_entry.grid(row=9, column=2, padx=10, pady=5)
 
-        new_phone_label = tk.Label(new_customer_window_frame, text="Phone")
+        new_phone_label = ttk.Label(new_customer_window_frame, text="Phone")
         new_phone_label.grid(row=10, column=1, padx=10, pady=5)
-        new_phone_entry = tk.Entry(new_customer_window_frame, width=15, background="white")
+        new_phone_entry = ttk.Entry(new_customer_window_frame, width=15, background="white")
         new_phone_entry.grid(row=10, column=2, padx=10, pady=5)
 
         # Save contact button
-        new_customer_window_save_button = tk.Button(new_customer_window_frame, text="Save", command=lambda:[save_new_customer(), new_customer_window.destroy()])
+        new_customer_window_save_button = ttk.Button(new_customer_window_frame, text="Save", command=lambda:[save_new_customer(), new_customer_window.destroy()])
         new_customer_window_save_button.grid(row=11, column=1, padx=10, pady=5)
 
         # Close window button
-        new_customer_window_close_button = tk.Button(new_customer_window_frame, text="Close", command=new_customer_window.destroy)
+        new_customer_window_close_button = ttk.Button(new_customer_window_frame, text="Close", command=new_customer_window.destroy)
         new_customer_window_close_button.grid(row=11, column=2)
 
         def save_new_customer():
@@ -468,58 +469,58 @@ class Customers:
             edit_customer_window.attributes('-topmost', 'True')
 
             # Create frame in the window    
-            edit_customer_window_frame = tk.Frame(edit_customer_window)
+            edit_customer_window_frame = ttk.Frame(edit_customer_window)
             edit_customer_window_frame.pack(fill="both", expand=1, pady=10)      
 
             # Add the entry boxes
-            edit_id_label = tk.Label(edit_customer_window_frame, text="ID")
+            edit_id_label = ttk.Label(edit_customer_window_frame, text="ID")
             #edit_id_label.grid(row=1, column=1, padx=10, pady=5)
-            edit_id_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
+            edit_id_entry = ttk.Entry(edit_customer_window_frame, width=15, background="white")
             #edit_id_entry.grid(row=1, column=2, padx=10, pady=5)
 
-            edit_name_label = tk.Label(edit_customer_window_frame, text="Name")
+            edit_name_label = ttk.Label(edit_customer_window_frame, text="Name")
             edit_name_label.grid(row=2, column=1, padx=10, pady=5)
-            edit_name_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
+            edit_name_entry = ttk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_name_entry.grid(row=2, column=2, padx=10, pady=5)
 
-            edit_company_label = tk.Label(edit_customer_window_frame, text="Company")
+            edit_company_label = ttk.Label(edit_customer_window_frame, text="Company")
             edit_company_label.grid(row=3, column=1, padx=10, pady=5)
-            edit_company_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
+            edit_company_entry = ttk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_company_entry.grid(row=3, column=2, padx=10, pady=5)
 
-            edit_street_label = tk.Label(edit_customer_window_frame, text="Street")
+            edit_street_label = ttk.Label(edit_customer_window_frame, text="Street")
             edit_street_label.grid(row=4, column=1, padx=10, pady=5)
-            edit_street_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
+            edit_street_entry = ttk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_street_entry.grid(row=4, column=2, padx=10, pady=5)
 
-            edit_town_label = tk.Label(edit_customer_window_frame, text="Town")
+            edit_town_label = ttk.Label(edit_customer_window_frame, text="Town")
             edit_town_label.grid(row=5, column=1, padx=10, pady=5)
-            edit_town_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
+            edit_town_entry = ttk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_town_entry.grid(row=5, column=2, padx=10, pady=5)
 
-            edit_city_label = tk.Label(edit_customer_window_frame, text="City")
+            edit_city_label = ttk.Label(edit_customer_window_frame, text="City")
             edit_city_label.grid(row=6, column=1, padx=10, pady=5)
-            edit_city_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
+            edit_city_entry = ttk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_city_entry.grid(row=6, column=2, padx=10, pady=5)
 
-            edit_county_label = tk.Label(edit_customer_window_frame, text="County")
+            edit_county_label = ttk.Label(edit_customer_window_frame, text="County")
             edit_county_label.grid(row=7, column=1, padx=10, pady=5)
-            edit_county_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
+            edit_county_entry = ttk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_county_entry.grid(row=7, column=2, padx=10, pady=5)
 
-            edit_postcode_label = tk.Label(edit_customer_window_frame, text="Postcode")
+            edit_postcode_label = ttk.Label(edit_customer_window_frame, text="Postcode")
             edit_postcode_label.grid(row=8, column=1, padx=10, pady=5)
-            edit_postcode_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
+            edit_postcode_entry = ttk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_postcode_entry.grid(row=8, column=2, padx=10, pady=5)
 
-            edit_email_label = tk.Label(edit_customer_window_frame, text="Email")
+            edit_email_label = ttk.Label(edit_customer_window_frame, text="Email")
             edit_email_label.grid(row=9, column=1, padx=10, pady=5)
-            edit_email_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
+            edit_email_entry = ttk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_email_entry.grid(row=9, column=2, padx=10, pady=5)
 
-            edit_phone_label = tk.Label(edit_customer_window_frame, text="Phone")
+            edit_phone_label = ttk.Label(edit_customer_window_frame, text="Phone")
             edit_phone_label.grid(row=10, column=1, padx=10, pady=5)
-            edit_phone_entry = tk.Entry(edit_customer_window_frame, width=15, background="white")
+            edit_phone_entry = ttk.Entry(edit_customer_window_frame, width=15, background="white")
             edit_phone_entry.grid(row=10, column=2, padx=10, pady=5)
             
             # Insert the pulled values from the database into the entry boxes
@@ -535,11 +536,11 @@ class Customers:
             edit_phone_entry.insert(0, values_customer[9])
 
             # Save contact button
-            close_button = tk.Button(edit_customer_window_frame, text="Save", command=lambda:[update_customer()])
+            close_button = ttk.Button(edit_customer_window_frame, text="Save", command=lambda:[update_customer()])
             close_button.grid(row=11, column=1, padx=10, pady=5)
 
             # Close window button
-            close_button = tk.Button(edit_customer_window_frame, text="Cancel", command=edit_customer_window.destroy)
+            close_button = ttk.Button(edit_customer_window_frame, text="Cancel", command=edit_customer_window.destroy)
             close_button.grid(row=11, column=2)
 
         # If a customer isn't select tell the user to select one
@@ -643,36 +644,36 @@ class Customers:
             
             # Add the vendor address, date and invoice number to the invoice
             # Create a frame in the window for the supplier address
-            customer_address_frame = tk.Frame(customer_invoice_window)
+            customer_address_frame = ttk.Frame(customer_invoice_window)
             customer_address_frame.pack(fill="both", padx=10, pady=15)  
 
             # Add the supplier address to the invoice
-            customer_name_label = tk.Label(customer_address_frame, text=values_customer[1])
+            customer_name_label = ttk.Label(customer_address_frame, text=values_customer[1])
             customer_name_label.grid(sticky="w", row=1, column=1, padx=10)
 
-            customer_company_label = tk.Label(customer_address_frame, text=values_customer[2])
+            customer_company_label = ttk.Label(customer_address_frame, text=values_customer[2])
             customer_company_label.grid(sticky="w", row=2, column=1, padx=10)
     
-            customer_street_label = tk.Label(customer_address_frame, text=values_customer[3])
+            customer_street_label = ttk.Label(customer_address_frame, text=values_customer[3])
             customer_street_label.grid(sticky="w", row=3, column=1, padx=10)
     
-            customer_town_label = tk.Label(customer_address_frame, text=values_customer[4])
+            customer_town_label = ttk.Label(customer_address_frame, text=values_customer[4])
             customer_town_label.grid(sticky="w", row=4, column=1, padx=10)
     
-            customer_city_label = tk.Label(customer_address_frame, text=values_customer[5])
+            customer_city_label = ttk.Label(customer_address_frame, text=values_customer[5])
             customer_city_label.grid(sticky="w", row=5, column=1, padx=10)
     
-            customer_county_label = tk.Label(customer_address_frame, text=values_customer[6])
+            customer_county_label = ttk.Label(customer_address_frame, text=values_customer[6])
             customer_county_label.grid(sticky="w", row=6, column=1, padx=10)
     
-            customer_postcode_label = tk.Label(customer_address_frame, text=values_customer[7])
+            customer_postcode_label = ttk.Label(customer_address_frame, text=values_customer[7])
             customer_postcode_label.grid(sticky="w", row=7, column=1, padx=10)
 
             # Add the date to the invoice
-            date_frame = tk.Frame(customer_invoice_window)
+            date_frame = ttk.Frame(customer_invoice_window)
             date_frame.pack(fill="both", padx=10, pady=15) 
 
-            date_label = tk.Label(date_frame, text="Date")
+            date_label = ttk.Label(date_frame, text="Date")
             date_label.grid(sticky="w", row=8, column=1, padx=10)
             cal = tkcal.DateEntry(date_frame, showweeknumbers=False, date_pattern='yyyy-mm-dd')
             cal.grid(sticky="w", row=9, column=1, padx=10)
@@ -680,21 +681,21 @@ class Customers:
             cal._top_cal.overrideredirect(False)
 
             # Add the invoice number
-            invoice_number_frame = tk.Frame(customer_invoice_window)
+            invoice_number_frame = ttk.Frame(customer_invoice_window)
             invoice_number_frame.pack(fill="both", padx=10, pady=15) 
 
-            customer_invoice_number_label = tk.Label(invoice_number_frame, text="Invoice number")
+            customer_invoice_number_label = ttk.Label(invoice_number_frame, text="Invoice number")
             customer_invoice_number_label.grid(sticky="w", row=9, column=1, padx=10)
-            customer_invoice_number_entry = tk.Entry(invoice_number_frame, width=15, background="white")
+            customer_invoice_number_entry = ttk.Entry(invoice_number_frame, width=15, background="white")
             customer_invoice_number_entry.grid(sticky="w", row=10, column=1, padx=10, pady=2)
 
             # Add the Treeview to the invoice
             # Create a frame for the Treeview widget
-            customer_invoice_treeview_frame = tk.Frame(customer_invoice_window)
+            customer_invoice_treeview_frame = ttk.Frame(customer_invoice_window)
             customer_invoice_treeview_frame.pack(fill="both", expand=1, padx=10)
 
             # Add a scrollbar to the frame
-            customer_invoice_treeview_scroll = tk.Scrollbar(customer_invoice_treeview_frame)
+            customer_invoice_treeview_scroll = ttk.Scrollbar(customer_invoice_treeview_frame)
             customer_invoice_treeview_scroll.pack(side="right", fill="y") 
 
             # Add the Treeview to the frame
@@ -702,10 +703,10 @@ class Customers:
             customer_invoice_treeview.pack(fill="both", expand="yes")  
 
             # Add the invoice total box            
-            invoice_total_box_entry = tk.Entry(customer_invoice_treeview_frame, width=15)
+            invoice_total_box_entry = ttk.Entry(customer_invoice_treeview_frame, width=15)
             invoice_total_box_entry.pack(side="right", padx=10, pady=5)
             invoice_total_box_entry.configure(state="readonly")
-            invoice_total_box_label = tk.Label(customer_invoice_treeview_frame, text="Total")
+            invoice_total_box_label = ttk.Label(customer_invoice_treeview_frame, text="Total")
             invoice_total_box_label.pack(side="right", padx=0, pady=5)
 
             # Create the columns in the Treeview
@@ -742,7 +743,7 @@ class Customers:
         
             # Add the invoice entry boxes and functional buttons to window
             # Create frame for the entry boxes and functional buttons
-            customer_invoice_entry_frame = tk.LabelFrame(customer_invoice_window, text="Add item to invoice")
+            customer_invoice_entry_frame = ttk.LabelFrame(customer_invoice_window, text="Add item to invoice")
             customer_invoice_entry_frame.pack(fill="both", padx=10, pady=10, expand=1)
             
             # Add the entry boxes
@@ -755,39 +756,39 @@ class Customers:
                 for record in account:
                     expense_accounts.append(record)
 
-            invoice_item_id_label = tk.Label(customer_invoice_entry_frame, text="id")
+            invoice_item_id_label = ttk.Label(customer_invoice_entry_frame, text="id")
             #invoice_item_id_label.grid(row=1, column=1, padx=10)
-            invoice_item_id_entry = tk.Entry(customer_invoice_entry_frame, width=15)
+            invoice_item_id_entry = ttk.Entry(customer_invoice_entry_frame, width=15)
             #invoice_item_id_entry.grid(row=2, column=1, padx=10)
 
-            invoice_item_description_label = tk.Label(customer_invoice_entry_frame, text="Description")
+            invoice_item_description_label = ttk.Label(customer_invoice_entry_frame, text="Description")
             invoice_item_description_label.grid(row=1, column=2, padx=10)
-            invoice_item_description_entry = tk.Entry(customer_invoice_entry_frame, width=15, background="white")
+            invoice_item_description_entry = ttk.Entry(customer_invoice_entry_frame, width=15, background="white")
             invoice_item_description_entry.grid(row=2, column=2, padx=10)
 
-            invoice_item_quantity_label = tk.Label(customer_invoice_entry_frame, text="Quantity")
+            invoice_item_quantity_label = ttk.Label(customer_invoice_entry_frame, text="Quantity")
             invoice_item_quantity_label.grid(row=1, column=3, padx=10)
-            invoice_item_quantity_entry = tk.Entry(customer_invoice_entry_frame, width=15, background="white")
+            invoice_item_quantity_entry = ttk.Entry(customer_invoice_entry_frame, width=15, background="white")
             invoice_item_quantity_entry.grid(row=2, column=3, padx=10)
             
-            invoice_item_unit_price_label = tk.Label(customer_invoice_entry_frame, text="Unit Price")
+            invoice_item_unit_price_label = ttk.Label(customer_invoice_entry_frame, text="Unit Price")
             invoice_item_unit_price_label.grid(row=1, column=4, padx=10)
-            invoice_item_unit_price_entry = tk.Entry(customer_invoice_entry_frame, width=15, background="white")
+            invoice_item_unit_price_entry = ttk.Entry(customer_invoice_entry_frame, width=15, background="white")
             invoice_item_unit_price_entry.grid(row=2, column=4, padx=10)
 
-            invoice_item_account = tk.Label(customer_invoice_entry_frame, text="Sales Account")
+            invoice_item_account = ttk.Label(customer_invoice_entry_frame, text="Sales Account")
             invoice_item_account.grid(row=1, column=5, padx=10)
             invoice_item_account_combo = ttk.Combobox(customer_invoice_entry_frame, value=expense_accounts, width=15, background="white")
             invoice_item_account_combo.grid(row=2, column=5, padx=10)
             
             # Add the functional buttons
-            self.add_to_invoice_button = tk.Button(customer_invoice_entry_frame, text="Add to invoice", command=lambda:[add_invoice_item()])
+            self.add_to_invoice_button = ttk.Button(customer_invoice_entry_frame, text="Add to invoice", command=lambda:[add_invoice_item()])
             self.add_to_invoice_button.grid(row=3, column=2, padx=10) 
             
-            self.edit_button = tk.Button(customer_invoice_entry_frame, text="Edit selected item")
+            self.edit_button = ttk.Button(customer_invoice_entry_frame, text="Edit selected item")
             self.edit_button.grid(row=3, column=3, padx=10) 
             
-            self.delete_button = tk.Button(customer_invoice_entry_frame, text="Delete item", command=lambda:[delete_invoice_item()])
+            self.delete_button = ttk.Button(customer_invoice_entry_frame, text="Delete item", command=lambda:[delete_invoice_item()])
             self.delete_button.grid(row=3, column=4, padx=10)
 
         else:
@@ -887,7 +888,7 @@ class Customers:
                         account = :account,
                         invoice_number = :invoice_number, 
                         
-                        credit = :credit
+                        debit = :debit
 
                         WHERE invoice_number = :invoice_number AND customer_rowid = :customer_rowid AND account = :account""", 
 
@@ -898,7 +899,7 @@ class Customers:
                         'account' :'Accounts Receivable (Debtors)',
                         'invoice_number' :customer_invoice_number_entry.get(),
                         
-                        'credit' :total_figure
+                        'debit' :total_figure
                         })
 
                     # Update child account in ledger
@@ -908,7 +909,7 @@ class Customers:
                         description = :description,
                         account = :account,
                         invoice_number = :invoice_number, 
-                        debit = debit+:debit 
+                        credit = credit+:credit 
                         
 
                         WHERE invoice_number = :invoice_number AND customer_rowid = :customer_rowid AND account = :account""", 
@@ -919,7 +920,7 @@ class Customers:
                         'description' :values_customer[1],
                         'account' :invoice_item_account_combo.get(),
                         'invoice_number' :customer_invoice_number_entry.get(),
-                        'debit' :sub_total
+                        'credit' :sub_total
                         
                         })
 
@@ -931,7 +932,7 @@ class Customers:
                         account = :account,
                         invoice_number = :invoice_number, 
                         
-                        credit = :credit
+                        debit = :debit
 
                         WHERE invoice_number = :invoice_number AND customer_rowid = :customer_rowid AND account = :account""", 
 
@@ -942,7 +943,7 @@ class Customers:
                         'account' :'Accounts Receivable (Debtors)',
                         'invoice_number' :customer_invoice_number_entry.get(),
                         
-                        'credit' :total_figure
+                        'debit' :total_figure
                         })
 
                     cur.execute("""INSERT INTO ledger (
@@ -962,8 +963,8 @@ class Customers:
                             values_customer[1],
                             invoice_item_account_combo.get(),
                             customer_invoice_number_entry.get(),
-                            sub_total,
-                            ''
+                            '',
+                            sub_total
                             ])
                     
                 else:      
@@ -985,8 +986,8 @@ class Customers:
                             values_customer[1],
                             'Accounts Receivable (Debtors)',
                             customer_invoice_number_entry.get(),
-                            '',
-                            total_figure
+                            total_figure,
+                            ''                            
                             ])
 
                     # Add child account to ledger
@@ -1007,8 +1008,8 @@ class Customers:
                             values_customer[1],
                             invoice_item_account_combo.get(),
                             customer_invoice_number_entry.get(),
-                            sub_total,
-                            ''
+                            '',
+                            sub_total
                             ])
                            
                 # Re-populate the invoice treeview
@@ -1054,14 +1055,14 @@ class Customers:
 
             # Lock the date
             cal.grid_forget()
-            date_entry = tk.Entry(date_frame)
+            date_entry = ttk.Entry(date_frame)
             date_entry.grid(sticky="w", row=9, column=1, padx=10)
             date_entry.insert(0, cal.get())
             date_entry.configure(state="readonly")
 
             # Lock the invoice number
             customer_invoice_number_entry.grid_forget()
-            invoice_number = tk.Entry(invoice_number_frame, width=15, background="white")
+            invoice_number = ttk.Entry(invoice_number_frame, width=15, background="white")
             invoice_number.grid(sticky="w", row=10, column=1, padx=10, pady=2)
             invoice_number.insert(0, customer_invoice_number_entry.get())
             invoice_number.configure(state="readonly")
@@ -1070,6 +1071,84 @@ class Customers:
             chart_of_accounts.populate_accounts_tree()
 
             # Re-populate ledger
+            ledger.populate_ledger_tree()
+
+        def delete_invoice_item():
+
+            # Connect to the database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
+
+            # Make the selected item in Treeview the focus and make it a variable called 'selected'
+            # Pull the values in 'selected' from the 'values' part of the database
+            selected_item = customer_invoice_treeview.focus()
+            invoice_item = customer_invoice_treeview.item(selected_item, 'values')
+            
+            # If an item is selected then delete it from the database
+            if invoice_item:
+                # Select the rowid and data from the database table and fetch everything
+                cur.execute("SELECT rowid, * FROM customer_invoices")
+                record = cur.fetchall()       
+
+                # Work out the sub_total of the item being deleted (quantity*unit price)
+                sub_total = invoice_item[5]
+                
+                # Delete the database row(rowid) that has the same rowid as the one selected in the Treeview
+                cur.execute("DELETE FROM customer_invoices WHERE rowid = " + invoice_item[0])
+
+                # Delete the item value from the parent account database
+                cur.execute('UPDATE parent_accounts SET total=total-? WHERE account_name=?',(sub_total, "Accounts Receivable (Debtors)"))
+
+                cur.execute("SELECT parent FROM child_accounts WHERE account_name=?", (invoice_item[2],))
+                parent_account = cur.fetchall()
+                cur.execute('UPDATE parent_accounts SET total=total-? WHERE account_number=?', (sub_total, parent_account[0][0]))
+                
+                # Delete the item value from the child account database
+                cur.execute('UPDATE child_accounts SET total=total-? WHERE account_name=?',(sub_total, invoice_item[2]))
+
+                # Delete the item value from the ledger
+                cur.execute('UPDATE ledger SET debit=debit-? WHERE customer_rowid=? AND invoice_number=? AND account =?', (sub_total, values_customer[0], customer_invoice_number_entry.get(), "Accounts Receivable (Debtors)"))
+                cur.execute('UPDATE ledger SET credit=credit-? WHERE customer_rowid=? AND invoice_number=? AND account =?', (sub_total, values_customer[0], customer_invoice_number_entry.get(), invoice_item[2]))
+
+                # Re-populate the invoice treeview
+                # Clear the treeview and total box
+                for record in customer_invoice_treeview.get_children():
+                    customer_invoice_treeview.delete(record)
+                
+                # Get data from the database that has the same invoice number as the one given in the invoice
+                cur.execute("SELECT rowid, * FROM customer_invoices WHERE invoice_number = " + customer_invoice_number_entry.get() + " AND customer_rowid = " + values_customer[0])
+                record = cur.fetchall()  
+
+                # Add up all the items in an invoice to give a total invoice figure
+                cur.execute("SELECT SUM(total) FROM customer_invoices WHERE invoice_number = " + customer_invoice_number_entry.get() + " AND customer_rowid = " + values_customer[0])
+                self.figure = cur.fetchall()
+                for figure in self.figure:
+                    for value in figure:
+                        total_figure = value 
+                
+                # Add the fetched data to the treeview and total box
+                global count
+                count = 0
+
+                for row in record:
+                    customer_invoice_treeview.insert(parent='', index='end', iid=count, text='', values=(row[0], row[5], row[9], row[6], row[7], row[8]))
+                    count+=1        
+
+                invoice_total_box_entry.configure(state="normal") 
+                invoice_total_box_entry.delete(0,'end')
+                invoice_total_box_entry.insert(0, total_figure)
+                invoice_total_box_entry.configure(state="readonly") 
+            
+            else:
+                Message("Please choose an item to delete")
+            
+            conn.commit()
+            conn.close()
+
+            # Re-populate the Chart of Accounts Treeview      
+            chart_of_accounts.populate_accounts_tree()
+
+            # Re-populate ledger treeview
             ledger.populate_ledger_tree()
 
 class Vendors:
@@ -1114,7 +1193,7 @@ class Vendors:
 
         def vendor_tab():
             # Create the tab
-            self.tab = tk.Frame(main_window)
+            self.tab = ttk.Frame(main_window)
             self.tab.pack(fill="both")
         
             # Add the tab to the notebook and provide a heading
@@ -1122,7 +1201,7 @@ class Vendors:
         
         def vendor_ribbon():
             # Make a frame for the buttons
-            vendor_ribbon_frame = tk.Frame(self.tab)
+            vendor_ribbon_frame = ttk.Frame(self.tab)
             vendor_ribbon_frame.pack(fill="x", padx=10, pady=10)
 
             # Assign an image to each button
@@ -1133,34 +1212,34 @@ class Vendors:
             self.vendor_invoice_history_icon = tk.PhotoImage(file="images/invoice_history.png")
 
             # Add new contact button to the frame
-            new_vendor_button = tk.Button(vendor_ribbon_frame, image=self.new_vendor_icon, command=self.new_vendor)
+            new_vendor_button = ttk.Button(vendor_ribbon_frame, image=self.new_vendor_icon, command=self.new_vendor)
             new_vendor_button.grid(padx=10, row=1, column=1)
-            new_vendor_label = tk.Label(vendor_ribbon_frame, text="Add New Vendor")
+            new_vendor_label = ttk.Label(vendor_ribbon_frame, text="Add New Vendor")
             new_vendor_label.grid(padx=10, row=2, column=1)
 
             # Add edit contact button to the frame
-            edit_vendor_button = tk.Button(vendor_ribbon_frame, image=self.edit_vendor_icon, command=self.edit_vendor)
+            edit_vendor_button = ttk.Button(vendor_ribbon_frame, image=self.edit_vendor_icon, command=self.edit_vendor)
             edit_vendor_button.grid(padx=10, row=1, column=2)
-            edit_vendor_label = tk.Label(vendor_ribbon_frame, text="Edit Vendor")
+            edit_vendor_label = ttk.Label(vendor_ribbon_frame, text="Edit Vendor")
             edit_vendor_label.grid(padx=10, row=2, column=2)
 
             # Add delete contact button to the frame
-            delete_vendor_button = tk.Button(vendor_ribbon_frame, image=self.delete_vendor_icon, command=self.delete_vendor)
+            delete_vendor_button = ttk.Button(vendor_ribbon_frame, image=self.delete_vendor_icon, command=self.delete_vendor)
             delete_vendor_button.grid(padx=10, row=1, column=3)
-            delete_vendor_label = tk.Label(vendor_ribbon_frame, text="Delete Vendor")
+            delete_vendor_label = ttk.Label(vendor_ribbon_frame, text="Delete Vendor")
             delete_vendor_label.grid(padx=10, row=2, column=3)
 
             # Add invoice button icon to the frame
-            new_vendor_invoice_button = tk.Button(vendor_ribbon_frame, image=self.vendor_invoice_icon, command=self.new_vendor_invoice)
+            new_vendor_invoice_button = ttk.Button(vendor_ribbon_frame, image=self.vendor_invoice_icon, command=self.new_vendor_invoice)
             new_vendor_invoice_button.grid(padx=10, row=1, column=4)
-            new_vendor_invoice_label = tk.Label(vendor_ribbon_frame, text="Add Vendor Invoice")
+            new_vendor_invoice_label = ttk.Label(vendor_ribbon_frame, text="Add Vendor Invoice")
             new_vendor_invoice_label.grid(padx=10, row=2, column=4)
 
             # View invoices icon
-            vendor_invoice_history_button = tk.Button(vendor_ribbon_frame, image=self.vendor_invoice_history_icon, command=self.invoice_history)
+            vendor_invoice_history_button = ttk.Button(vendor_ribbon_frame, image=self.vendor_invoice_history_icon, command=self.invoice_history)
             vendor_invoice_history_button.grid(padx=10, row=1, column=5)
             vendor_invoice_history_button.bind("<ButtonRelease-1>", self.invoice_history)
-            vendor_invoice_history_label = tk.Label(vendor_ribbon_frame, text="Invoice History")
+            vendor_invoice_history_label = ttk.Label(vendor_ribbon_frame, text="Invoice History")
             vendor_invoice_history_label.grid(padx=10, row=2, column=5)
             
         def vendor_treeview():
@@ -1198,11 +1277,11 @@ class Vendors:
                 right_click_vendor.tk_popup(event.x_root, event.y_root)
 
             # Create a frame for the vendor treeview
-            self.vendor_treeview_frame = tk.Frame(self.tab)
+            self.vendor_treeview_frame = ttk.Frame(self.tab)
             self.vendor_treeview_frame.pack(fill="both", padx=10, pady=10, expand="yes")
 
             # Add a scrollbar to the frame
-            self.vendor_treeview_frame_scroll = tk.Scrollbar(self.vendor_treeview_frame)
+            self.vendor_treeview_frame_scroll = ttk.Scrollbar(self.vendor_treeview_frame)
             self.vendor_treeview_frame_scroll.pack(side="right", fill="y") 
 
             # Add a Treeview to the frame
@@ -1314,66 +1393,66 @@ class Vendors:
         new_vendor_window.attributes('-topmost', 'True')
 
         # Create a frame in the new window    
-        new_vendor_window_frame = tk.Frame(new_vendor_window)
+        new_vendor_window_frame = ttk.Frame(new_vendor_window)
         new_vendor_window_frame.pack(fill="both", expand=1, pady=10)      
 
         # Add the entry boxes
-        new_id_label = tk.Label(new_vendor_window_frame, text="ID")
+        new_id_label = ttk.Label(new_vendor_window_frame, text="ID")
         #new_id_label.grid(row=1, column=1, padx=10, pady=5)
-        new_id_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
+        new_id_entry = ttk.Entry(new_vendor_window_frame, width=15, background="white")
         #new_id_entry.grid(row=1, column=2, padx=10, pady=5)
 
-        new_name_label = tk.Label(new_vendor_window_frame, text="Name")
+        new_name_label = ttk.Label(new_vendor_window_frame, text="Name")
         new_name_label.grid(row=2, column=1, padx=10, pady=5)
-        new_name_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
+        new_name_entry = ttk.Entry(new_vendor_window_frame, width=15, background="white")
         new_name_entry.grid(row=2, column=2, padx=10, pady=5)
 
-        new_company_label = tk.Label(new_vendor_window_frame, text="Company")
+        new_company_label = ttk.Label(new_vendor_window_frame, text="Company")
         new_company_label.grid(row=3, column=1, padx=10, pady=5)
-        new_company_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
+        new_company_entry = ttk.Entry(new_vendor_window_frame, width=15, background="white")
         new_company_entry.grid(row=3, column=2, padx=10, pady=5)
 
-        new_street_label = tk.Label(new_vendor_window_frame, text="Street")
+        new_street_label = ttk.Label(new_vendor_window_frame, text="Street")
         new_street_label.grid(row=4, column=1, padx=10, pady=5)
-        new_street_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
+        new_street_entry = ttk.Entry(new_vendor_window_frame, width=15, background="white")
         new_street_entry.grid(row=4, column=2, padx=10, pady=5)
 
-        new_town_label = tk.Label(new_vendor_window_frame, text="Town")
+        new_town_label = ttk.Label(new_vendor_window_frame, text="Town")
         new_town_label.grid(row=5, column=1, padx=10, pady=5)
-        new_town_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
+        new_town_entry = ttk.Entry(new_vendor_window_frame, width=15, background="white")
         new_town_entry.grid(row=5, column=2, padx=10, pady=5)
 
-        new_city_label = tk.Label(new_vendor_window_frame, text="City")
+        new_city_label = ttk.Label(new_vendor_window_frame, text="City")
         new_city_label.grid(row=6, column=1, padx=10, pady=5)
-        new_city_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
+        new_city_entry = ttk.Entry(new_vendor_window_frame, width=15, background="white")
         new_city_entry.grid(row=6, column=2, padx=10, pady=5)
 
-        new_county_label = tk.Label(new_vendor_window_frame, text="County")
+        new_county_label = ttk.Label(new_vendor_window_frame, text="County")
         new_county_label.grid(row=7, column=1, padx=10, pady=5)
-        new_county_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
+        new_county_entry = ttk.Entry(new_vendor_window_frame, width=15, background="white")
         new_county_entry.grid(row=7, column=2, padx=10, pady=5)
 
-        new_postcode_label = tk.Label(new_vendor_window_frame, text="Postcode")
+        new_postcode_label = ttk.Label(new_vendor_window_frame, text="Postcode")
         new_postcode_label.grid(row=8, column=1, padx=10, pady=5)
-        new_postcode_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
+        new_postcode_entry = ttk.Entry(new_vendor_window_frame, width=15, background="white")
         new_postcode_entry.grid(row=8, column=2, padx=10, pady=5)
 
-        new_email_label = tk.Label(new_vendor_window_frame, text="Email")
+        new_email_label = ttk.Label(new_vendor_window_frame, text="Email")
         new_email_label.grid(row=9, column=1, padx=10, pady=5)
-        new_email_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
+        new_email_entry = ttk.Entry(new_vendor_window_frame, width=15, background="white")
         new_email_entry.grid(row=9, column=2, padx=10, pady=5)
 
-        new_phone_label = tk.Label(new_vendor_window_frame, text="Phone")
+        new_phone_label = ttk.Label(new_vendor_window_frame, text="Phone")
         new_phone_label.grid(row=10, column=1, padx=10, pady=5)
-        new_phone_entry = tk.Entry(new_vendor_window_frame, width=15, background="white")
+        new_phone_entry = ttk.Entry(new_vendor_window_frame, width=15, background="white")
         new_phone_entry.grid(row=10, column=2, padx=10, pady=5)
 
         # Save contact button
-        new_vendor_window_save_button = tk.Button(new_vendor_window_frame, text="Save", command=lambda:[save_new_vendor(), new_vendor_window.destroy()])
+        new_vendor_window_save_button = ttk.Button(new_vendor_window_frame, text="Save", command=lambda:[save_new_vendor(), new_vendor_window.destroy()])
         new_vendor_window_save_button.grid(row=11, column=1, padx=10, pady=5)
 
         # Close window button
-        new_vendor_window_close_button = tk.Button(new_vendor_window_frame, text="Cancel", command=new_vendor_window.destroy)
+        new_vendor_window_close_button = ttk.Button(new_vendor_window_frame, text="Cancel", command=new_vendor_window.destroy)
         new_vendor_window_close_button.grid(row=11, column=2)
 
         def save_new_vendor():
@@ -1442,58 +1521,58 @@ class Vendors:
             edit_vendor_window.attributes('-topmost', 'True')
 
             # Create frame in the window    
-            edit_vendor_window_frame = tk.Frame(edit_vendor_window)
+            edit_vendor_window_frame = ttk.Frame(edit_vendor_window)
             edit_vendor_window_frame.pack(fill="both", expand=1, pady=10)      
 
             # Add the entry boxes
-            edit_id_label = tk.Label(edit_vendor_window_frame, text="ID")
+            edit_id_label = ttk.Label(edit_vendor_window_frame, text="ID")
             #edit_id_label.grid(row=1, column=1, padx=10, pady=5)
-            edit_id_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
+            edit_id_entry = ttk.Entry(edit_vendor_window_frame, width=15, background="white")
             #edit_id_entry.grid(row=1, column=2, padx=10, pady=5)
 
-            edit_name_label = tk.Label(edit_vendor_window_frame, text="Name")
+            edit_name_label = ttk.Label(edit_vendor_window_frame, text="Name")
             edit_name_label.grid(row=2, column=1, padx=10, pady=5)
-            edit_name_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
+            edit_name_entry = ttk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_name_entry.grid(row=2, column=2, padx=10, pady=5)
 
-            edit_company_label = tk.Label(edit_vendor_window_frame, text="Company")
+            edit_company_label = ttk.Label(edit_vendor_window_frame, text="Company")
             edit_company_label.grid(row=3, column=1, padx=10, pady=5)
-            edit_company_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
+            edit_company_entry = ttk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_company_entry.grid(row=3, column=2, padx=10, pady=5)
 
-            edit_street_label = tk.Label(edit_vendor_window_frame, text="Street")
+            edit_street_label = ttk.Label(edit_vendor_window_frame, text="Street")
             edit_street_label.grid(row=4, column=1, padx=10, pady=5)
-            edit_street_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
+            edit_street_entry = ttk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_street_entry.grid(row=4, column=2, padx=10, pady=5)
 
-            edit_town_label = tk.Label(edit_vendor_window_frame, text="Town")
+            edit_town_label = ttk.Label(edit_vendor_window_frame, text="Town")
             edit_town_label.grid(row=5, column=1, padx=10, pady=5)
-            edit_town_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
+            edit_town_entry = ttk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_town_entry.grid(row=5, column=2, padx=10, pady=5)
 
-            edit_city_label = tk.Label(edit_vendor_window_frame, text="City")
+            edit_city_label = ttk.Label(edit_vendor_window_frame, text="City")
             edit_city_label.grid(row=6, column=1, padx=10, pady=5)
-            edit_city_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
+            edit_city_entry = ttk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_city_entry.grid(row=6, column=2, padx=10, pady=5)
 
-            edit_county_label = tk.Label(edit_vendor_window_frame, text="County")
+            edit_county_label = ttk.Label(edit_vendor_window_frame, text="County")
             edit_county_label.grid(row=7, column=1, padx=10, pady=5)
-            edit_county_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
+            edit_county_entry = ttk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_county_entry.grid(row=7, column=2, padx=10, pady=5)
 
-            edit_postcode_label = tk.Label(edit_vendor_window_frame, text="Postcode")
+            edit_postcode_label = ttk.Label(edit_vendor_window_frame, text="Postcode")
             edit_postcode_label.grid(row=8, column=1, padx=10, pady=5)
-            edit_postcode_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
+            edit_postcode_entry = ttk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_postcode_entry.grid(row=8, column=2, padx=10, pady=5)
 
-            edit_email_label = tk.Label(edit_vendor_window_frame, text="Email")
+            edit_email_label = ttk.Label(edit_vendor_window_frame, text="Email")
             edit_email_label.grid(row=9, column=1, padx=10, pady=5)
-            edit_email_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
+            edit_email_entry = ttk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_email_entry.grid(row=9, column=2, padx=10, pady=5)
 
-            edit_phone_label = tk.Label(edit_vendor_window_frame, text="Phone")
+            edit_phone_label = ttk.Label(edit_vendor_window_frame, text="Phone")
             edit_phone_label.grid(row=10, column=1, padx=10, pady=5)
-            edit_phone_entry = tk.Entry(edit_vendor_window_frame, width=15, background="white")
+            edit_phone_entry = ttk.Entry(edit_vendor_window_frame, width=15, background="white")
             edit_phone_entry.grid(row=10, column=2, padx=10, pady=5)
             
             # Insert the pulled values from the database into the entry boxes
@@ -1509,11 +1588,11 @@ class Vendors:
             edit_phone_entry.insert(0, values_vendor[9])
 
             # Save contact button
-            close_button = tk.Button(edit_vendor_window_frame, text="Save", command=lambda:[update_vendor()])
+            close_button = ttk.Button(edit_vendor_window_frame, text="Save", command=lambda:[update_vendor()])
             close_button.grid(row=11, column=1, padx=10, pady=5)
 
             # Close window button
-            close_button = tk.Button(edit_vendor_window_frame, text="Cancel", command=edit_vendor_window.destroy)
+            close_button = ttk.Button(edit_vendor_window_frame, text="Cancel", command=edit_vendor_window.destroy)
             close_button.grid(row=11, column=2)
 
         # If a vendor isn't select tell the user to select one
@@ -1621,36 +1700,36 @@ class Vendors:
             
             # Add the vendor address, date and invoice number to the invoice
             # Create a frame in the window for the supplier address
-            vendor_address_frame = tk.Frame(vendor_invoice_window)
+            vendor_address_frame = ttk.Frame(vendor_invoice_window)
             vendor_address_frame.pack(fill="both", padx=10, pady=15)  
 
             # Add the supplier address to the invoice
-            vendor_name_label = tk.Label(vendor_address_frame, text=values_vendor[1])
+            vendor_name_label = ttk.Label(vendor_address_frame, text=values_vendor[1])
             vendor_name_label.grid(sticky="w", row=1, column=1, padx=10)
 
-            vendor_company_label = tk.Label(vendor_address_frame, text=values_vendor[2])
+            vendor_company_label = ttk.Label(vendor_address_frame, text=values_vendor[2])
             vendor_company_label.grid(sticky="w", row=2, column=1, padx=10)
     
-            vendor_street_label = tk.Label(vendor_address_frame, text=values_vendor[3])
+            vendor_street_label = ttk.Label(vendor_address_frame, text=values_vendor[3])
             vendor_street_label.grid(sticky="w", row=3, column=1, padx=10)
     
-            vendor_town_label = tk.Label(vendor_address_frame, text=values_vendor[4])
+            vendor_town_label = ttk.Label(vendor_address_frame, text=values_vendor[4])
             vendor_town_label.grid(sticky="w", row=4, column=1, padx=10)
     
-            vendor_city_label = tk.Label(vendor_address_frame, text=values_vendor[5])
+            vendor_city_label = ttk.Label(vendor_address_frame, text=values_vendor[5])
             vendor_city_label.grid(sticky="w", row=5, column=1, padx=10)
     
-            vendor_county_label = tk.Label(vendor_address_frame, text=values_vendor[6])
+            vendor_county_label = ttk.Label(vendor_address_frame, text=values_vendor[6])
             vendor_county_label.grid(sticky="w", row=6, column=1, padx=10)
     
-            vendor_postcode_label = tk.Label(vendor_address_frame, text=values_vendor[7])
+            vendor_postcode_label = ttk.Label(vendor_address_frame, text=values_vendor[7])
             vendor_postcode_label.grid(sticky="w", row=7, column=1, padx=10)
 
             # Add the date to the invoice
-            date_frame = tk.Frame(vendor_invoice_window)
+            date_frame = ttk.Frame(vendor_invoice_window)
             date_frame.pack(fill="both", padx=10, pady=15) 
 
-            date_label = tk.Label(date_frame, text="Date")
+            date_label = ttk.Label(date_frame, text="Date")
             date_label.grid(sticky="w", row=8, column=1, padx=10)
             cal = tkcal.DateEntry(date_frame, showweeknumbers=False, date_pattern='yyyy-mm-dd')
             cal.grid(sticky="w", row=9, column=1, padx=10)
@@ -1658,21 +1737,21 @@ class Vendors:
             cal._top_cal.overrideredirect(False)
 
             # Add the invoice number
-            invoice_number_frame = tk.Frame(vendor_invoice_window)
+            invoice_number_frame = ttk.Frame(vendor_invoice_window)
             invoice_number_frame.pack(fill="both", padx=10, pady=15) 
 
-            vendor_invoice_number_label = tk.Label(invoice_number_frame, text="Invoice number")
+            vendor_invoice_number_label = ttk.Label(invoice_number_frame, text="Invoice number")
             vendor_invoice_number_label.grid(sticky="w", row=9, column=1, padx=10)
-            vendor_invoice_number_entry = tk.Entry(invoice_number_frame, width=15, background="white")
+            vendor_invoice_number_entry = ttk.Entry(invoice_number_frame, width=15, background="white")
             vendor_invoice_number_entry.grid(sticky="w", row=10, column=1, padx=10, pady=2)
 
             # Add the Treeview to the invoice
             # Create a frame for the Treeview widget
-            vendor_invoice_treeview_frame = tk.Frame(vendor_invoice_window)
+            vendor_invoice_treeview_frame = ttk.Frame(vendor_invoice_window)
             vendor_invoice_treeview_frame.pack(fill="both", expand=1, padx=10)
 
             # Add a scrollbar to the frame
-            vendor_invoice_treeview_scroll = tk.Scrollbar(vendor_invoice_treeview_frame)
+            vendor_invoice_treeview_scroll = ttk.Scrollbar(vendor_invoice_treeview_frame)
             vendor_invoice_treeview_scroll.pack(side="right", fill="y") 
 
             # Add the Treeview to the frame
@@ -1680,10 +1759,10 @@ class Vendors:
             vendor_invoice_treeview.pack(fill="both", expand="yes")  
 
             # Add the invoice total box            
-            invoice_total_box_entry = tk.Entry(vendor_invoice_treeview_frame, width=15)
+            invoice_total_box_entry = ttk.Entry(vendor_invoice_treeview_frame, width=15)
             invoice_total_box_entry.pack(side="right", padx=10, pady=5)
             invoice_total_box_entry.configure(state="readonly")
-            invoice_total_box_label = tk.Label(vendor_invoice_treeview_frame, text="Total")
+            invoice_total_box_label = ttk.Label(vendor_invoice_treeview_frame, text="Total")
             invoice_total_box_label.pack(side="right", padx=0, pady=5)
 
             # Create the columns in the Treeview
@@ -1720,7 +1799,7 @@ class Vendors:
 
             # Add the invoice entry boxes and functional buttons to window
             # Create frame for the entry boxes and functional buttons
-            vendor_invoice_entry_frame = tk.LabelFrame(vendor_invoice_window, text="Add item to invoice")
+            vendor_invoice_entry_frame = ttk.LabelFrame(vendor_invoice_window, text="Add item to invoice")
             vendor_invoice_entry_frame.pack(fill="both", padx=10, pady=10, expand=1)
             
             # Add the entry boxes
@@ -1733,39 +1812,39 @@ class Vendors:
                 for record in account:
                     expense_accounts.append(record)
 
-            invoice_item_id_label = tk.Label(vendor_invoice_entry_frame, text="id")
+            invoice_item_id_label = ttk.Label(vendor_invoice_entry_frame, text="id")
             #invoice_item_id_label.grid(row=1, column=1, padx=10)
-            invoice_item_id_entry = tk.Entry(vendor_invoice_entry_frame, width=15)
+            invoice_item_id_entry = ttk.Entry(vendor_invoice_entry_frame, width=15)
             #invoice_item_id_entry.grid(row=2, column=1, padx=10)
 
-            invoice_item_description_label = tk.Label(vendor_invoice_entry_frame, text="Description")
+            invoice_item_description_label = ttk.Label(vendor_invoice_entry_frame, text="Description")
             invoice_item_description_label.grid(row=1, column=2, padx=10)
-            invoice_item_description_entry = tk.Entry(vendor_invoice_entry_frame, width=15, background="white")
+            invoice_item_description_entry = ttk.Entry(vendor_invoice_entry_frame, width=15, background="white")
             invoice_item_description_entry.grid(row=2, column=2, padx=10)
 
-            invoice_item_quantity_label = tk.Label(vendor_invoice_entry_frame, text="Quantity")
+            invoice_item_quantity_label = ttk.Label(vendor_invoice_entry_frame, text="Quantity")
             invoice_item_quantity_label.grid(row=1, column=3, padx=10)
-            invoice_item_quantity_entry = tk.Entry(vendor_invoice_entry_frame, width=15, background="white")
+            invoice_item_quantity_entry = ttk.Entry(vendor_invoice_entry_frame, width=15, background="white")
             invoice_item_quantity_entry.grid(row=2, column=3, padx=10)
             
-            invoice_item_unit_price_label = tk.Label(vendor_invoice_entry_frame, text="Unit Price")
+            invoice_item_unit_price_label = ttk.Label(vendor_invoice_entry_frame, text="Unit Price")
             invoice_item_unit_price_label.grid(row=1, column=4, padx=10)
-            invoice_item_unit_price_entry = tk.Entry(vendor_invoice_entry_frame, width=15, background="white")
+            invoice_item_unit_price_entry = ttk.Entry(vendor_invoice_entry_frame, width=15, background="white")
             invoice_item_unit_price_entry.grid(row=2, column=4, padx=10)
 
-            invoice_item_account = tk.Label(vendor_invoice_entry_frame, text="Expense Account")
+            invoice_item_account = ttk.Label(vendor_invoice_entry_frame, text="Expense Account")
             invoice_item_account.grid(row=1, column=5, padx=10)
             invoice_item_account_combo = ttk.Combobox(vendor_invoice_entry_frame, value=expense_accounts, width=15, background="white")
             invoice_item_account_combo.grid(row=2, column=5, padx=10)
             
             # Add the functional buttons
-            self.add_to_invoice_button = tk.Button(vendor_invoice_entry_frame, text="Add to invoice", command=lambda:[add_invoice_item()])
+            self.add_to_invoice_button = ttk.Button(vendor_invoice_entry_frame, text="Add to invoice", command=lambda:[add_invoice_item()])
             self.add_to_invoice_button.grid(row=3, column=2, padx=10) 
             
-            self.edit_button = tk.Button(vendor_invoice_entry_frame, text="Edit selected item")
+            self.edit_button = ttk.Button(vendor_invoice_entry_frame, text="Edit selected item")
             self.edit_button.grid(row=3, column=3, padx=10) 
             
-            self.delete_button = tk.Button(vendor_invoice_entry_frame, text="Delete item", command=lambda:[delete_invoice_item()])
+            self.delete_button = ttk.Button(vendor_invoice_entry_frame, text="Delete item", command=lambda:[delete_invoice_item()])
             self.delete_button.grid(row=3, column=4, padx=10)
             
         else:
@@ -2040,14 +2119,14 @@ class Vendors:
 
             # Lock the date
             cal.grid_forget()
-            date_entry = tk.Entry(date_frame)
+            date_entry = ttk.Entry(date_frame)
             date_entry.grid(sticky="w", row=9, column=1, padx=10)
             date_entry.insert(0, cal.get())
             date_entry.configure(state="readonly")
 
             # Lock the invoice number
             vendor_invoice_number_entry.grid_forget()
-            invoice_number = tk.Entry(invoice_number_frame, width=15, background="white")
+            invoice_number = ttk.Entry(invoice_number_frame, width=15, background="white")
             invoice_number.grid(sticky="w", row=10, column=1, padx=10, pady=2)
             invoice_number.insert(0, vendor_invoice_number_entry.get())
             invoice_number.configure(state="readonly")
@@ -2159,48 +2238,48 @@ class Vendors:
             vendor_invoice_history_window.attributes('-topmost', 'true') 
             
             # Create a frame in the window for the supplier address
-            vendor_address_frame = tk.Frame(vendor_invoice_history_window)
+            vendor_address_frame = ttk.Frame(vendor_invoice_history_window)
             vendor_address_frame.pack(fill="both")  
 
             # Add the supplier address to the invoice
-            vendor_name_label = tk.Label(vendor_address_frame, text=vendor_values[1])
+            vendor_name_label = ttk.Label(vendor_address_frame, text=vendor_values[1])
             vendor_name_label.grid(sticky="w", row=1, column=1, padx=10)
             
-            vendor_company_label = tk.Label(vendor_address_frame, text=vendor_values[2])
+            vendor_company_label = ttk.Label(vendor_address_frame, text=vendor_values[2])
             vendor_company_label.grid(sticky="w", row=2, column=1, padx=10)
             
-            vendor_street_label = tk.Label(vendor_address_frame, text=vendor_values[3])
+            vendor_street_label = ttk.Label(vendor_address_frame, text=vendor_values[3])
             vendor_street_label.grid(sticky="w", row=3, column=1, padx=10)
             
-            vendor_town_label = tk.Label(vendor_address_frame, text=vendor_values[4])
+            vendor_town_label = ttk.Label(vendor_address_frame, text=vendor_values[4])
             vendor_town_label.grid(sticky="w", row=4, column=1, padx=10)
-            vendor_city_label = tk.Label(vendor_address_frame, text=vendor_values[5])
+            vendor_city_label = ttk.Label(vendor_address_frame, text=vendor_values[5])
             
             vendor_city_label.grid(sticky="w", row=5, column=1, padx=10)
-            vendor_county_label = tk.Label(vendor_address_frame, text=vendor_values[6])
+            vendor_county_label = ttk.Label(vendor_address_frame, text=vendor_values[6])
             vendor_county_label.grid(sticky="w", row=6, column=1, padx=10)
             
-            vendor_postcode_label = tk.Label(vendor_address_frame, text=vendor_values[7])
+            vendor_postcode_label = ttk.Label(vendor_address_frame, text=vendor_values[7])
             vendor_postcode_label.grid(sticky="w", row=7, column=1, padx=10)
 
             # Create a frame for the ribbon
-            vendor_invoice_history_ribbon_frame = tk.Frame(vendor_invoice_history_window)
+            vendor_invoice_history_ribbon_frame = ttk.Frame(vendor_invoice_history_window)
             vendor_invoice_history_ribbon_frame.pack(fill="both")
 
             # Add functional buttons to ribbon
             # Add invoice button icon to the frame
             self.view_invoice_icon = tk.PhotoImage(file="images/invoice.png")    
-            view_invoice_button = tk.Button(vendor_invoice_history_ribbon_frame, image=self.view_invoice_icon, command=self.view_invoice)
+            view_invoice_button = ttk.Button(vendor_invoice_history_ribbon_frame, image=self.view_invoice_icon, command=self.view_invoice)
             view_invoice_button.grid(padx=10, pady=0, row=1, column=1)
-            view_invoice_label = tk.Label(vendor_invoice_history_ribbon_frame, text="View Invoice")
+            view_invoice_label = ttk.Label(vendor_invoice_history_ribbon_frame, text="View Invoice")
             view_invoice_label.grid(padx=10, pady=0, row=2, column=1)
                     
             # Create a frame for the Treeview widget
-            invoice_history_treeview_frame = tk.Frame(vendor_invoice_history_window)
+            invoice_history_treeview_frame = ttk.Frame(vendor_invoice_history_window)
             invoice_history_treeview_frame.pack(fill="both", expand=1)
 
             # Add a scrollbar to the frame
-            invoice_history_treeview_scroll = tk.Scrollbar(invoice_history_treeview_frame)
+            invoice_history_treeview_scroll = ttk.Scrollbar(invoice_history_treeview_frame)
             invoice_history_treeview_scroll.pack(side="right", fill="y") 
 
             # Add the Treeview to the frame
@@ -2276,60 +2355,60 @@ class Vendors:
             vendor_invoice_window.attributes('-topmost', 'true') 
 
             # Create a frame in the window for the supplier address
-            vendor_address_frame = tk.Frame(vendor_invoice_window)
+            vendor_address_frame = ttk.Frame(vendor_invoice_window)
             vendor_address_frame.pack(fill="both", padx=10, pady=5)  
 
             # Add the supplier address to the invoice
-            vendor_name_label = tk.Label(vendor_address_frame, text=values_vendor[1])
+            vendor_name_label = ttk.Label(vendor_address_frame, text=values_vendor[1])
             vendor_name_label.grid(sticky="w", row=1, column=1, padx=10)
 
-            vendor_company_label = tk.Label(vendor_address_frame, text=values_vendor[2])
+            vendor_company_label = ttk.Label(vendor_address_frame, text=values_vendor[2])
             vendor_company_label.grid(sticky="w", row=2, column=1, padx=10)
     
-            vendor_street_label = tk.Label(vendor_address_frame, text=values_vendor[3])
+            vendor_street_label = ttk.Label(vendor_address_frame, text=values_vendor[3])
             vendor_street_label.grid(sticky="w", row=3, column=1, padx=10)
     
-            vendor_town_label = tk.Label(vendor_address_frame, text=values_vendor[4])
+            vendor_town_label = ttk.Label(vendor_address_frame, text=values_vendor[4])
             vendor_town_label.grid(sticky="w", row=4, column=1, padx=10)
     
-            vendor_city_label = tk.Label(vendor_address_frame, text=values_vendor[5])
+            vendor_city_label = ttk.Label(vendor_address_frame, text=values_vendor[5])
             vendor_city_label.grid(sticky="w", row=5, column=1, padx=10)
     
-            vendor_county_label = tk.Label(vendor_address_frame, text=values_vendor[6])
+            vendor_county_label = ttk.Label(vendor_address_frame, text=values_vendor[6])
             vendor_county_label.grid(sticky="w", row=6, column=1, padx=10)
     
-            vendor_postcode_label = tk.Label(vendor_address_frame, text=values_vendor[7])
+            vendor_postcode_label = ttk.Label(vendor_address_frame, text=values_vendor[7])
             vendor_postcode_label.grid(sticky="w", row=7, column=1, padx=10)
 
             # Add the date
-            date_frame = tk.Frame(vendor_invoice_window)
+            date_frame = ttk.Frame(vendor_invoice_window)
             date_frame.pack(fill="both", padx=10, pady=15) 
 
-            date_label = tk.Label(date_frame, text="Date")
+            date_label = ttk.Label(date_frame, text="Date")
             date_label.grid(sticky="w", row=8, column=1, padx=10, pady=0)
-            date = tk.Entry(date_frame)
+            date = ttk.Entry(date_frame)
             date.insert(0, values_invoice[1])
             date.configure(state="readonly")
             date.grid(sticky="w", row=9, column=1, padx=10)
 
             # Add the invoice number
-            invoice_number_frame = tk.Frame(vendor_invoice_window)
+            invoice_number_frame = ttk.Frame(vendor_invoice_window)
             invoice_number_frame.pack(fill="both", padx=10, pady=15)
 
-            vendor_invoice_number_label = tk.Label(invoice_number_frame, text="Invoice number")
+            vendor_invoice_number_label = ttk.Label(invoice_number_frame, text="Invoice number")
             vendor_invoice_number_label.grid(sticky="w", row=9, column=1, padx=10)
-            vendor_invoice_number_entry = tk.Entry(invoice_number_frame, width=15, background="white")
+            vendor_invoice_number_entry = ttk.Entry(invoice_number_frame, width=15, background="white")
             vendor_invoice_number_entry.insert(0, values_invoice[2])
             vendor_invoice_number_entry.configure(state="readonly")
             vendor_invoice_number_entry.grid(sticky="w", row=10, column=1, padx=10, pady=0)
 
             # Add the Treeview to the invoice
             # Create a frame for the Treeview widget
-            vendor_invoice_treeview_frame = tk.Frame(vendor_invoice_window)
+            vendor_invoice_treeview_frame = ttk.Frame(vendor_invoice_window)
             vendor_invoice_treeview_frame.pack(fill="both", expand=1, padx=10)
 
             # Add a scrollbar to the frame
-            vendor_invoice_treeview_scroll = tk.Scrollbar(vendor_invoice_treeview_frame)
+            vendor_invoice_treeview_scroll = ttk.Scrollbar(vendor_invoice_treeview_frame)
             vendor_invoice_treeview_scroll.pack(side="right", fill="y") 
 
             # Add the Treeview to the frame
@@ -2337,9 +2416,9 @@ class Vendors:
             vendor_invoice_treeview.pack(fill="both", expand="yes")  
 
             # Add the invoice total box            
-            invoice_total_box_entry = tk.Entry(vendor_invoice_treeview_frame, width=15, state="readonly")
+            invoice_total_box_entry = ttk.Entry(vendor_invoice_treeview_frame, width=15, state="readonly")
             invoice_total_box_entry.pack(side="right", padx=10, pady=10)
-            invoice_total_box_label = tk.Label(vendor_invoice_treeview_frame, text="Total")
+            invoice_total_box_label = ttk.Label(vendor_invoice_treeview_frame, text="Total")
             invoice_total_box_label.pack(side="right", padx=0, pady=10)
 
             # Create the columns in the Treeview
@@ -2458,7 +2537,7 @@ class Chart_of_accounts:
 
         def accounts_tab():
             # Create the tab
-            self.tab = tk.Frame(main_window)
+            self.tab = ttk.Frame(main_window)
             self.tab.pack(fill="both", expand="yes")
 
             # Add the tab to the notebook and provide a heading
@@ -2466,7 +2545,7 @@ class Chart_of_accounts:
         
         def accounts_ribbon():
             # Make a frame for the ribbon
-            accounts_ribbon_frame = tk.Frame(self.tab)
+            accounts_ribbon_frame = ttk.Frame(self.tab)
             accounts_ribbon_frame.pack(side="top", fill="x", padx=10, pady=10)
         
             # Assign an image to each button
@@ -2476,30 +2555,30 @@ class Chart_of_accounts:
             self.edit_account_icon = tk.PhotoImage(file="images/edit_account.png")
 
             # Add "new account" button to the frame and give it a command
-            new_account_button = tk.Button(accounts_ribbon_frame, image=self.new_account_icon, command=self.new_parent_account)
+            new_account_button = ttk.Button(accounts_ribbon_frame, image=self.new_account_icon, command=self.new_parent_account)
             new_account_button.grid(padx=10, row=1, column=1)
 
-            new_account_label = tk.Label(accounts_ribbon_frame, text="Add New Account")
+            new_account_label = ttk.Label(accounts_ribbon_frame, text="Add New Account")
             new_account_label.grid(padx=10, row=2, column=1)
 
             # Add "add child account" button to the frame and give it a command  
-            new_child_account_button = tk.Button(accounts_ribbon_frame, image=self.new_child_account_icon, command=self.new_child_account)
+            new_child_account_button = ttk.Button(accounts_ribbon_frame, image=self.new_child_account_icon, command=self.new_child_account)
             new_child_account_button.grid(padx=10, row=1, column=2)
-            new_child_account_label = tk.Label(accounts_ribbon_frame, text="Add Child Account")
+            new_child_account_label = ttk.Label(accounts_ribbon_frame, text="Add Child Account")
             new_child_account_label.grid(padx=10, row=2, column=2)
 
             # Add "edit account" button to the frame and give it a command
-            edit_account_button = tk.Button(accounts_ribbon_frame, image=self.edit_account_icon, command=self.edit_account)
+            edit_account_button = ttk.Button(accounts_ribbon_frame, image=self.edit_account_icon, command=self.edit_account)
             edit_account_button.grid(padx=10, row=1, column=3)
 
-            edit_account_label = tk.Label(accounts_ribbon_frame, text="Edit Account")
+            edit_account_label = ttk.Label(accounts_ribbon_frame, text="Edit Account")
             edit_account_label.grid(padx=10, row=2, column=3)
 
             # Add "delete account" button to the frame and give it a command
-            delete_account_button = tk.Button(accounts_ribbon_frame, image=self.delete_account_icon, command=self.delete_account)
+            delete_account_button = ttk.Button(accounts_ribbon_frame, image=self.delete_account_icon, command=self.delete_account)
             delete_account_button.grid(padx=10, row=1, column=4)
 
-            delete_account_label = tk.Label(accounts_ribbon_frame, text="Delete Account")
+            delete_account_label = ttk.Label(accounts_ribbon_frame, text="Delete Account")
             delete_account_label.grid(padx=10, row=2, column=4)
             
         def accounts_treeview():
@@ -2537,11 +2616,11 @@ class Chart_of_accounts:
 
                 
             # Create a frame for the Treeview
-            self.accounts_treeview_frame = tk.Frame(self.tab)
+            self.accounts_treeview_frame = ttk.Frame(self.tab)
             self.accounts_treeview_frame.pack(side="bottom", fill="both", padx=10, expand=1)
 
             # Create a scrollbar for the Treeview
-            self.accounts_treeview_scroll = tk.Scrollbar(self.accounts_treeview_frame)
+            self.accounts_treeview_scroll = ttk.Scrollbar(self.accounts_treeview_frame)
             self.accounts_treeview_scroll.pack(side="right", fill="y") 
 
             # Create the Treeview
@@ -2635,53 +2714,53 @@ class Chart_of_accounts:
         new_account_window.title("Add New Account")
         new_account_window.attributes('-topmost')
             
-        new_account_window_frame = tk.Frame(new_account_window)
+        new_account_window_frame = ttk.Frame(new_account_window)
         new_account_window_frame.pack(fill="both", expand=1, pady=10)      
 
         # Create the entry boxes
-        new_account_id_label = tk.Label(new_account_window_frame, text="ID")
+        new_account_id_label = ttk.Label(new_account_window_frame, text="ID")
         #new_account_id_label.grid(row=1, column=1, padx=10, pady=5)
-        new_account_id_entry = tk.Entry(new_account_window_frame, width=15)
+        new_account_id_entry = ttk.Entry(new_account_window_frame, width=15)
         #new_account_id_entry.grid(row=1, column=2, padx=10, pady=5)
         
-        new_account_number_label = tk.Label(new_account_window_frame, text="Account Number")
+        new_account_number_label = ttk.Label(new_account_window_frame, text="Account Number")
         new_account_number_label.grid(row=2, column=1, padx=10, pady=5)
-        new_account_number_entry = tk.Entry(new_account_window_frame, width=15)
+        new_account_number_entry = ttk.Entry(new_account_window_frame, width=15)
         new_account_number_entry.grid(row=2, column=2, padx=10, pady=5)
 
-        new_account_name_label = tk.Label(new_account_window_frame, text="Account Name")
+        new_account_name_label = ttk.Label(new_account_window_frame, text="Account Name")
         new_account_name_label.grid(row=3, column=1, padx=10, pady=5)
-        new_account_name_entry = tk.Entry(new_account_window_frame, width=15)
+        new_account_name_entry = ttk.Entry(new_account_window_frame, width=15)
         new_account_name_entry.grid(row=3, column=2, padx=10, pady=5)    
 
-        new_account_total_label = tk.Label(new_account_window_frame, text="Total")
+        new_account_total_label = ttk.Label(new_account_window_frame, text="Total")
         #new_account_total_label.grid(row=4, column=1, padx=10, pady=5)
-        new_account_total_entry = tk.Entry(new_account_window_frame, width=15)
+        new_account_total_entry = ttk.Entry(new_account_window_frame, width=15)
         #new_account_total_entry.grid(row=4, column=2, padx=10, pady=5)       
 
-        new_parent_account_label = tk.Label(new_account_window_frame, text="Parent")
+        new_parent_account_label = ttk.Label(new_account_window_frame, text="Parent")
         #new_parent_account_label.grid(row=5, column=1, padx=10, pady=5)
-        new_parent_account_entry = tk.Entry(new_account_window_frame, width=15)
+        new_parent_account_entry = ttk.Entry(new_account_window_frame, width=15)
         #new_parent_account_entry.grid(row=5, column=2, padx=10, pady=5)     
 
-        new_child_account_status_label = tk.Label(new_account_window_frame, text="Child Account?")
+        new_child_account_status_label = ttk.Label(new_account_window_frame, text="Child Account?")
         #new_child_account_status_label.grid(row=6, column=1, padx=10, pady=5)
-        new_child_account_status_entry = tk.Entry(new_account_window_frame, width=10)
+        new_child_account_status_entry = ttk.Entry(new_account_window_frame, width=10)
         #new_child_account_status_entry.grid(row=6, column=2, padx=10, pady=5)
 
         account_type = ["Asset", "Liability", "Capital", "Sales", "Expense"]
-        new_account_type_label = tk.Label(new_account_window_frame, text="Type")
+        new_account_type_label = ttk.Label(new_account_window_frame, text="Type")
         new_account_type_label.grid(row=7, column=1, padx=10, pady=5)
         new_account_type_entry = ttk.Combobox(new_account_window_frame, values=account_type, width=15)
         new_account_type_entry.set("Choose account type")
         new_account_type_entry.grid(row=7, column=2, padx=10, pady=5)
 
         # Save contact button
-        close_button = tk.Button(new_account_window_frame, text="Save", command=lambda:[save_new_account(), new_account_window.destroy()])
+        close_button = ttk.Button(new_account_window_frame, text="Save", command=lambda:[save_new_account(), new_account_window.destroy()])
         close_button.grid(row=8, column=1)
 
         # Close window button
-        self.close_button = tk.Button(new_account_window_frame, text="Close", command=new_account_window.destroy)
+        self.close_button = ttk.Button(new_account_window_frame, text="Close", command=new_account_window.destroy)
         self.close_button.grid(row=8, column=2)
 
         def save_new_account():   
@@ -2763,55 +2842,55 @@ class Chart_of_accounts:
             child_account_window.title("Add Child Account")
             child_account_window.attributes('-topmost', 'True')
                 
-            child_account_window_frame = tk.Frame(child_account_window)
+            child_account_window_frame = ttk.Frame(child_account_window)
             child_account_window_frame.pack(fill="both", expand=1, pady=10)      
 
             # Create the entry boxes
-            child_account_id_label = tk.Label(child_account_window_frame, text="ID")
+            child_account_id_label = ttk.Label(child_account_window_frame, text="ID")
             #child_account_id_label.grid(row=1, column=1, padx=10, pady=5)
-            child_account_id_entry = tk.Entry(child_account_window_frame, width=15)
+            child_account_id_entry = ttk.Entry(child_account_window_frame, width=15)
             #child_account_id_entry.grid(row=1, column=2, padx=10, pady=5)
             
-            child_account_number_label = tk.Label(child_account_window_frame, text="Account Number")
+            child_account_number_label = ttk.Label(child_account_window_frame, text="Account Number")
             child_account_number_label.grid(row=2, column=1, padx=10, pady=5)
-            child_account_number_entry = tk.Entry(child_account_window_frame, width=15)
+            child_account_number_entry = ttk.Entry(child_account_window_frame, width=15)
             child_account_number_entry.grid(row=2, column=2, padx=10, pady=5)
 
-            child_account_name_label = tk.Label(child_account_window_frame, text="Account Name")
+            child_account_name_label = ttk.Label(child_account_window_frame, text="Account Name")
             child_account_name_label.grid(row=3, column=1, padx=10, pady=5)
-            child_account_name_entry = tk.Entry(child_account_window_frame, width=15)
+            child_account_name_entry = ttk.Entry(child_account_window_frame, width=15)
             child_account_name_entry.grid(row=3, column=2, padx=10, pady=5)    
 
-            child_account_total_label = tk.Label(child_account_window_frame, text="Total")
+            child_account_total_label = ttk.Label(child_account_window_frame, text="Total")
             #child_account_total_label.grid(row=4, column=1, padx=10, pady=5)
-            child_account_total_entry = tk.Entry(child_account_window_frame, width=15)
+            child_account_total_entry = ttk.Entry(child_account_window_frame, width=15)
             #child_account_total_entry.grid(row=4, column=2, padx=10, pady=5)       
 
-            parent_account_number_label = tk.Label(child_account_window_frame, text="Parent")
+            parent_account_number_label = ttk.Label(child_account_window_frame, text="Parent")
             parent_account_number_label.grid(row=5, column=1, padx=10, pady=5)
-            parent_account_number_entry = tk.Entry(child_account_window_frame, width=15)
+            parent_account_number_entry = ttk.Entry(child_account_window_frame, width=15)
             parent_account_number_entry.grid(row=5, column=2, padx=10, pady=5) 
             parent_account_number_entry.insert(0, values_account[1])  
             parent_account_number_entry.config(state='readonly')  
 
-            child_account_status_label = tk.Label(child_account_window_frame, text="Child Account?")
+            child_account_status_label = ttk.Label(child_account_window_frame, text="Child Account?")
             #child_account_status_label.grid(row=6, column=1, padx=10, pady=5)
-            child_account_status_entry = tk.Entry(child_account_window_frame, width=15)
+            child_account_status_entry = ttk.Entry(child_account_window_frame, width=15)
             #child_account_status_entry.grid(row=6, column=2, padx=10, pady=5)
 
-            child_account_type_label = tk.Label(child_account_window_frame, text="Type")
+            child_account_type_label = ttk.Label(child_account_window_frame, text="Type")
             child_account_type_label.grid(row=7, column=1, padx=10, pady=5)
-            child_account_type_entry = tk.Entry(child_account_window_frame, width=15)
+            child_account_type_entry = ttk.Entry(child_account_window_frame, width=15)
             child_account_type_entry.grid(row=7, column=2, padx=10, pady=5)
             child_account_type_entry.insert(0, values_account[2])
             child_account_type_entry.config(state='readonly')
 
             # Save contact and close window
-            save_button = tk.Button(child_account_window_frame, text="Save", command=lambda:[save_child_account(), child_account_window.destroy()])
+            save_button = ttk.Button(child_account_window_frame, text="Save", command=lambda:[save_child_account(), child_account_window.destroy()])
             save_button.grid(row=8, column=1)
 
             # Close window
-            close_button = tk.Button(child_account_window_frame, text="Close", command=child_account_window.destroy)
+            close_button = ttk.Button(child_account_window_frame, text="Close", command=child_account_window.destroy)
             close_button.grid(row=8, column=2)    
 
         # If a parent account hasn't been selected tell the user to choose a parent account. 
@@ -2882,43 +2961,43 @@ class Chart_of_accounts:
             edit_account_window.title("Edit Account")
             edit_account_window.attributes('-topmost', 'True')
                 
-            edit_account_window_frame = tk.Frame(edit_account_window)
+            edit_account_window_frame = ttk.Frame(edit_account_window)
             edit_account_window_frame.pack(fill="both", expand=1, pady=10)      
 
             # Create the entry boxes
-            edit_account_id_label = tk.Label(edit_account_window_frame, text="ID")
+            edit_account_id_label = ttk.Label(edit_account_window_frame, text="ID")
             #edit_account_id_label.grid(row=1, column=1, padx=10, pady=5)
-            edit_account_id_entry = tk.Entry(edit_account_window_frame, width=15)
+            edit_account_id_entry = ttk.Entry(edit_account_window_frame, width=15)
             #edit_account_id_entry.grid(row=1, column=2, padx=10, pady=5)
             
-            edit_account_number_label = tk.Label(edit_account_window_frame, text="Account Number")
+            edit_account_number_label = ttk.Label(edit_account_window_frame, text="Account Number")
             edit_account_number_label.grid(row=2, column=1, padx=10, pady=5)
-            edit_account_number_entry = tk.Entry(edit_account_window_frame, width=15)
+            edit_account_number_entry = ttk.Entry(edit_account_window_frame, width=15)
             edit_account_number_entry.grid(row=2, column=2, padx=10, pady=5)
 
-            edit_account_name_label = tk.Label(edit_account_window_frame, text="Account Name")
+            edit_account_name_label = ttk.Label(edit_account_window_frame, text="Account Name")
             edit_account_name_label.grid(row=3, column=1, padx=10, pady=5)
-            edit_account_name_entry = tk.Entry(edit_account_window_frame, width=15)
+            edit_account_name_entry = ttk.Entry(edit_account_window_frame, width=15)
             edit_account_name_entry.grid(row=3, column=2, padx=10, pady=5)    
 
-            edit_account_total_label = tk.Label(edit_account_window_frame, text="Total")
+            edit_account_total_label = ttk.Label(edit_account_window_frame, text="Total")
             #edit_account_total_label.grid(row=4, column=1, padx=10, pady=5)
-            edit_account_total_entry = tk.Entry(edit_account_window_frame, width=15)
+            edit_account_total_entry = ttk.Entry(edit_account_window_frame, width=15)
             #edit_account_total_entry.grid(row=4, column=2, padx=10, pady=5)       
 
-            edit_parent_account_label = tk.Label(edit_account_window_frame, text="Parent")
+            edit_parent_account_label = ttk.Label(edit_account_window_frame, text="Parent")
             edit_parent_account_label.grid(row=5, column=1, padx=10, pady=5)
-            edit_parent_account_entry = tk.Entry(edit_account_window_frame, width=15)
+            edit_parent_account_entry = ttk.Entry(edit_account_window_frame, width=15)
             edit_parent_account_entry.grid(row=5, column=2, padx=10, pady=5)     
 
-            edit_child_account_status_label = tk.Label(edit_account_window_frame, text="Child Account?")
+            edit_child_account_status_label = ttk.Label(edit_account_window_frame, text="Child Account?")
             #edit_child_account_status_label.grid(row=6, column=1, padx=10, pady=5)
-            edit_child_account_status_entry = tk.Entry(edit_account_window_frame, width=15)
+            edit_child_account_status_entry = ttk.Entry(edit_account_window_frame, width=15)
             #edit_child_account_status_entry.grid(row=6, column=2, padx=10, pady=5)
 
-            edit_account_type_label = tk.Label(edit_account_window_frame, text="Type")
+            edit_account_type_label = ttk.Label(edit_account_window_frame, text="Type")
             edit_account_type_label.grid(row=7, column=1, padx=10, pady=5)
-            edit_account_type_entry = tk.Entry(edit_account_window_frame, width=15)
+            edit_account_type_entry = ttk.Entry(edit_account_window_frame, width=15)
             edit_account_type_entry.grid(row=7, column=2, padx=10, pady=5)
 
             # Insert the pulled values from the database into the entry boxes
@@ -2936,11 +3015,11 @@ class Chart_of_accounts:
             edit_account_type_entry.config(state='readonly')
 
             # Update account button
-            save_button = tk.Button(edit_account_window_frame, text="Save", command=lambda:[save_account_edit(), edit_account_window.destroy()])
+            save_button = ttk.Button(edit_account_window_frame, text="Save", command=lambda:[save_account_edit(), edit_account_window.destroy()])
             save_button.grid(row=8, column=1)
 
             # Close window button
-            close_button = tk.Button(edit_account_window_frame, text="Close", command=edit_account_window.destroy)
+            close_button = ttk.Button(edit_account_window_frame, text="Close", command=edit_account_window.destroy)
             close_button.grid(row=8, column=2)
 
         # If an account in the Treeview isn't selected tell the user to select and account
@@ -3076,7 +3155,7 @@ class Ledger:
         
         def ledger_tab():
             # Create the tab
-            self.tab = tk.Frame(main_window)
+            self.tab = ttk.Frame(main_window)
             self.tab.pack(fill="both", expand="yes")
 
             # Add the tab to the notebook and provide a heading
@@ -3084,11 +3163,11 @@ class Ledger:
 
         def ledger_treeview():
             # Create a frame for the Treeview
-            self.ledger_treeview_frame = tk.Frame(self.tab)
+            self.ledger_treeview_frame = ttk.Frame(self.tab)
             self.ledger_treeview_frame.pack(side="bottom", fill="both", padx=10, expand=1)
 
             # Create a scrollbar for the Treeview
-            self.ledger_treeview_scroll = tk.Scrollbar(self.ledger_treeview_frame)
+            self.ledger_treeview_scroll = ttk.Scrollbar(self.ledger_treeview_frame)
             self.ledger_treeview_scroll.pack(side="right", fill="y") 
 
             # Create the Treeview
@@ -3131,20 +3210,20 @@ class Ledger:
 
             # Ledger total box
             # Create frame
-            ledger_total_frame = tk.Frame(self.ledger_treeview_frame)
+            ledger_total_frame = ttk.Frame(self.ledger_treeview_frame)
             ledger_total_frame.pack(fill="both", padx=390, pady=10)
 
             # Create the boxes
-            debit_total_label = tk.Label(ledger_total_frame, text="Debit Total")
+            debit_total_label = ttk.Label(ledger_total_frame, text="Debit Total")
             debit_total_label.grid(row=1, column=1, padx=10)
-            self.debit_total_entry = tk.Entry(ledger_total_frame, width=12)
+            self.debit_total_entry = ttk.Entry(ledger_total_frame, width=12)
             self.debit_total_entry.grid(row=1, column=2)
             #self.debit_total_entry.insert(0, "debit total")
             #self.debit_total_entry.configure(state="readonly")
 
-            credit_total_label = tk.Label(ledger_total_frame, text="Credit Total")
+            credit_total_label = ttk.Label(ledger_total_frame, text="Credit Total")
             credit_total_label.grid(row=2, column=1, padx=10)
-            self.credit_total_entry = tk.Entry(ledger_total_frame, width=12)
+            self.credit_total_entry = ttk.Entry(ledger_total_frame, width=12)
             self.credit_total_entry.grid(row=2, column=3)
             self.credit_total_entry.insert(0, "credit total")
             self.credit_total_entry.configure(state="readonly")            
@@ -3230,7 +3309,7 @@ class Settings:
 
         def settings_tab():
             # Create the settings tab
-            self.settings_tab = tk.Frame(main_window)
+            self.settings_tab = ttk.Frame(main_window)
             self.settings_tab.pack(fill="both")
 
             # Add the tab to the Notebook
@@ -3242,48 +3321,48 @@ class Settings:
 
     def business_address(self):
         # Create the frame for the business address form
-        business_address_frame = tk.LabelFrame(self.settings_tab, text="Business Address")
+        business_address_frame = ttk.LabelFrame(self.settings_tab, text="Business Address")
         business_address_frame.pack(fill="x", padx=10, pady=10)
 
         # Add the entry boxes
-        company_label = tk.Label(business_address_frame, text="Company")
+        company_label = ttk.Label(business_address_frame, text="Company")
         company_label.grid(row=1, column=1, padx=10, pady=5)
-        company_entry = tk.Entry(business_address_frame, width=15, background="white")
+        company_entry = ttk.Entry(business_address_frame, width=15, background="white")
         company_entry.grid(row=1, column=2, padx=10, pady=5)
         
-        street_label = tk.Label(business_address_frame, text="Street")
+        street_label = ttk.Label(business_address_frame, text="Street")
         street_label.grid(row=2, column=1, padx=10, pady=5)
-        street_entry = tk.Entry(business_address_frame, width=15, background="white")
+        street_entry = ttk.Entry(business_address_frame, width=15, background="white")
         street_entry.grid(row=2, column=2, padx=10, pady=5)
     
-        town_label = tk.Label(business_address_frame, text="Town")
+        town_label = ttk.Label(business_address_frame, text="Town")
         town_label.grid(row=3, column=1, padx=10, pady=5)
-        town_entry = tk.Entry(business_address_frame, width=15, background="white")
+        town_entry = ttk.Entry(business_address_frame, width=15, background="white")
         town_entry.grid(row=3, column=2, padx=10, pady=5)
         
-        city_label = tk.Label(business_address_frame, text="City")
+        city_label = ttk.Label(business_address_frame, text="City")
         city_label.grid(row=4, column=1, padx=10, pady=5)
-        city_entry = tk.Entry(business_address_frame, width=15, background="white")
+        city_entry = ttk.Entry(business_address_frame, width=15, background="white")
         city_entry.grid(row=4, column=2, padx=10, pady=5)
         
-        county_label = tk.Label(business_address_frame, text="County")
+        county_label = ttk.Label(business_address_frame, text="County")
         county_label.grid(row=5, column=1, padx=10, pady=5)
-        county_entry = tk.Entry(business_address_frame, width=15, background="white")
+        county_entry = ttk.Entry(business_address_frame, width=15, background="white")
         county_entry.grid(row=5, column=2, padx=10, pady=5)
         
-        postcode_label = tk.Label(business_address_frame, text="Postcode")
+        postcode_label = ttk.Label(business_address_frame, text="Postcode")
         postcode_label.grid(row=6, column=1, padx=10, pady=5)
-        postcode_entry = tk.Entry(business_address_frame, width=15, background="white")
+        postcode_entry = ttk.Entry(business_address_frame, width=15, background="white")
         postcode_entry.grid(row=6, column=2, padx=10, pady=5)
         
-        email_label = tk.Label(business_address_frame, text="Email")
+        email_label = ttk.Label(business_address_frame, text="Email")
         email_label.grid(row=7, column=1, padx=10, pady=5)
-        email_entry = tk.Entry(business_address_frame, width=15, background="white")
+        email_entry = ttk.Entry(business_address_frame, width=15, background="white")
         email_entry.grid(row=7, column=2, padx=10, pady=5)
         
-        phone_label = tk.Label(business_address_frame, text="Phone")
+        phone_label = ttk.Label(business_address_frame, text="Phone")
         phone_label.grid(row=8, column=1, padx=10, pady=5)
-        phone_entry = tk.Entry(business_address_frame, width=15, background="white")
+        phone_entry = ttk.Entry(business_address_frame, width=15, background="white")
         phone_entry.grid(row=8, column=2, padx=10, pady=5)
 
         def populate_business_address():
@@ -3318,12 +3397,12 @@ class Settings:
             
             # If there are data for the business address in the database create a button named update
             if values_business_address:
-                update_business_address_button = tk.Button(business_address_frame, text="Update", command=lambda:[update_business_address()])
+                update_business_address_button = ttk.Button(business_address_frame, text="Update", command=lambda:[update_business_address()])
                 update_business_address_button.grid(row=9, column=1, padx=10, pady=5)
             
             # If the table is empty then create a button named save
             else:
-                save_business_address_button = tk.Button(business_address_frame, text="Save", command=lambda:[save_business_address(), populate_business_address()])
+                save_business_address_button = ttk.Button(business_address_frame, text="Save", command=lambda:[save_business_address(), populate_business_address()])
                 save_business_address_button.grid(row=9, column=1, padx=10, pady=5)
 
             # Close connection
@@ -3421,22 +3500,23 @@ class Settings:
 class Message:
 
     def __init__(self, message):
+        messagebox.showerror('error', message)
         # Create a window
-        message_window = tk.Toplevel()
-        message_window.title("Message")
-        message_window.attributes('-topmost', 'True')
+        #message_window = tk.Toplevel()
+        #message_window.title("Message")
+        #message_window.attributes('-topmost', 'True')
         
         # Create a frame in the window
-        message_window_frame = tk.Frame(message_window)
-        message_window_frame.pack(fill="both", expand=1, pady=10)
+        #message_window_frame = ttk.Frame(message_window)
+        #message_window_frame.pack(fill="both", expand=1, pady=10)
         
         # Add a message to the frame
-        message = tk.Label(message_window_frame, text=message)
-        message.pack(side="left", padx=10, pady=10)
+        #message = ttk.Label(message_window_frame, text=message)
+        #message.pack(side="left", padx=10, pady=10)
         
         # Create a close button
-        close_button = tk.Button(message_window, text="Close", command=message_window.destroy)
-        close_button.pack(side="bottom", pady=10)
+        #close_button = ttk.Button(message_window, text="Close", command=message_window.destroy)
+        #close_button.pack(side="bottom", pady=10)
 
 
 customers = Customers()
