@@ -2233,6 +2233,20 @@ class Vendors:
         def invoice_clicked(event):
             # Call the method
             self.view_invoice()
+        
+        def populate_vendor_report_treeview(self):
+            # Fetch data from database
+            #cur.execute("SELECT rowid, *, SUM(total) FROM vendor_invoices WHERE vendor_rowid = " + vendor_values[0] + " GROUP BY invoice_number")
+            cur.execute("SELECT rowid, * FROM ledger WHERE vendor_rowid = " + vendor_values[0] + " AND account = 'Accounts Payable (Creditors)'")
+            record = cur.fetchall()   
+            
+            # Add the fetched data to the treeview
+            global count
+            count = 0
+
+            for row in record:
+                self.vendor_report_tree.insert(parent='', index='end', iid=count, text='', values=(row[2], row[3], row[6], "", row[7], row[8]))
+                count+=1  
 
         # Connect to the database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
@@ -2248,7 +2262,7 @@ class Vendors:
             vendor_report_window = tk.Toplevel()
             vendor_report_window.title("Vendor Report")
             vendor_report_window.geometry("1024x640")
-            vendor_report_window.attributes('-topmost', 'true') 
+            #vendor_report_window.attributes('-topmost', 'true') 
             
             # Create a frame in the window for the supplier address
             vendor_address_frame = ttk.Frame(vendor_report_window)
@@ -2288,7 +2302,7 @@ class Vendors:
             view_invoice_label.grid(padx=10, pady=0, row=2, column=1)
 
             self.make_payment_icon = tk.PhotoImage(file="images/invoice.png")    
-            make_payment_button = ttk.Button(vendor_report_ribbon_frame, image=self.view_invoice_icon, command=lambda:Payment(vendor_values[0]))
+            make_payment_button = ttk.Button(vendor_report_ribbon_frame, image=self.view_invoice_icon, command=lambda:self.make_payment(vendor_values[0], vendor_values[1]))
             make_payment_button.grid(padx=10, pady=0, row=1, column=2)
             make_payment_label = ttk.Label(vendor_report_ribbon_frame, text="Make Payment")
             make_payment_label.grid(padx=10, pady=0, row=2, column=2)
@@ -2341,18 +2355,8 @@ class Vendors:
             #self.vendor_report_tree.heading("Total", text="Total")  
 
             # Add the data to the treeview
-            # Fetch data from database
-            #cur.execute("SELECT rowid, *, SUM(total) FROM vendor_invoices WHERE vendor_rowid = " + vendor_values[0] + " GROUP BY invoice_number")
-            cur.execute("SELECT rowid, * FROM ledger WHERE vendor_rowid = " + vendor_values[0] + " AND account = 'Accounts Payable (Creditors)'")
-            record = cur.fetchall()   
-            
-            # Add the fetched data to the treeview
-            global count
-            count = 0
-
-            for row in record:
-                self.vendor_report_tree.insert(parent='', index='end', iid=count, text='', values=(row[2], row[3], row[6], "", row[7], row[8]))
-                count+=1        
+            populate_vendor_report_treeview(self)
+                  
 
             # Vendor report total box
             # Create frame
@@ -2378,10 +2382,7 @@ class Vendors:
             self.credit_total_entry.insert(0, credit_total)
             self.credit_total_entry.configure(state="readonly")   
 
-            if debit_total:
-                total=credit_total
-            else:
-                total = credit_total-debit_total
+            total = credit_total[0]-debit_total[0]
             total_label = ttk.Label(vendor_report_total_frame, text="Total Due")
             total_label.grid(row=3, column=1, padx=10)
             self.total_entry = ttk.Entry(vendor_report_total_frame, width=24)
@@ -2550,6 +2551,186 @@ class Vendors:
         conn.commit()
         conn.close() 
 
+    def make_payment(self, vendor_rowid, vendor_name):
+        self.vendor_rowid = vendor_rowid
+        self.vendor_name = vendor_name
+
+        def populate_payment_treeview(self):
+
+            # Connect to the database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
+
+            # Make a list of all outstanding invoices
+            cur.execute("SELECT date, invoice_number, SUM(total) FROM vendor_invoices WHERE paid = 'NO' AND vendor_rowid = " + self.vendor_rowid + " GROUP BY invoice_number")
+            outstanding = cur.fetchall()
+            
+            # Populate treeview
+            for record in self.payment_window_treeview.get_children():
+                self.payment_window_treeview.delete(record)
+        
+            # Add data to treeview
+            global count
+            count = 0
+            for row in outstanding:
+                self.payment_window_treeview.insert(parent='', index='end', iid=count, text='', values=(
+                    row[0], # Date
+                    row[1], # Invoice number
+                    row[2] # Ammount
+
+                ))
+
+                count+=1
+        
+        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        cur = conn.cursor()
+
+        # Create window
+        payment_window = tk.Toplevel()
+        payment_window.geometry("800x400")
+        payment_window.title("Make/Receive Payment")
+
+        # Create a frame in the window
+        payment_window_treeview_frame = ttk.LabelFrame(payment_window, text="Outstanding Balances")
+        payment_window_treeview_frame.pack(fill="both", expand=1, padx=10, pady=10)
+
+        # Add the treeview
+        # Scrollbar
+        payment_window_treeview_scrollbar = ttk.Scrollbar(payment_window_treeview_frame)
+        payment_window_treeview_scrollbar.pack(side="right", fill="y")
+
+        # Treeview
+        self.payment_window_treeview = ttk.Treeview(payment_window_treeview_frame, yscrollcommand=payment_window_treeview_scrollbar.set, selectmode="extended")
+        self.payment_window_treeview.pack(fill="both", expand="y")
+
+        # Create the columns in the treeview
+        self.payment_window_treeview['columns'] = (
+            "Date",
+            "Invoice Number", 
+            "Ammount"
+        )
+
+        # Name the headings of each column
+        self.payment_window_treeview.column("#0", width=0, stretch="no")
+        self.payment_window_treeview.heading("#0", text="")
+
+        self.payment_window_treeview.column("Date", minwidth=25, width=50)
+        self.payment_window_treeview.heading("Date", text="Date")
+
+        self.payment_window_treeview.column("Invoice Number", minwidth=25, width=50)
+        self.payment_window_treeview.heading("Invoice Number", text="Invoice Number")
+
+        self.payment_window_treeview.column("Ammount", minwidth=25, width=50)
+        self.payment_window_treeview.heading("Ammount", text="Ammount")
+        
+        # Create a combobox listing accounts available to pay from 
+        cur.execute("SELECT account_name FROM child_accounts WHERE type = 'Bank'")
+        banks = cur.fetchall()
+
+        payment_window_transfer_from_frame = ttk.LabelFrame(payment_window, text="Transfer Account")
+        payment_window_transfer_from_frame.pack(fill="both", padx=10, pady=10)
+
+        transfer_account_label = ttk.Label(payment_window_transfer_from_frame, text="Transfer from")
+        transfer_account_label.grid(row=1, column=2, padx=10, pady=10)
+
+        self.transfer_account_combo = ttk.Combobox(payment_window_transfer_from_frame, values=banks, width=15)
+        self.transfer_account_combo.grid(row=1, column=2, padx=10, pady=10)
+
+        # Pay button
+        pay_button = ttk.Button(payment_window_transfer_from_frame, text="Pay", command=lambda:pay(self))
+        pay_button.grid(row=1, column=3)
+
+        # Close connection
+        conn.commit()
+        conn.close()
+
+        # Populate payment treeview
+        populate_payment_treeview(self)        
+        
+        def pay(self):
+            # Connect to the database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
+    
+            selected_invoice = self.payment_window_treeview.focus()
+            invoice_values = self.payment_window_treeview.item(selected_invoice, 'values') 
+
+            # Update vendor_invoices
+            cur.execute("UPDATE vendor_invoices SET paid = 'YES' WHERE vendor_rowid=? AND invoice_number=?", (self.vendor_rowid, invoice_values[1]))
+    
+            # Update accounts payable in ledger
+            cur.execute("""INSERT INTO ledger (
+                            vendor_rowid, 
+                            date,
+                            description,
+                            account,
+                            invoice_number,  
+                            debit,
+                            credit
+                            )
+
+                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+
+                            self.vendor_rowid, 
+                            invoice_values[0],
+                            self.vendor_name,
+                            'Accounts Payable (Creditors)',
+                            invoice_values[1],
+                            invoice_values[2],
+                            ''
+                            ])
+    
+            # Update bank account in ledger
+            cur.execute("""INSERT INTO ledger (
+                            vendor_rowid, 
+                            date,
+                            description,
+                            account,
+                            invoice_number,  
+                            debit,
+                            credit
+                            )
+
+                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+
+                            self.vendor_rowid, 
+                            invoice_values[0],
+                            self.vendor_name,
+                            self.transfer_account_combo.get(),
+                            invoice_values[1],
+                            '',
+                            invoice_values[2]
+                            ])
+            
+            # Update child account
+            cur.execute('UPDATE child_accounts SET total = total-? WHERE account_name=?',(invoice_values[2], self.transfer_account_combo.get(),))
+
+            # Update parent account 
+            cur.execute('SELECT parent FROM child_accounts WHERE account_name=?', (self.transfer_account_combo.get(),))
+            parent_account = cur.fetchall()
+            cur.execute('UPDATE parent_accounts SET total = total-? WHERE account_number=?', (invoice_values[2], parent_account[0][0]),)
+            
+            # Update accounts payable in parent_accounts
+            cur.execute('UPDATE parent_accounts SET total = total-? WHERE account_name=?', (invoice_values[2], 'Accounts Payable (Creditors)'))
+
+            # Close connection
+            conn.commit()
+            conn.close()
+    
+            # Re-populate ledger
+            ledger.populate_ledger_tree()
+
+            # Re-populate the Chart of Accounts Treeview      
+            chart_of_accounts.populate_accounts_tree()
+
+            # Re-populate vendor report
+
+            # Re-populate make payment treeview
+            vendors.populate_vendor_report_treeview
+
+            # Populate payment treeview
+            populate_payment_treeview(self)     
+  
 class Chart_of_accounts:
     
     def __init__(self):
@@ -2584,7 +2765,7 @@ class Chart_of_accounts:
             if initial:
                 pass
             else:
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (1000, 'Current Accounts', 0.00, "NO", 'Asset'))
+                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (1000, 'Current Accounts', 0.00, "NO", 'Bank'))
                 cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (1100, 'Accounts Receivable (Debtors)', 0.00, "NO", 'Asset'))
                 cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (2000, 'Accounts Payable (Creditors)', 0.00, "NO", 'Liability'))
                 cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (4000, 'Income', 0.00, "NO", 'Sales'))
@@ -2814,7 +2995,7 @@ class Chart_of_accounts:
         new_child_account_status_entry = ttk.Entry(new_account_window_frame, width=10)
         #new_child_account_status_entry.grid(row=6, column=2, padx=10, pady=5)
 
-        account_type = ["Asset", "Liability", "Capital", "Sales", "Expense"]
+        account_type = ["Bank", "Cash", "Asset", "Liability", "Capital", "Sales", "Expense"]
         new_account_type_label = ttk.Label(new_account_window_frame, text="Type")
         new_account_type_label.grid(row=7, column=1, padx=10, pady=5)
         new_account_type_entry = ttk.Combobox(new_account_window_frame, values=account_type, width=15)
@@ -3345,33 +3526,6 @@ class Ledger:
         # Close connection
         conn.commit()
         conn.close()
-
-class Payment:
-    def __init__(self, vendor):
-        # Connect to the database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
-        cur = conn.cursor()
-
-        # Make a list of all outstanding invoices
-        cur.execute("SELECT date, invoice_number, SUM(total) FROM vendor_invoices WHERE paid = 'NO' AND vendor_rowid = " + vendor + " GROUP BY invoice_number")
-        self.outstanding = cur.fetchall()
-
-        # Create window
-        payment_window = tk.Toplevel()
-        payment_window.title("Make/Receive Payment")
-
-        # Create a frame in the window
-        self.payment_window_frame = ttk.LabelFrame(payment_window, text="Make Payment")
-        self.payment_window_frame.pack(fill="both", expand=1, padx=10, pady=10)
-
-        self.make_payment()
-
-    def make_payment(self):
-        # Add boxes
-        make_payment_label = ttk.Label(self.payment_window_frame, text="Outstanding balances")
-        make_payment_label.grid(row=1, column=1, padx=10, pady=10)
-        make_payment_combo = ttk.Combobox(self.payment_window_frame, value=self.outstanding, width=50, background="white")
-        make_payment_combo.grid(row=1, column=2, padx=10, pady=10)
             
 class Settings:
 
