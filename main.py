@@ -73,7 +73,7 @@ class Menu_bar:
         vendors_menu.add_command(label="Edit Vendor", command=vendors.edit_vendor, state="disabled")
         vendors_menu.add_command(label="Delete Vendor", command=vendors.delete_vendor, state="disabled")
         vendors_menu.add_command(label="New Vendor Invoice", command=vendors.new_vendor_invoice, state="disabled")
-        vendors_menu.add_command(label="Invoice History", command=vendors.invoice_history, state="disabled")
+        vendors_menu.add_command(label="Vendor Report", command=vendors.vendor_report, state="disabled")
 
         # Enable certain items when a vendor is selected in the treeview
         def enable_buttons(event):
@@ -84,7 +84,7 @@ class Menu_bar:
                 vendors_menu.entryconfig("Edit Vendor", state="normal")
                 vendors_menu.entryconfig("Delete Vendor", state="normal")
                 vendors_menu.entryconfig("New Vendor Invoice", state="normal")
-                vendors_menu.entryconfig("Invoice History", state="normal")
+                vendors_menu.entryconfig("Vendor Report", state="normal")
             else:
                 pass
         
@@ -219,12 +219,16 @@ class Customers:
                 # Create the menu items
                 right_click_customer.add_command(label="New Customer", command=customers.new_customer)
                 right_click_customer.add_command(label="Edit Customer", command=customers.edit_customer, state="disabled")
-                right_click_customer.add_command(label="Delete Customer", command=customers.delete_customer, state="disabled")                  
+                right_click_customer.add_command(label="Delete Customer", command=customers.delete_customer, state="disabled")   
+                right_click_customer.add_separator()
+                right_click_customer.add_command(label="New Customer Invoice", command=customers.new_customer_invoice, state="disabled")
+                right_click_customer.add_separator()               
 
                 # If a customer is selected change the state of menu items
                 if values_customer:
                     right_click_customer.entryconfig("Edit Customer", state="normal")
                     right_click_customer.entryconfig("Delete Customer", state="normal")
+                    right_click_customer.entryconfig("New Customer Invoice", state="normal")
                 else:
                     pass
 
@@ -1184,7 +1188,8 @@ class Vendors:
                 quantity FLOAT, 
                 unit_price FLOAT, 
                 total FLOAT,
-                account TEXT
+                account TEXT,
+                paid TEXT
                 )""")
         
             # Close connection
@@ -1208,8 +1213,8 @@ class Vendors:
             self.new_vendor_icon = tk.PhotoImage(file="images/new_contact.png")
             self.delete_vendor_icon = tk.PhotoImage(file="images/delete_contact.png")
             self.edit_vendor_icon = tk.PhotoImage(file="images/edit_contact.png")
-            self.vendor_invoice_icon = tk.PhotoImage(file="images/invoice.png")
-            self.vendor_invoice_history_icon = tk.PhotoImage(file="images/invoice_history.png")
+            self.vendor_invoice_icon = tk.PhotoImage(file="images/new_invoice.png")
+            self.vendor_report_icon = tk.PhotoImage(file="images/vendor_report.png")
 
             # Add new contact button to the frame
             new_vendor_button = ttk.Button(vendor_ribbon_frame, image=self.new_vendor_icon, command=self.new_vendor)
@@ -1236,17 +1241,17 @@ class Vendors:
             new_vendor_invoice_label.grid(padx=10, row=2, column=4)
 
             # View invoices icon
-            vendor_invoice_history_button = ttk.Button(vendor_ribbon_frame, image=self.vendor_invoice_history_icon, command=self.invoice_history)
-            vendor_invoice_history_button.grid(padx=10, row=1, column=5)
-            vendor_invoice_history_button.bind("<ButtonRelease-1>", self.invoice_history)
-            vendor_invoice_history_label = ttk.Label(vendor_ribbon_frame, text="Invoice History")
-            vendor_invoice_history_label.grid(padx=10, row=2, column=5)
+            vendor_report_button = ttk.Button(vendor_ribbon_frame, image=self.vendor_report_icon, command=self.vendor_report)
+            vendor_report_button.grid(padx=10, row=1, column=5)
+            #vendor_report_button.bind("<ButtonRelease-1>", self.vendor_report)
+            vendor_report_label = ttk.Label(vendor_ribbon_frame, text="Vendor Report")
+            vendor_report_label.grid(padx=10, row=2, column=5)
             
         def vendor_treeview():
             
             def vendor_double_clicked(event):
                 # Call the method
-                vendors.invoice_history()
+                vendors.vendor_report()
 
             def right_click_vendor(event):
                 # Create a toggle to determine if a vendor is selected
@@ -1262,14 +1267,15 @@ class Vendors:
                 right_click_vendor.add_command(label="Delete Vendor", command=vendors.delete_vendor, state="disabled")
                 right_click_vendor.add_separator()
                 right_click_vendor.add_command(label="New Vendor Invoice", command=vendors.new_vendor_invoice, state="disabled")
-                right_click_vendor.add_command(label="Invoice History", command=vendors.invoice_history, state="disabled")
+                right_click_vendor.add_separator()
+                right_click_vendor.add_command(label="Vendor Report", command=vendors.vendor_report, state="disabled")
 
                 # If a vendor is selected change the state of menu items
                 if values_vendor:
                     right_click_vendor.entryconfig("Edit Vendor", state="normal")
                     right_click_vendor.entryconfig("Delete Vendor", state="normal")
                     right_click_vendor.entryconfig("New Vendor Invoice", state="normal")
-                    right_click_vendor.entryconfig("Invoice History", state="normal")
+                    right_click_vendor.entryconfig("Vendor Report", state="normal")
                 else:
                     pass
                 
@@ -1694,7 +1700,7 @@ class Vendors:
         if values_vendor: 
             # Create the window
             vendor_invoice_window = tk.Toplevel()
-            vendor_invoice_window.title("Add Vendor Invoice")
+            vendor_invoice_window.title("New Vendor Invoice")
             vendor_invoice_window.geometry("1024x800")
             #vendor_invoice_window.attributes('-topmost', 'true') 
             
@@ -1705,7 +1711,7 @@ class Vendors:
 
             # Add the supplier address to the invoice
             vendor_name_label = ttk.Label(vendor_address_frame, text=values_vendor[1])
-            vendor_name_label.grid(sticky="w", row=1, column=1, padx=10)
+            vendor_name_label.grid(sticky="w", row=1, column=1, padx=10, pady=(5,0))
 
             vendor_company_label = ttk.Label(vendor_address_frame, text=values_vendor[2])
             vendor_company_label.grid(sticky="w", row=2, column=1, padx=10)
@@ -1723,16 +1729,16 @@ class Vendors:
             vendor_county_label.grid(sticky="w", row=6, column=1, padx=10)
     
             vendor_postcode_label = ttk.Label(vendor_address_frame, text=values_vendor[7])
-            vendor_postcode_label.grid(sticky="w", row=7, column=1, padx=10)
+            vendor_postcode_label.grid(sticky="w", row=7, column=1, padx=10, pady=(0,5))
 
             # Add the date to the invoice
             date_frame = ttk.Frame(vendor_invoice_window)
             date_frame.pack(fill="both", padx=10, pady=15) 
 
             date_label = ttk.Label(date_frame, text="Date")
-            date_label.grid(sticky="w", row=8, column=1, padx=10)
+            date_label.grid(sticky="w", row=8, column=1, padx=10, pady=(5,0))
             cal = tkcal.DateEntry(date_frame, showweeknumbers=False, date_pattern='yyyy-mm-dd')
-            cal.grid(sticky="w", row=9, column=1, padx=10)
+            cal.grid(sticky="w", row=9, column=1, padx=10, pady=(0,5))
 
             cal._top_cal.overrideredirect(False)
 
@@ -1741,9 +1747,9 @@ class Vendors:
             invoice_number_frame.pack(fill="both", padx=10, pady=15) 
 
             vendor_invoice_number_label = ttk.Label(invoice_number_frame, text="Invoice number")
-            vendor_invoice_number_label.grid(sticky="w", row=9, column=1, padx=10)
+            vendor_invoice_number_label.grid(sticky="w", row=9, column=1, padx=10, pady=(5,0))
             vendor_invoice_number_entry = ttk.Entry(invoice_number_frame, width=15, background="white")
-            vendor_invoice_number_entry.grid(sticky="w", row=10, column=1, padx=10, pady=2)
+            vendor_invoice_number_entry.grid(sticky="w", row=10, column=1, padx=10, pady=(0,5))
 
             # Add the Treeview to the invoice
             # Create a frame for the Treeview widget
@@ -1758,11 +1764,13 @@ class Vendors:
             vendor_invoice_treeview = ttk.Treeview(vendor_invoice_treeview_frame, yscrollcommand=vendor_invoice_treeview_scroll.set, selectmode="extended") 
             vendor_invoice_treeview.pack(fill="both", expand="yes")  
 
-            # Add the invoice total box            
-            invoice_total_box_entry = ttk.Entry(vendor_invoice_treeview_frame, width=15)
+            # Add the invoice total box 
+            invoice_total_box_frame = ttk.Frame(vendor_invoice_window)   
+            invoice_total_box_frame.pack(fill="both", padx=10, pady=2)        
+            invoice_total_box_entry = ttk.Entry(invoice_total_box_frame, width=15)
             invoice_total_box_entry.pack(side="right", padx=10, pady=5)
             invoice_total_box_entry.configure(state="readonly")
-            invoice_total_box_label = ttk.Label(vendor_invoice_treeview_frame, text="Total")
+            invoice_total_box_label = ttk.Label(invoice_total_box_frame, text="Total")
             invoice_total_box_label.pack(side="right", padx=0, pady=5)
 
             # Create the columns in the Treeview
@@ -1910,10 +1918,11 @@ class Vendors:
                     quantity, 
                     unit_price, 
                     total,
-                    account
+                    account,
+                    paid
                     ) 
 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", [
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", [
 
                     invoice_item_id_entry.get(),
                     vendor_invoice_number_entry.get(),
@@ -1923,7 +1932,8 @@ class Vendors:
                     invoice_item_quantity_entry.get(), 
                     invoice_item_unit_price_entry.get(), 
                     sub_total,
-                    invoice_item_account_combo.get()
+                    invoice_item_account_combo.get(),
+                    "NO"
                     ])     
 
                 # Add the item value to the child account database
@@ -1945,6 +1955,7 @@ class Vendors:
                     for value in figure:
                         total_figure = value
                 
+                # Update child account and ledger
                 if values_vendor[1] in vendor and vendor_invoice_number_entry.get() in vendor_invoices and invoice_item_account_combo.get() in ledger_accounts:
                     # Update accounts payable in ledger
                     cur.execute("""UPDATE ledger SET
@@ -1990,6 +2001,7 @@ class Vendors:
                         
                         })
 
+                # Insert into child account and update ledger
                 elif values_vendor[1] in vendor and vendor_invoice_number_entry.get() in vendor_invoices:
                     cur.execute("""UPDATE ledger SET
                         vendor_rowid = :vendor_rowid, 
@@ -2033,6 +2045,7 @@ class Vendors:
                             ''
                             ])
                     
+                # Insert into child account and ledger    
                 else:      
                     # Add Accounts Payable to ledger          
                     cur.execute("""INSERT INTO ledger (
@@ -2215,7 +2228,7 @@ class Vendors:
             # Re-populate ledger treeview
             ledger.populate_ledger_tree()
 
-    def invoice_history(self):
+    def vendor_report(self):
         
         def invoice_clicked(event):
             # Call the method
@@ -2232,13 +2245,13 @@ class Vendors:
         # If a supplier is selected open a window with a form to enter details into
         if vendor_values: 
             # Create the window
-            vendor_invoice_history_window = tk.Toplevel()
-            vendor_invoice_history_window.title("Invoice History")
-            vendor_invoice_history_window.geometry("1024x640")
-            vendor_invoice_history_window.attributes('-topmost', 'true') 
+            vendor_report_window = tk.Toplevel()
+            vendor_report_window.title("Vendor Report")
+            vendor_report_window.geometry("1024x640")
+            vendor_report_window.attributes('-topmost', 'true') 
             
             # Create a frame in the window for the supplier address
-            vendor_address_frame = ttk.Frame(vendor_invoice_history_window)
+            vendor_address_frame = ttk.Frame(vendor_report_window)
             vendor_address_frame.pack(fill="both")  
 
             # Add the supplier address to the invoice
@@ -2263,56 +2276,74 @@ class Vendors:
             vendor_postcode_label.grid(sticky="w", row=7, column=1, padx=10)
 
             # Create a frame for the ribbon
-            vendor_invoice_history_ribbon_frame = ttk.Frame(vendor_invoice_history_window)
-            vendor_invoice_history_ribbon_frame.pack(fill="both")
+            vendor_report_ribbon_frame = ttk.Frame(vendor_report_window)
+            vendor_report_ribbon_frame.pack(fill="both")
 
             # Add functional buttons to ribbon
             # Add invoice button icon to the frame
             self.view_invoice_icon = tk.PhotoImage(file="images/invoice.png")    
-            view_invoice_button = ttk.Button(vendor_invoice_history_ribbon_frame, image=self.view_invoice_icon, command=self.view_invoice)
+            view_invoice_button = ttk.Button(vendor_report_ribbon_frame, image=self.view_invoice_icon, command=self.view_invoice)
             view_invoice_button.grid(padx=10, pady=0, row=1, column=1)
-            view_invoice_label = ttk.Label(vendor_invoice_history_ribbon_frame, text="View Invoice")
+            view_invoice_label = ttk.Label(vendor_report_ribbon_frame, text="View Invoice")
             view_invoice_label.grid(padx=10, pady=0, row=2, column=1)
+
+            self.make_payment_icon = tk.PhotoImage(file="images/invoice.png")    
+            make_payment_button = ttk.Button(vendor_report_ribbon_frame, image=self.view_invoice_icon, command=lambda:Payment(vendor_values[0]))
+            make_payment_button.grid(padx=10, pady=0, row=1, column=2)
+            make_payment_label = ttk.Label(vendor_report_ribbon_frame, text="Make Payment")
+            make_payment_label.grid(padx=10, pady=0, row=2, column=2)
                     
             # Create a frame for the Treeview widget
-            invoice_history_treeview_frame = ttk.Frame(vendor_invoice_history_window)
-            invoice_history_treeview_frame.pack(fill="both", expand=1)
+            vendor_report_treeview_frame = ttk.Frame(vendor_report_window)
+            vendor_report_treeview_frame.pack(fill="both", expand=1)
 
             # Add a scrollbar to the frame
-            invoice_history_treeview_scroll = ttk.Scrollbar(invoice_history_treeview_frame)
-            invoice_history_treeview_scroll.pack(side="right", fill="y") 
+            vendor_report_treeview_scroll = ttk.Scrollbar(vendor_report_treeview_frame)
+            vendor_report_treeview_scroll.pack(side="right", fill="y") 
 
             # Add the Treeview to the frame
-            self.vendor_invoice_history_tree = ttk.Treeview(invoice_history_treeview_frame, yscrollcommand=invoice_history_treeview_scroll.set, selectmode="extended") 
-            self.vendor_invoice_history_tree.pack(fill="both", expand="y")  
+            self.vendor_report_tree = ttk.Treeview(vendor_report_treeview_frame, yscrollcommand=vendor_report_treeview_scroll.set, selectmode="extended") 
+            self.vendor_report_tree.pack(fill="both", expand="y")  
 
             # Create the columns in the Treeview
-            self.vendor_invoice_history_tree['columns'] = (
+            self.vendor_report_tree['columns'] = (
             "ID",
             "Date", 
             "Invoice Number", 
-            "Total"
+            "Description",
+            "Debit",
+            "Credit"
             )
 
             # Provide the headings for each column
-            self.vendor_invoice_history_tree.column("#0", width=0, stretch="no")
-            self.vendor_invoice_history_tree.heading("#0", text="")
+            self.vendor_report_tree.column("#0", width=0, stretch="no")
+            self.vendor_report_tree.heading("#0", text="")
             
-            self.vendor_invoice_history_tree.column("ID", width=0, stretch="no")
-            self.vendor_invoice_history_tree.heading("ID", text="ID")
+            self.vendor_report_tree.column("ID", width=0, stretch="no")
+            self.vendor_report_tree.heading("ID", text="ID")
             
-            self.vendor_invoice_history_tree.column("Date") 
-            self.vendor_invoice_history_tree.heading("Date", text="Date")  
+            self.vendor_report_tree.column("Date") 
+            self.vendor_report_tree.heading("Date", text="Date")  
             
-            self.vendor_invoice_history_tree.column("Invoice Number") 
-            self.vendor_invoice_history_tree.heading("Invoice Number", text="Invoice Number")  
+            self.vendor_report_tree.column("Invoice Number") 
+            self.vendor_report_tree.heading("Invoice Number", text="Invoice Number")  
+
+            self.vendor_report_tree.column("Description") 
+            self.vendor_report_tree.heading("Description", text="Description") 
+
+            self.vendor_report_tree.column("Debit") 
+            self.vendor_report_tree.heading("Debit", text="Debit") 
+
+            self.vendor_report_tree.column("Credit") 
+            self.vendor_report_tree.heading("Credit", text="Credit") 
             
-            self.vendor_invoice_history_tree.column("Total") 
-            self.vendor_invoice_history_tree.heading("Total", text="Total")  
+            #self.vendor_report_tree.column("Total") 
+            #self.vendor_report_tree.heading("Total", text="Total")  
 
             # Add the data to the treeview
             # Fetch data from database
-            cur.execute("SELECT rowid, *, SUM(total) FROM vendor_invoices WHERE vendor_rowid = " + vendor_values[0] + " GROUP BY invoice_number")
+            #cur.execute("SELECT rowid, *, SUM(total) FROM vendor_invoices WHERE vendor_rowid = " + vendor_values[0] + " GROUP BY invoice_number")
+            cur.execute("SELECT rowid, * FROM ledger WHERE vendor_rowid = " + vendor_values[0] + " AND account = 'Accounts Payable (Creditors)'")
             record = cur.fetchall()   
             
             # Add the fetched data to the treeview
@@ -2320,14 +2351,49 @@ class Vendors:
             count = 0
 
             for row in record:
-                self.vendor_invoice_history_tree.insert(parent='', index='end', iid=count, text='', values=(row[1], row[4], row[2], row[10]))
+                self.vendor_report_tree.insert(parent='', index='end', iid=count, text='', values=(row[2], row[3], row[6], "", row[7], row[8]))
                 count+=1        
+
+            # Vendor report total box
+            # Create frame
+            vendor_report_total_frame = ttk.Frame(vendor_report_window)
+            vendor_report_total_frame.pack(side="right", fill="both", padx=20, pady=10)
+
+            # Create the boxes
+            cur.execute("SELECT SUM(debit) FROM ledger WHERE vendor_rowid = " + vendor_values[0] + " AND account = 'Accounts Payable (Creditors)'")
+            debit_total = cur.fetchone()
+            debit_total_label = ttk.Label(vendor_report_total_frame, text="Debit Total")
+            debit_total_label.grid(row=1, column=1, padx=10)
+            self.debit_total_entry = ttk.Entry(vendor_report_total_frame, width=12)
+            self.debit_total_entry.grid(row=1, column=2)
+            self.debit_total_entry.insert(0, debit_total)
+            self.debit_total_entry.configure(state="readonly")
+
+            cur.execute("SELECT SUM(credit) FROM ledger WHERE vendor_rowid = " + vendor_values[0] + " AND account = 'Accounts Payable (Creditors)'")
+            credit_total = cur.fetchone()
+            credit_total_label = ttk.Label(vendor_report_total_frame, text="Credit Total")
+            credit_total_label.grid(row=2, column=1, padx=10)
+            self.credit_total_entry = ttk.Entry(vendor_report_total_frame, width=12)
+            self.credit_total_entry.grid(row=2, column=3)
+            self.credit_total_entry.insert(0, credit_total)
+            self.credit_total_entry.configure(state="readonly")   
+
+            if debit_total:
+                total=credit_total
+            else:
+                total = credit_total-debit_total
+            total_label = ttk.Label(vendor_report_total_frame, text="Total Due")
+            total_label.grid(row=3, column=1, padx=10)
+            self.total_entry = ttk.Entry(vendor_report_total_frame, width=24)
+            self.total_entry.grid(row=3, column=2, columnspan=2)
+            self.total_entry.insert(0, total)
+            self.total_entry.configure(state="readonly") 
         
         # If a supplier isn't selected tell the user to select a supplier
         else:
             Message("Please select a supplier first")
 
-        self.vendor_invoice_history_tree.bind("<Double-Button-1>", invoice_clicked)
+        self.vendor_report_tree.bind("<Double-Button-1>", invoice_clicked)
         
         # Disconnect from the database
         conn.commit()
@@ -2343,8 +2409,8 @@ class Vendors:
         values_vendor = self.vendor_treeview.item(selected_vendor, 'values') 
 
         # Select an invoice
-        selected_invoice = self.vendor_invoice_history_tree.focus()
-        values_invoice = self.vendor_invoice_history_tree.item(selected_invoice, 'values') 
+        selected_invoice = self.vendor_report_tree.focus()
+        values_invoice = self.vendor_report_tree.item(selected_invoice, 'values') 
 
         # If an invoice is selected then open a window showing the invoice details
         if values_invoice:
@@ -3218,15 +3284,13 @@ class Ledger:
             debit_total_label.grid(row=1, column=1, padx=10)
             self.debit_total_entry = ttk.Entry(ledger_total_frame, width=12)
             self.debit_total_entry.grid(row=1, column=2)
-            #self.debit_total_entry.insert(0, "debit total")
-            #self.debit_total_entry.configure(state="readonly")
+            
 
             credit_total_label = ttk.Label(ledger_total_frame, text="Credit Total")
             credit_total_label.grid(row=2, column=1, padx=10)
             self.credit_total_entry = ttk.Entry(ledger_total_frame, width=12)
             self.credit_total_entry.grid(row=2, column=3)
-            self.credit_total_entry.insert(0, "credit total")
-            self.credit_total_entry.configure(state="readonly")            
+                      
 
         ledger_database_table()
         ledger_tab()
@@ -3282,6 +3346,33 @@ class Ledger:
         conn.commit()
         conn.close()
 
+class Payment:
+    def __init__(self, vendor):
+        # Connect to the database
+        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        cur = conn.cursor()
+
+        # Make a list of all outstanding invoices
+        cur.execute("SELECT date, invoice_number, SUM(total) FROM vendor_invoices WHERE paid = 'NO' AND vendor_rowid = " + vendor + " GROUP BY invoice_number")
+        self.outstanding = cur.fetchall()
+
+        # Create window
+        payment_window = tk.Toplevel()
+        payment_window.title("Make/Receive Payment")
+
+        # Create a frame in the window
+        self.payment_window_frame = ttk.LabelFrame(payment_window, text="Make Payment")
+        self.payment_window_frame.pack(fill="both", expand=1, padx=10, pady=10)
+
+        self.make_payment()
+
+    def make_payment(self):
+        # Add boxes
+        make_payment_label = ttk.Label(self.payment_window_frame, text="Outstanding balances")
+        make_payment_label.grid(row=1, column=1, padx=10, pady=10)
+        make_payment_combo = ttk.Combobox(self.payment_window_frame, value=self.outstanding, width=50, background="white")
+        make_payment_combo.grid(row=1, column=2, padx=10, pady=10)
+            
 class Settings:
 
     def __init__(self):
@@ -3501,23 +3592,6 @@ class Message:
 
     def __init__(self, message):
         messagebox.showerror('error', message)
-        # Create a window
-        #message_window = tk.Toplevel()
-        #message_window.title("Message")
-        #message_window.attributes('-topmost', 'True')
-        
-        # Create a frame in the window
-        #message_window_frame = ttk.Frame(message_window)
-        #message_window_frame.pack(fill="both", expand=1, pady=10)
-        
-        # Add a message to the frame
-        #message = ttk.Label(message_window_frame, text=message)
-        #message.pack(side="left", padx=10, pady=10)
-        
-        # Create a close button
-        #close_button = ttk.Button(message_window, text="Close", command=message_window.destroy)
-        #close_button.pack(side="bottom", pady=10)
-
 
 customers = Customers()
 vendors = Vendors()
@@ -3527,13 +3601,3 @@ settings = Settings()
 menu_bar = Menu_bar()
 
 root.mainloop()
-
-#### Add edit invoice feature ####
-#### Update right click options ####
-#### Update ribbons ####
-
-#### Process payment ####
-
-
-#### Import csv ####
-
