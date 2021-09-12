@@ -208,6 +208,10 @@ class Customers:
 
         def customer_treeview():
 
+            def vendor_double_clicked(event):
+                # Call the method
+                customers.customer_report()
+
             def right_click_customer(event):
                 # Create a toggle to determine if a customer is selected
                 selected_customer = customers.customer_treeview.focus()
@@ -1154,6 +1158,316 @@ class Customers:
 
             # Re-populate ledger treeview
             ledger.populate_ledger_tree()
+
+    def customer_report(self):
+
+        def invoice_clicked(event):
+            # Call the method
+            self.view_invoice()
+
+        # Connect to the database
+        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        cur = conn.cursor()
+
+        # Select a vendor
+        customer_selected = self.customer_treeview.focus()
+        customer_values = self.customer_treeview.item(customer_selected, 'values') 
+
+        # If a supplier is selected open a window with a form to enter details into
+        if customer_values: 
+            # Create the window
+            customer_report_window = tk.Toplevel()
+            customer_report_window.title("Customer Report")
+            customer_report_window.geometry("1024x640")
+            #customer_report_window.attributes('-topmost', 'true') 
+            
+            # Create a frame in the window for the supplier address
+            customer_address_frame = ttk.Frame(customer_report_window)
+            customer_address_frame.pack(fill="both")  
+
+            # Add the supplier address to the invoice
+            customer_name_label = ttk.Label(customer_address_frame, text=customer_values[1])
+            customer_name_label.grid(sticky="w", row=1, column=1, padx=10)
+            
+            customer_company_label = ttk.Label(customer_address_frame, text=customer_values[2])
+            customer_company_label.grid(sticky="w", row=2, column=1, padx=10)
+            
+            customer_street_label = ttk.Label(customer_address_frame, text=customer_values[3])
+            customer_street_label.grid(sticky="w", row=3, column=1, padx=10)
+            
+            customer_town_label = ttk.Label(customer_address_frame, text=customer_values[4])
+            customer_town_label.grid(sticky="w", row=4, column=1, padx=10)
+            
+            customer_city_label = ttk.Label(customer_address_frame, text=customer_values[5])
+            customer_city_label.grid(sticky="w", row=5, column=1, padx=10)
+            
+            customer_county_label = ttk.Label(customer_address_frame, text=customer_values[6])
+            customer_county_label.grid(sticky="w", row=6, column=1, padx=10)
+            
+            customer_postcode_label = ttk.Label(customer_address_frame, text=customer_values[7])
+            customer_postcode_label.grid(sticky="w", row=7, column=1, padx=10)
+
+            # Create a frame for the ribbon
+            customer_report_ribbon_frame = ttk.Frame(customer_report_window)
+            customer_report_ribbon_frame.pack(fill="both")
+
+            # Add functional buttons to ribbon
+            # Add invoice button icon to the frame
+            self.view_invoice_icon = tk.PhotoImage(file="images/invoice.png")    
+            view_invoice_button = ttk.Button(customer_report_ribbon_frame, image=self.view_invoice_icon, command=self.view_invoice)
+            view_invoice_button.grid(padx=10, pady=0, row=1, column=1)
+            view_invoice_label = ttk.Label(customer_report_ribbon_frame, text="View Invoice")
+            view_invoice_label.grid(padx=10, pady=0, row=2, column=1)
+
+            self.make_payment_icon = tk.PhotoImage(file="images/invoice.png")    
+            make_payment_button = ttk.Button(customer_report_ribbon_frame, image=self.view_invoice_icon, command=lambda:self.make_payment(customer_values[0], customer_values[1]))
+            make_payment_button.grid(padx=10, pady=0, row=1, column=2)
+            make_payment_label = ttk.Label(customer_report_ribbon_frame, text="Make Payment")
+            make_payment_label.grid(padx=10, pady=0, row=2, column=2)
+                    
+            # Create a frame for the Treeview widget
+            customer_report_treeview_frame = ttk.Frame(customer_report_window)
+            customer_report_treeview_frame.pack(fill="both", expand=1)
+
+            # Add a scrollbar to the frame
+            customer_report_treeview_scroll = ttk.Scrollbar(customer_report_treeview_frame)
+            customer_report_treeview_scroll.pack(side="right", fill="y") 
+
+            # Add the Treeview to the frame
+            self.customer_report_tree = ttk.Treeview(customer_report_treeview_frame, yscrollcommand=customer_report_treeview_scroll.set, selectmode="extended") 
+            self.customer_report_tree.pack(fill="both", expand="y")  
+
+            # Create the columns in the Treeview
+            self.customer_report_tree['columns'] = (
+            "ID",
+            "Date", 
+            "Invoice Number", 
+            "Description",
+            "Debit",
+            "Credit"
+            )
+
+            # Provide the headings for each column
+            self.customer_report_tree.column("#0", width=0, stretch="no")
+            self.customer_report_tree.heading("#0", text="")
+            
+            self.customer_report_tree.column("ID", width=0, stretch="no")
+            self.customer_report_tree.heading("ID", text="ID")
+            
+            self.customer_report_tree.column("Date") 
+            self.customer_report_tree.heading("Date", text="Date")  
+            
+            self.customer_report_tree.column("Invoice Number") 
+            self.customer_report_tree.heading("Invoice Number", text="Invoice Number")  
+            
+            self.customer_report_tree.column("Description") 
+            self.customer_report_tree.heading("Description", text="Description") 
+            
+            self.customer_report_tree.column("Debit") 
+            self.customer_report_tree.heading("Debit", text="Debit") 
+            
+            self.customer_report_tree.column("Credit") 
+            self.customer_report_tree.heading("Credit", text="Credit") 
+            
+            #self.customer_report_tree.column("Total") 
+            #self.customer_report_tree.heading("Total", text="Total")  
+
+            # Add the data to the treeview
+            self.populate_customer_report_treeview(customer_values[0])
+                  
+
+            # Vendor report total box
+            # Create frame
+            customer_report_total_frame = ttk.Frame(customer_report_window)
+            customer_report_total_frame.pack(side="right", fill="both", padx=20, pady=10)
+
+            # Create the boxes
+            cur.execute("SELECT SUM(debit) FROM ledger WHERE customer_rowid = " + customer_values[0] + " AND account = 'Accounts Receivable (Debtors)'")
+            debit_total = cur.fetchone()
+            debit_total_label = ttk.Label(customer_report_total_frame, text="Debit Total")
+            debit_total_label.grid(row=1, column=1, padx=10)
+            self.debit_total_entry = ttk.Entry(customer_report_total_frame, width=12)
+            self.debit_total_entry.grid(row=1, column=2)
+            self.debit_total_entry.insert(0, debit_total)
+            self.debit_total_entry.configure(state="readonly")
+
+            cur.execute("SELECT SUM(credit) FROM ledger WHERE customer_rowid = " + customer_values[0] + " AND account = 'Accounts Receivable (Debtors)'")
+            credit_total = cur.fetchone()
+            credit_total_label = ttk.Label(customer_report_total_frame, text="Credit Total")
+            credit_total_label.grid(row=2, column=1, padx=10)
+            self.credit_total_entry = ttk.Entry(customer_report_total_frame, width=12)
+            self.credit_total_entry.grid(row=2, column=3)
+            self.credit_total_entry.insert(0, credit_total)
+            self.credit_total_entry.configure(state="readonly")   
+
+            total = credit_total[0]-debit_total[0]
+            total_label = ttk.Label(customer_report_total_frame, text="Total Due")
+            total_label.grid(row=3, column=1, padx=10)
+            self.total_entry = ttk.Entry(customer_report_total_frame, width=24)
+            self.total_entry.grid(row=3, column=2, columnspan=2)
+            self.total_entry.insert(0, total)
+            self.total_entry.configure(state="readonly") 
+        
+        # If a supplier isn't selected tell the user to select a supplier
+        else:
+            Message("Please select a supplier first")
+
+        self.customer_report_tree.bind("<Double-Button-1>", invoice_clicked)
+        
+        # Disconnect from the database
+        conn.commit()
+        conn.close()
+
+    def view_invoice(self):
+        # Connect to the database
+        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        cur = conn.cursor()
+
+        # Select vendor
+        selected_customer = self.customer_treeview.focus()
+        values_customer = self.customer_treeview.item(selected_customer, 'values') 
+
+        # Select an invoice
+        selected_invoice = self.customer_report_tree.focus()
+        values_invoice = self.customer_report_tree.item(selected_invoice, 'values') 
+
+        # If an invoice is selected then open a window showing the invoice details
+        if values_invoice:
+            # Create the window
+            customer_invoice_window = tk.Toplevel()
+            customer_invoice_window.title("Invoice")
+            customer_invoice_window.geometry("1024x600")
+            customer_invoice_window.attributes('-topmost', 'true') 
+
+            # Create a frame in the window for the supplier address
+            customer_address_frame = ttk.Frame(customer_invoice_window)
+            customer_address_frame.pack(fill="both", padx=10, pady=5)  
+
+            # Add the supplier address to the invoice
+            customer_name_label = ttk.Label(customer_address_frame, text=values_customer[1])
+            customer_name_label.grid(sticky="w", row=1, column=1, padx=10)
+            
+            customer_company_label = ttk.Label(customer_address_frame, text=values_customer[2])
+            customer_company_label.grid(sticky="w", row=2, column=1, padx=10)
+            
+            customer_street_label = ttk.Label(customer_address_frame, text=values_customer[3])
+            customer_street_label.grid(sticky="w", row=3, column=1, padx=10)
+            
+            customer_town_label = ttk.Label(customer_address_frame, text=values_customer[4])
+            customer_town_label.grid(sticky="w", row=4, column=1, padx=10)
+            
+            customer_city_label = ttk.Label(customer_address_frame, text=values_customer[5])
+            customer_city_label.grid(sticky="w", row=5, column=1, padx=10)
+            
+            customer_county_label = ttk.Label(customer_address_frame, text=values_customer[6])
+            customer_county_label.grid(sticky="w", row=6, column=1, padx=10)
+            
+            customer_postcode_label = ttk.Label(customer_address_frame, text=values_customer[7])
+            customer_postcode_label.grid(sticky="w", row=7, column=1, padx=10)
+
+            # Add the date
+            date_frame = ttk.Frame(customer_invoice_window)
+            date_frame.pack(fill="both", padx=10, pady=15) 
+
+            date_label = ttk.Label(date_frame, text="Date")
+            date_label.grid(sticky="w", row=8, column=1, padx=10, pady=0)
+            date = ttk.Entry(date_frame)
+            date.insert(0, values_invoice[1])
+            date.configure(state="readonly")
+            date.grid(sticky="w", row=9, column=1, padx=10)
+
+            # Add the invoice number
+            invoice_number_frame = ttk.Frame(customer_invoice_window)
+            invoice_number_frame.pack(fill="both", padx=10, pady=15)
+
+            customer_invoice_number_label = ttk.Label(invoice_number_frame, text="Invoice number")
+            customer_invoice_number_label.grid(sticky="w", row=9, column=1, padx=10)
+            customer_invoice_number_entry = ttk.Entry(invoice_number_frame, width=15, background="white")
+            customer_invoice_number_entry.insert(0, values_invoice[2])
+            customer_invoice_number_entry.configure(state="readonly")
+            customer_invoice_number_entry.grid(sticky="w", row=10, column=1, padx=10, pady=0)
+
+            # Add the Treeview to the invoice
+            # Create a frame for the Treeview widget
+            customer_invoice_treeview_frame = ttk.Frame(customer_invoice_window)
+            customer_invoice_treeview_frame.pack(fill="both", expand=1, padx=10)
+
+            # Add a scrollbar to the frame
+            customer_invoice_treeview_scroll = ttk.Scrollbar(customer_invoice_treeview_frame)
+            customer_invoice_treeview_scroll.pack(side="right", fill="y") 
+
+            # Add the Treeview to the frame
+            customer_invoice_treeview = ttk.Treeview(customer_invoice_treeview_frame, yscrollcommand=customer_invoice_treeview_scroll.set, selectmode="extended") 
+            customer_invoice_treeview.pack(fill="both", expand="yes")  
+
+            # Add the invoice total box            
+            invoice_total_box_entry = ttk.Entry(customer_invoice_treeview_frame, width=15, state="readonly")
+            invoice_total_box_entry.pack(side="right", padx=10, pady=10)
+            invoice_total_box_label = ttk.Label(customer_invoice_treeview_frame, text="Total")
+            invoice_total_box_label.pack(side="right", padx=0, pady=10)
+
+            # Create the columns in the Treeview
+            customer_invoice_treeview['columns'] = (
+            "id",
+            "Description", 
+            "Account",
+            "Quantity", 
+            "Unit Price", 
+            "Sub Total"
+            )
+
+            # Provide the headings for each column
+            customer_invoice_treeview.column("#0", width=0, stretch="no")
+            customer_invoice_treeview.heading("#0", text="")
+            
+            customer_invoice_treeview.column("id", width=0, stretch="no")
+            customer_invoice_treeview.heading("id", text="id")
+            
+            customer_invoice_treeview.column("Description", minwidth=500) 
+            customer_invoice_treeview.heading("Description", text="Description") 
+            
+            customer_invoice_treeview.column("Account", minwidth=100) 
+            customer_invoice_treeview.heading("Account", text="Account") 
+            
+            customer_invoice_treeview.column("Quantity", minwidth=100) 
+            customer_invoice_treeview.heading("Quantity", text="Quantity")   
+            
+            customer_invoice_treeview.column("Unit Price", minwidth=100) 
+            customer_invoice_treeview.heading("Unit Price", text="Unit Price")   
+            
+            customer_invoice_treeview.column("Sub Total", minwidth=100) 
+            customer_invoice_treeview.heading("Sub Total", text="Sub Total")
+
+            # Populate the treeview
+            # Get data from the database that has the same invoice number as the one given in the invoice
+            cur.execute("SELECT rowid, * FROM customer_invoices WHERE invoice_number = " + customer_invoice_number_entry.get() + " AND customer_rowid = " + values_customer[0])
+            record = cur.fetchall()  
+
+            # Calculate the total 
+            cur.execute("SELECT SUM(total) FROM customer_invoices WHERE invoice_number = " + customer_invoice_number_entry.get() + " AND customer_rowid = " + values_customer[0])
+            self.figure = cur.fetchall()
+            for figure in self.figure:
+                for value in figure:
+                    total_figure = value 
+
+            # Add the fetched data to the treeview and total box
+            global count
+            self.count = 0
+
+            for row in record:
+                customer_invoice_treeview.insert(parent='', index='end', iid=self.count, text='', values=(row[0], row[5], row[9], row[6], row[7], row[8]))
+                self.count+=1   
+
+            invoice_total_box_entry.configure(state="normal")     
+            invoice_total_box_entry.insert(0, total_figure)
+            invoice_total_box_entry.configure(state="readonly")
+
+        else:
+            pass
+  
+        # Disconnect from the database
+        conn.commit()
+        conn.close() 
 
 class Vendors:
 
