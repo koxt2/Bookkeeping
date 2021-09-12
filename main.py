@@ -156,7 +156,8 @@ class Customers:
                 quantity FLOAT, 
                 unit_price FLOAT, 
                 total FLOAT,
-                account TEXT
+                account TEXT,
+                paid TEXT
                 )""")
 
             # Close connection
@@ -208,7 +209,7 @@ class Customers:
 
         def customer_treeview():
 
-            def vendor_double_clicked(event):
+            def customer_double_clicked(event):
                 # Call the method
                 customers.customer_report()
 
@@ -299,6 +300,9 @@ class Customers:
             self.customer_treeview.column("Phone", minwidth=25, width=50) 
             self.customer_treeview.heading("Phone", text="Phone") 
 
+            # Bind a double click
+            self.customer_treeview.bind("<Double-Button-1>", customer_double_clicked)  
+
             self.customer_treeview.bind("<Control-Button-1>", right_click_customer)
             self.customer_treeview.bind("<ButtonRelease-3>", right_click_customer)
 
@@ -344,6 +348,60 @@ class Customers:
         conn.commit()
         conn.close() 
 
+    def populate_customer_report_treeview(self, customer_rowid):
+            # Fetch data from database
+            # Connect to database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
+
+            # Clear the treeview
+            for record in self.customer_report_tree.get_children():
+                self.customer_report_tree.delete(record)
+
+            cur.execute("SELECT rowid, * FROM ledger WHERE customer_rowid = " + customer_rowid + " AND account = 'Accounts Receivable (Debtors)'")
+            record = cur.fetchall()   
+
+            # Add the fetched data to the treeview
+            global count
+            count = 0
+
+            for row in record:
+                self.customer_report_tree.insert(parent='', index='end', iid=count, text='', values=(row[2], row[3], row[6], "", row[7], row[8]))
+                count+=1  
+            
+            del record
+
+            # Close connection
+            conn.commit()
+            conn.close()
+    
+    def populate_payment_treeview(self, customer_rowid):
+
+            # Connect to the database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
+
+            # Clear the treeview
+            for record in self.payment_window_treeview.get_children():
+                self.payment_window_treeview.delete(record)
+
+            # Make a list of all outstanding invoices
+            cur.execute("SELECT date, invoice_number, SUM(total) FROM customer_invoices WHERE paid = 'NO' AND customer_rowid = " + customer_rowid + " GROUP BY invoice_number")
+            outstanding = cur.fetchall()
+            
+            # Add data to treeview
+            global count
+            count = 0
+            for row in outstanding:
+                self.payment_window_treeview.insert(parent='', index='end', iid=count, text='', values=(
+                    row[0], # Date
+                    row[1], # Invoice number
+                    row[2] # Ammount
+
+                ))
+
+                count+=1
+ 
     
     def new_customer(self):
         # Create a new window and make it sit on top all all other windows
@@ -852,10 +910,11 @@ class Customers:
                     quantity, 
                     unit_price, 
                     total,
-                    account
+                    account,
+                    paid
                     ) 
 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""", [
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", [
 
                     invoice_item_id_entry.get(),
                     customer_invoice_number_entry.get(),
@@ -865,7 +924,8 @@ class Customers:
                     invoice_item_quantity_entry.get(), 
                     invoice_item_unit_price_entry.get(), 
                     sub_total,
-                    invoice_item_account_combo.get()
+                    invoice_item_account_combo.get(),
+                    "NO"
                     ])     
 
                 # Add the item value to the child account database
@@ -1300,7 +1360,7 @@ class Customers:
             self.credit_total_entry.insert(0, credit_total)
             self.credit_total_entry.configure(state="readonly")   
 
-            total = credit_total[0]-debit_total[0]
+            total = debit_total[0]-credit_total[0]
             total_label = ttk.Label(customer_report_total_frame, text="Total Due")
             total_label.grid(row=3, column=1, padx=10)
             self.total_entry = ttk.Entry(customer_report_total_frame, width=24)
@@ -1468,6 +1528,157 @@ class Customers:
         # Disconnect from the database
         conn.commit()
         conn.close() 
+
+    def make_payment(self, customer_rowid, customer_name):
+        self.customer_rowid = customer_rowid
+        self.customer_name = customer_name
+        
+        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        cur = conn.cursor()
+
+        # Create window
+        payment_window = tk.Toplevel()
+        payment_window.geometry("800x400")
+        payment_window.title("Make/Receive Payment")
+
+        # Create a frame in the window
+        payment_window_treeview_frame = ttk.LabelFrame(payment_window, text="Outstanding Balances")
+        payment_window_treeview_frame.pack(fill="both", expand=1, padx=10, pady=10)
+
+        # Add the treeview
+        # Scrollbar
+        payment_window_treeview_scrollbar = ttk.Scrollbar(payment_window_treeview_frame)
+        payment_window_treeview_scrollbar.pack(side="right", fill="y")
+
+        # Treeview
+        self.payment_window_treeview = ttk.Treeview(payment_window_treeview_frame, yscrollcommand=payment_window_treeview_scrollbar.set, selectmode="extended")
+        self.payment_window_treeview.pack(fill="both", expand="y")
+
+        # Create the columns in the treeview
+        self.payment_window_treeview['columns'] = (
+            "Date",
+            "Invoice Number", 
+            "Ammount"
+        )
+
+        # Name the headings of each column
+        self.payment_window_treeview.column("#0", width=0, stretch="no")
+        self.payment_window_treeview.heading("#0", text="")
+
+        self.payment_window_treeview.column("Date", minwidth=25, width=50)
+        self.payment_window_treeview.heading("Date", text="Date")
+
+        self.payment_window_treeview.column("Invoice Number", minwidth=25, width=50)
+        self.payment_window_treeview.heading("Invoice Number", text="Invoice Number")
+
+        self.payment_window_treeview.column("Ammount", minwidth=25, width=50)
+        self.payment_window_treeview.heading("Ammount", text="Ammount")
+        
+        # Create a combobox listing accounts available to pay from 
+        cur.execute("SELECT account_name FROM child_accounts WHERE type = 'Bank'")
+        banks = cur.fetchall()
+
+        payment_window_transfer_from_frame = ttk.LabelFrame(payment_window, text="Transfer Account")
+        payment_window_transfer_from_frame.pack(fill="both", padx=10, pady=10)
+
+        transfer_account_label = ttk.Label(payment_window_transfer_from_frame, text="Transfer from")
+        transfer_account_label.grid(row=1, column=2, padx=10, pady=10)
+
+        self.transfer_account_combo = ttk.Combobox(payment_window_transfer_from_frame, values=banks, width=15)
+        self.transfer_account_combo.grid(row=1, column=2, padx=10, pady=10)
+
+        # Pay button
+        pay_button = ttk.Button(payment_window_transfer_from_frame, text="Pay", command=lambda:pay(self))
+        pay_button.grid(row=1, column=3)
+
+        # Close connection
+        conn.commit()
+        conn.close()
+
+        # Populate payment treeview
+        self.populate_payment_treeview(self.customer_rowid)        
+        
+        def pay(self):
+            # Connect to the database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
+    
+            selected_invoice = self.payment_window_treeview.focus()
+            invoice_values = self.payment_window_treeview.item(selected_invoice, 'values') 
+
+            # Update vendor_invoices
+            cur.execute("UPDATE customer_invoices SET paid = 'YES' WHERE customer_rowid=? AND invoice_number=?", (self.customer_rowid, invoice_values[1]))
+    
+            # Update accounts payable in ledger
+            cur.execute("""INSERT INTO ledger (
+                            customer_rowid, 
+                            date,
+                            description,
+                            account,
+                            invoice_number,  
+                            debit,
+                            credit
+                            )
+
+                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+
+                            self.customer_rowid, 
+                            invoice_values[0],
+                            self.customer_name,
+                            'Accounts Receivable (Debtors)',
+                            invoice_values[1],
+                            '',
+                            invoice_values[2]
+                            ])
+    
+            # Update bank account in ledger
+            cur.execute("""INSERT INTO ledger (
+                            customer_rowid, 
+                            date,
+                            description,
+                            account,
+                            invoice_number,  
+                            debit,
+                            credit
+                            )
+
+                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+
+                            self.customer_rowid, 
+                            invoice_values[0],
+                            self.customer_name,
+                            self.transfer_account_combo.get(),
+                            invoice_values[1],
+                            invoice_values[2],
+                            ''
+                            ])
+            
+            # Update child account
+            cur.execute('UPDATE child_accounts SET total = total+? WHERE account_name=?',(invoice_values[2], self.transfer_account_combo.get(),))
+
+            # Update parent account 
+            cur.execute('SELECT parent FROM child_accounts WHERE account_name=?', (self.transfer_account_combo.get(),))
+            parent_account = cur.fetchall()
+            cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_number=?', (invoice_values[2], parent_account[0][0]),)
+            
+            # Update accounts receivable in parent_accounts
+            cur.execute('UPDATE parent_accounts SET total = total-? WHERE account_name=?', (invoice_values[2], 'Accounts Receivable (Debtors)'))
+
+            # Close connection
+            conn.commit()
+            conn.close()
+    
+            # Re-populate ledger
+            ledger.populate_ledger_tree()
+
+            # Re-populate the Chart of Accounts Treeview      
+            chart_of_accounts.populate_accounts_tree()
+
+            # Re-populate vendor report
+            customers.populate_customer_report_treeview(self.customer_rowid)
+
+            # Re-populate payment treeview
+            customers.populate_payment_treeview(self.customer_rowid)     
 
 class Vendors:
 
