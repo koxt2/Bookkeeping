@@ -1391,6 +1391,60 @@ class Vendors:
         conn.commit()
         conn.close() 
 
+    def populate_vendor_report_treeview(self, vendor_rowid):
+            # Fetch data from database
+            # Connect to database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
+
+            # Clear the treeview
+            for record in self.vendor_report_tree.get_children():
+                self.vendor_report_tree.delete(record)
+
+            cur.execute("SELECT rowid, * FROM ledger WHERE vendor_rowid = " + vendor_rowid + " AND account = 'Accounts Payable (Creditors)'")
+            record = cur.fetchall()   
+
+            # Add the fetched data to the treeview
+            global count
+            count = 0
+
+            for row in record:
+                self.vendor_report_tree.insert(parent='', index='end', iid=count, text='', values=(row[2], row[3], row[6], "", row[7], row[8]))
+                count+=1  
+            
+            del record
+
+            # Close connection
+            conn.commit()
+            conn.close()
+    
+    def populate_payment_treeview(self, vendor_rowid):
+
+            # Connect to the database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
+
+            # Clear the treeview
+            for record in self.payment_window_treeview.get_children():
+                self.payment_window_treeview.delete(record)
+
+            # Make a list of all outstanding invoices
+            cur.execute("SELECT date, invoice_number, SUM(total) FROM vendor_invoices WHERE paid = 'NO' AND vendor_rowid = " + vendor_rowid + " GROUP BY invoice_number")
+            outstanding = cur.fetchall()
+            
+            # Add data to treeview
+            global count
+            count = 0
+            for row in outstanding:
+                self.payment_window_treeview.insert(parent='', index='end', iid=count, text='', values=(
+                    row[0], # Date
+                    row[1], # Invoice number
+                    row[2] # Ammount
+
+                ))
+
+                count+=1
+        
     
     def new_vendor(self):
         # Create a new window and make it sit on top all all other windows
@@ -2150,6 +2204,12 @@ class Vendors:
             # Re-populate ledger
             ledger.populate_ledger_tree()
 
+            # Repopulate Vendor Report
+            self.populate_vendor_report_treeview(values_vendor[0])
+
+            # Populate payment treeview
+            self.populate_payment_treeview(self.vendor_rowid)  
+
         def delete_invoice_item():
 
             # Connect to the database
@@ -2228,26 +2288,18 @@ class Vendors:
             # Re-populate ledger treeview
             ledger.populate_ledger_tree()
 
+            # Re-populate vendor report
+            self.populate_vendor_report_treeview(values_vendor[0])
+
+            # Populate payment treeview
+            self.populate_payment_treeview(self.vendor_rowid)  
+
     def vendor_report(self):
         
         def invoice_clicked(event):
             # Call the method
             self.view_invoice()
         
-        def populate_vendor_report_treeview(self):
-            # Fetch data from database
-            #cur.execute("SELECT rowid, *, SUM(total) FROM vendor_invoices WHERE vendor_rowid = " + vendor_values[0] + " GROUP BY invoice_number")
-            cur.execute("SELECT rowid, * FROM ledger WHERE vendor_rowid = " + vendor_values[0] + " AND account = 'Accounts Payable (Creditors)'")
-            record = cur.fetchall()   
-            
-            # Add the fetched data to the treeview
-            global count
-            count = 0
-
-            for row in record:
-                self.vendor_report_tree.insert(parent='', index='end', iid=count, text='', values=(row[2], row[3], row[6], "", row[7], row[8]))
-                count+=1  
-
         # Connect to the database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
@@ -2355,7 +2407,7 @@ class Vendors:
             #self.vendor_report_tree.heading("Total", text="Total")  
 
             # Add the data to the treeview
-            populate_vendor_report_treeview(self)
+            self.populate_vendor_report_treeview(vendor_values[0])
                   
 
             # Vendor report total box
@@ -2554,33 +2606,6 @@ class Vendors:
     def make_payment(self, vendor_rowid, vendor_name):
         self.vendor_rowid = vendor_rowid
         self.vendor_name = vendor_name
-
-        def populate_payment_treeview(self):
-
-            # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
-            cur = conn.cursor()
-
-            # Make a list of all outstanding invoices
-            cur.execute("SELECT date, invoice_number, SUM(total) FROM vendor_invoices WHERE paid = 'NO' AND vendor_rowid = " + self.vendor_rowid + " GROUP BY invoice_number")
-            outstanding = cur.fetchall()
-            
-            # Populate treeview
-            for record in self.payment_window_treeview.get_children():
-                self.payment_window_treeview.delete(record)
-        
-            # Add data to treeview
-            global count
-            count = 0
-            for row in outstanding:
-                self.payment_window_treeview.insert(parent='', index='end', iid=count, text='', values=(
-                    row[0], # Date
-                    row[1], # Invoice number
-                    row[2] # Ammount
-
-                ))
-
-                count+=1
         
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
@@ -2645,7 +2670,7 @@ class Vendors:
         conn.close()
 
         # Populate payment treeview
-        populate_payment_treeview(self)        
+        self.populate_payment_treeview(self.vendor_rowid)        
         
         def pay(self):
             # Connect to the database
@@ -2724,12 +2749,10 @@ class Vendors:
             chart_of_accounts.populate_accounts_tree()
 
             # Re-populate vendor report
+            vendors.populate_vendor_report_treeview(self.vendor_rowid)
 
-            # Re-populate make payment treeview
-            vendors.populate_vendor_report_treeview
-
-            # Populate payment treeview
-            populate_payment_treeview(self)     
+            # Re-populate payment treeview
+            vendors.populate_payment_treeview(self.vendor_rowid)     
   
 class Chart_of_accounts:
     
