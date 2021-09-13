@@ -377,7 +377,7 @@ class Customers:
             for record in self.customer_report_tree.get_children():
                 self.customer_report_tree.delete(record)
 
-            cur.execute("SELECT rowid, * FROM ledger WHERE customer_rowid = " + customer_rowid + " AND account = 'Accounts Receivable (Debtors)'")
+            cur.execute("SELECT rowid, * FROM general_journal WHERE customer_rowid = " + customer_rowid + " AND account = 'Accounts Receivable (Debtors)'")
             record = cur.fetchall()   
 
             # Add the fetched data to the treeview
@@ -397,7 +397,7 @@ class Customers:
 
             # Total boxes
             # Debit
-            cur.execute("SELECT SUM(debit) FROM ledger WHERE customer_rowid = " + customer_rowid + " AND account = 'Accounts Receivable (Debtors)'")
+            cur.execute("SELECT SUM(debit) FROM general_journal WHERE customer_rowid = " + customer_rowid + " AND account = 'Accounts Receivable (Debtors)'")
             debit_total = cur.fetchone()
             customers.debit_total_entry.configure(state="normal")
             customers.debit_total_entry.delete(0, "end")
@@ -405,7 +405,7 @@ class Customers:
             customers.debit_total_entry.configure(state="readonly")
 
             # Credit
-            cur.execute("SELECT SUM(credit) FROM ledger WHERE customer_rowid = " + customer_rowid + " AND account = 'Accounts Receivable (Debtors)'")
+            cur.execute("SELECT SUM(credit) FROM general_journal WHERE customer_rowid = " + customer_rowid + " AND account = 'Accounts Receivable (Debtors)'")
             credit_total = cur.fetchone()
             customers.credit_total_entry.configure(state="normal") 
             customers.credit_total_entry.delete(0, "end")
@@ -922,8 +922,8 @@ class Customers:
                 for invoice in record:
                     customer_invoices.append(invoice)
 
-            # Make a list of all the vendors entered into the ledger
-            cur.execute("SELECT description FROM ledger WHERE customer_rowid = " + values_customer[0])
+            # Make a list of all the vendors entered into the general_journal
+            cur.execute("SELECT description FROM general_journal WHERE customer_rowid = " + values_customer[0])
             records = cur.fetchall()   
 
             customer = []
@@ -931,14 +931,14 @@ class Customers:
                 for invoice in record:
                     customer.append(invoice)
             
-            # Make a list of all the accounts entered into the ledger
-            cur.execute("SELECT account FROM ledger WHERE customer_rowid = " + values_customer[0])
+            # Make a list of all the accounts entered into the general_journal
+            cur.execute("SELECT account FROM general_journal WHERE customer_rowid = " + values_customer[0])
             records = cur.fetchall()
 
-            ledger_accounts = []
+            general_journal_accounts = []
             for record in records:
                 for invoice in record:
-                    ledger_accounts.append(invoice)
+                    general_journal_accounts.append(invoice)
 
             # Check the invoice has an invoice number. If not tell the user to set one
             if len(customer_invoice_number_entry.get()) == 0:
@@ -987,7 +987,7 @@ class Customers:
                 # Add the invoice item value to the Accounts Payable database
                 cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_name=?', (sub_total, 'Accounts Receivable (Debtors)'))
 
-                # Add the invoice to the ledger
+                # Add the invoice to the general_journal
                 # Add up all the items in an invoice to give a total invoice figure
                 cur.execute("SELECT SUM(total) FROM customer_invoices WHERE invoice_number = " + customer_invoice_number_entry.get() + " AND customer_rowid = " + values_customer[0])
                 self.figure = cur.fetchall()
@@ -995,9 +995,9 @@ class Customers:
                     for value in figure:
                         total_figure = value
                 
-                if values_customer[1] in customer and customer_invoice_number_entry.get() in customer_invoices and invoice_item_account_combo.get() in ledger_accounts:
-                    # Update accounts payable in ledger
-                    cur.execute("""UPDATE ledger SET
+                if values_customer[1] in customer and customer_invoice_number_entry.get() in customer_invoices and invoice_item_account_combo.get() in general_journal_accounts:
+                    # Update accounts payable in general_journal
+                    cur.execute("""UPDATE general_journal SET
                         customer_rowid = :customer_rowid, 
                         date = :date,
                         description = :description,
@@ -1018,8 +1018,8 @@ class Customers:
                         'debit' :total_figure
                         })
 
-                    # Update child account in ledger
-                    cur.execute("""UPDATE ledger SET
+                    # Update child account in general_journal
+                    cur.execute("""UPDATE general_journal SET
                         customer_rowid = :customer_rowid, 
                         date = :date,
                         description = :description,
@@ -1041,7 +1041,7 @@ class Customers:
                         })
 
                 elif values_customer[1] in customer and customer_invoice_number_entry.get() in customer_invoices:
-                    cur.execute("""UPDATE ledger SET
+                    cur.execute("""UPDATE general_journal SET
                         customer_rowid = :customer_rowid, 
                         date = :date,
                         description = :description,
@@ -1062,7 +1062,7 @@ class Customers:
                         'debit' :total_figure
                         })
 
-                    cur.execute("""INSERT INTO ledger (
+                    cur.execute("""INSERT INTO general_journal (
                             customer_rowid, 
                             date,
                             description,
@@ -1084,8 +1084,8 @@ class Customers:
                             ])
                     
                 else:      
-                    # Add Accounts Payable to ledger          
-                    cur.execute("""INSERT INTO ledger (
+                    # Add Accounts Payable to general_journal          
+                    cur.execute("""INSERT INTO general_journal (
                             customer_rowid, 
                             date,
                             description,
@@ -1106,8 +1106,8 @@ class Customers:
                             ''                            
                             ])
 
-                    # Add child account to ledger
-                    cur.execute("""INSERT INTO ledger (
+                    # Add child account to general_journal
+                    cur.execute("""INSERT INTO general_journal (
                             customer_rowid, 
                             date,
                             description,
@@ -1186,8 +1186,8 @@ class Customers:
             # Re-populate the Chart of Accounts Treeview      
             chart_of_accounts.populate_accounts_tree()
 
-            # Re-populate ledger
-            ledger.populate_ledger_tree()
+            # Re-populate general_journal
+            general_journal.populate_general_journal_tree()
 
             # Repopulate Vendor Report
             self.populate_customer_report(values_customer[0])
@@ -1228,9 +1228,9 @@ class Customers:
                 # Delete the item value from the child account database
                 cur.execute('UPDATE child_accounts SET total=total-? WHERE account_name=?',(sub_total, invoice_item[2]))
 
-                # Delete the item value from the ledger
-                cur.execute('UPDATE ledger SET debit=debit-? WHERE customer_rowid=? AND invoice_number=? AND account =?', (sub_total, values_customer[0], customer_invoice_number_entry.get(), "Accounts Receivable (Debtors)"))
-                cur.execute('UPDATE ledger SET credit=credit-? WHERE customer_rowid=? AND invoice_number=? AND account =?', (sub_total, values_customer[0], customer_invoice_number_entry.get(), invoice_item[2]))
+                # Delete the item value from the general_journal
+                cur.execute('UPDATE general_journal SET debit=debit-? WHERE customer_rowid=? AND invoice_number=? AND account =?', (sub_total, values_customer[0], customer_invoice_number_entry.get(), "Accounts Receivable (Debtors)"))
+                cur.execute('UPDATE general_journal SET credit=credit-? WHERE customer_rowid=? AND invoice_number=? AND account =?', (sub_total, values_customer[0], customer_invoice_number_entry.get(), invoice_item[2]))
 
                 # Re-populate the invoice treeview
                 # Clear the treeview and total box
@@ -1270,8 +1270,8 @@ class Customers:
             # Re-populate the Chart of Accounts Treeview      
             chart_of_accounts.populate_accounts_tree()
 
-            # Re-populate ledger treeview
-            ledger.populate_ledger_tree()
+            # Re-populate general_journal treeview
+            general_journal.populate_general_journal_tree()
 
     def customer_report(self):
 
@@ -1654,8 +1654,8 @@ class Customers:
             # Update vendor_invoices
             cur.execute("UPDATE customer_invoices SET paid = 'YES' WHERE customer_rowid=? AND invoice_number=?", (self.customer_rowid, invoice_values[1]))
     
-            # Update accounts payable in ledger
-            cur.execute("""INSERT INTO ledger (
+            # Update accounts payable in general_journal
+            cur.execute("""INSERT INTO general_journal (
                             customer_rowid, 
                             date,
                             description,
@@ -1676,8 +1676,8 @@ class Customers:
                             invoice_values[2]
                             ])
     
-            # Update bank account in ledger
-            cur.execute("""INSERT INTO ledger (
+            # Update bank account in general_journal
+            cur.execute("""INSERT INTO general_journal (
                             customer_rowid, 
                             date,
                             description,
@@ -1713,8 +1713,8 @@ class Customers:
             conn.commit()
             conn.close()
     
-            # Re-populate ledger
-            ledger.populate_ledger_tree()
+            # Re-populate general_journal
+            general_journal.populate_general_journal_tree()
 
             # Re-populate the Chart of Accounts Treeview      
             chart_of_accounts.populate_accounts_tree()
@@ -1971,7 +1971,7 @@ class Vendors:
             for record in self.vendor_report_tree.get_children():
                 self.vendor_report_tree.delete(record)
 
-            cur.execute("SELECT rowid, * FROM ledger WHERE vendor_rowid = " + vendor_rowid + " AND account = 'Accounts Payable (Creditors)'")
+            cur.execute("SELECT rowid, * FROM general_journal WHERE vendor_rowid = " + vendor_rowid + " AND account = 'Accounts Payable (Creditors)'")
             record = cur.fetchall()   
 
             # Add the fetched data to the treeview
@@ -2500,8 +2500,8 @@ class Vendors:
                 for invoice in record:
                     vendor_invoices.append(invoice)
 
-            # Make a list of all the vendors entered into the ledger
-            cur.execute("SELECT description FROM ledger WHERE vendor_rowid = " + values_vendor[0])
+            # Make a list of all the vendors entered into the general_journal
+            cur.execute("SELECT description FROM general_journal WHERE vendor_rowid = " + values_vendor[0])
             records = cur.fetchall()   
 
             vendor = []
@@ -2509,14 +2509,14 @@ class Vendors:
                 for invoice in record:
                     vendor.append(invoice)
             
-            # Make a list of all the accounts entered into the ledger
-            cur.execute("SELECT account FROM ledger WHERE vendor_rowid = " + values_vendor[0])
+            # Make a list of all the accounts entered into the general_journal
+            cur.execute("SELECT account FROM general_journal WHERE vendor_rowid = " + values_vendor[0])
             records = cur.fetchall()
 
-            ledger_accounts = []
+            general_journal_accounts = []
             for record in records:
                 for invoice in record:
-                    ledger_accounts.append(invoice)
+                    general_journal_accounts.append(invoice)
 
             # Check the invoice has an invoice number. If not tell the user to set one
             if len(vendor_invoice_number_entry.get()) == 0:
@@ -2571,7 +2571,7 @@ class Vendors:
                 # Add the invoice item value to the Accounts Payable database
                 cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_name=?', (sub_total, 'Accounts Payable (Creditors)'))
 
-                # Add the invoice to the ledger
+                # Add the invoice to the general_journal
                 # Add up all the items in an invoice to give a total invoice figure
                 cur.execute("SELECT SUM(total) FROM vendor_invoices WHERE invoice_number = " + vendor_invoice_number_entry.get() + " AND vendor_rowid = " + values_vendor[0])
                 self.figure = cur.fetchall()
@@ -2579,10 +2579,10 @@ class Vendors:
                     for value in figure:
                         total_figure = value
                 
-                # Update child account and ledger
-                if values_vendor[1] in vendor and vendor_invoice_number_entry.get() in vendor_invoices and invoice_item_account_combo.get() in ledger_accounts:
-                    # Update accounts payable in ledger
-                    cur.execute("""UPDATE ledger SET
+                # Update child account and general_journal
+                if values_vendor[1] in vendor and vendor_invoice_number_entry.get() in vendor_invoices and invoice_item_account_combo.get() in general_journal_accounts:
+                    # Update accounts payable in general_journal
+                    cur.execute("""UPDATE general_journal SET
                         vendor_rowid = :vendor_rowid, 
                         date = :date,
                         description = :description,
@@ -2603,8 +2603,8 @@ class Vendors:
                         'credit' :total_figure
                         })
 
-                    # Update child account in ledger
-                    cur.execute("""UPDATE ledger SET
+                    # Update child account in general_journal
+                    cur.execute("""UPDATE general_journal SET
                         vendor_rowid = :vendor_rowid, 
                         date = :date,
                         description = :description,
@@ -2625,9 +2625,9 @@ class Vendors:
                         
                         })
 
-                # Insert into child account and update ledger
+                # Insert into child account and update general_journal
                 elif values_vendor[1] in vendor and vendor_invoice_number_entry.get() in vendor_invoices:
-                    cur.execute("""UPDATE ledger SET
+                    cur.execute("""UPDATE general_journal SET
                         vendor_rowid = :vendor_rowid, 
                         date = :date,
                         description = :description,
@@ -2648,7 +2648,7 @@ class Vendors:
                         'credit' :total_figure
                         })
 
-                    cur.execute("""INSERT INTO ledger (
+                    cur.execute("""INSERT INTO general_journal (
                             vendor_rowid, 
                             date,
                             description,
@@ -2669,10 +2669,10 @@ class Vendors:
                             ''
                             ])
                     
-                # Insert into child account and ledger    
+                # Insert into child account and general_journal    
                 else:      
-                    # Add Accounts Payable to ledger          
-                    cur.execute("""INSERT INTO ledger (
+                    # Add Accounts Payable to general_journal          
+                    cur.execute("""INSERT INTO general_journal (
                             vendor_rowid, 
                             date,
                             description,
@@ -2693,8 +2693,8 @@ class Vendors:
                             total_figure
                             ])
 
-                    # Add child account to ledger
-                    cur.execute("""INSERT INTO ledger (
+                    # Add child account to general_journal
+                    cur.execute("""INSERT INTO general_journal (
                             vendor_rowid, 
                             date,
                             description,
@@ -2771,8 +2771,8 @@ class Vendors:
             # Re-populate the Chart of Accounts Treeview      
             chart_of_accounts.populate_accounts_tree()
 
-            # Re-populate ledger
-            ledger.populate_ledger_tree()
+            # Re-populate general_journal
+            general_journal.populate_general_journal_tree()
 
             # Repopulate Vendor Report
             self.populate_vendor_report_treeview(values_vendor[0])
@@ -2813,9 +2813,9 @@ class Vendors:
                 # Delete the item value from the child account database
                 cur.execute('UPDATE child_accounts SET total=total-? WHERE account_name=?',(sub_total, invoice_item[2]))
 
-                # Delete the item value from the ledger
-                cur.execute('UPDATE ledger SET credit=credit-? WHERE vendor_rowid=? AND invoice_number=? AND account =?', (sub_total, values_vendor[0], vendor_invoice_number_entry.get(), "Accounts Payable (Creditors)"))
-                cur.execute('UPDATE ledger SET debit=debit-? WHERE vendor_rowid=? AND invoice_number=? AND account =?', (sub_total, values_vendor[0], vendor_invoice_number_entry.get(), invoice_item[2]))
+                # Delete the item value from the general_journal
+                cur.execute('UPDATE general_journal SET credit=credit-? WHERE vendor_rowid=? AND invoice_number=? AND account =?', (sub_total, values_vendor[0], vendor_invoice_number_entry.get(), "Accounts Payable (Creditors)"))
+                cur.execute('UPDATE general_journal SET debit=debit-? WHERE vendor_rowid=? AND invoice_number=? AND account =?', (sub_total, values_vendor[0], vendor_invoice_number_entry.get(), invoice_item[2]))
 
                 # Re-populate the invoice treeview
                 # Clear the treeview and total box
@@ -2855,8 +2855,8 @@ class Vendors:
             # Re-populate the Chart of Accounts Treeview      
             chart_of_accounts.populate_accounts_tree()
 
-            # Re-populate ledger treeview
-            ledger.populate_ledger_tree()
+            # Re-populate general_journal treeview
+            general_journal.populate_general_journal_tree()
 
             # Re-populate vendor report
             self.populate_vendor_report_treeview(values_vendor[0])
@@ -2986,7 +2986,7 @@ class Vendors:
             vendor_report_total_frame.pack(side="right", fill="both", padx=20, pady=10)
 
             # Create the boxes
-            cur.execute("SELECT SUM(debit) FROM ledger WHERE vendor_rowid = " + vendor_values[0] + " AND account = 'Accounts Payable (Creditors)'")
+            cur.execute("SELECT SUM(debit) FROM general_journal WHERE vendor_rowid = " + vendor_values[0] + " AND account = 'Accounts Payable (Creditors)'")
             debit_total = cur.fetchone()
             debit_total_label = ttk.Label(vendor_report_total_frame, text="Debit Total")
             debit_total_label.grid(row=1, column=1, padx=10)
@@ -2995,7 +2995,7 @@ class Vendors:
             self.debit_total_entry.insert(0, debit_total)
             self.debit_total_entry.configure(state="readonly")
 
-            cur.execute("SELECT SUM(credit) FROM ledger WHERE vendor_rowid = " + vendor_values[0] + " AND account = 'Accounts Payable (Creditors)'")
+            cur.execute("SELECT SUM(credit) FROM general_journal WHERE vendor_rowid = " + vendor_values[0] + " AND account = 'Accounts Payable (Creditors)'")
             credit_total = cur.fetchone()
             credit_total_label = ttk.Label(vendor_report_total_frame, text="Credit Total")
             credit_total_label.grid(row=2, column=1, padx=10)
@@ -3253,8 +3253,8 @@ class Vendors:
             # Update vendor_invoices
             cur.execute("UPDATE vendor_invoices SET paid = 'YES' WHERE vendor_rowid=? AND invoice_number=?", (self.vendor_rowid, invoice_values[1]))
     
-            # Update accounts payable in ledger
-            cur.execute("""INSERT INTO ledger (
+            # Update accounts payable in general_journal
+            cur.execute("""INSERT INTO general_journal (
                             vendor_rowid, 
                             date,
                             description,
@@ -3275,8 +3275,8 @@ class Vendors:
                             ''
                             ])
     
-            # Update bank account in ledger
-            cur.execute("""INSERT INTO ledger (
+            # Update bank account in general_journal
+            cur.execute("""INSERT INTO general_journal (
                             vendor_rowid, 
                             date,
                             description,
@@ -3312,8 +3312,8 @@ class Vendors:
             conn.commit()
             conn.close()
     
-            # Re-populate ledger
-            ledger.populate_ledger_tree()
+            # Re-populate general_journal
+            general_journal.populate_general_journal_tree()
 
             # Re-populate the Chart of Accounts Treeview      
             chart_of_accounts.populate_accounts_tree()
@@ -3968,16 +3968,16 @@ class Chart_of_accounts:
         # Regenerate Menu bar
         Menu_bar()
 
-class Ledger:
+class general_journal:
     
     def __init__(self):
-        def ledger_database_table():
+        def general_journal_database_table():
             # Connect to the database
             conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Create database table
-            cur.execute("""CREATE TABLE IF NOT EXISTS ledger (
+            cur.execute("""CREATE TABLE IF NOT EXISTS general_journal (
                 id INTEGER,
                 vendor_rowid INTEGER,
                 date INTEGER, 
@@ -3993,102 +3993,102 @@ class Ledger:
             conn.commit()
             conn.close() 
         
-        def ledger_tab():
+        def general_journal_tab():
             # Create the tab
             self.tab = ttk.Frame(main_window)
             self.tab.pack(fill="both", expand="yes")
 
             # Add the tab to the notebook and provide a heading
-            main_window.add(self.tab, text="Ledger")
+            main_window.add(self.tab, text="General Journal")
 
-        def ledger_treeview():
+        def general_journal_treeview():
             # Create a frame for the Treeview
-            self.ledger_treeview_frame = ttk.Frame(self.tab)
-            self.ledger_treeview_frame.pack(side="bottom", fill="both", padx=10, expand=1)
+            self.general_journal_treeview_frame = ttk.Frame(self.tab)
+            self.general_journal_treeview_frame.pack(side="bottom", fill="both", padx=10, expand=1)
 
             # Create a scrollbar for the Treeview
-            self.ledger_treeview_scroll = ttk.Scrollbar(self.ledger_treeview_frame)
-            self.ledger_treeview_scroll.pack(side="right", fill="y") 
+            self.general_journal_treeview_scroll = ttk.Scrollbar(self.general_journal_treeview_frame)
+            self.general_journal_treeview_scroll.pack(side="right", fill="y") 
 
             # Create the Treeview
-            self.ledger_treeview = ttk.Treeview(self.ledger_treeview_frame, yscrollcommand=self.ledger_treeview_scroll.set, selectmode="extended") 
-            self.ledger_treeview.pack(fill="both", expand="yes")        
+            self.general_journal_treeview = ttk.Treeview(self.general_journal_treeview_frame, yscrollcommand=self.general_journal_treeview_scroll.set, selectmode="extended") 
+            self.general_journal_treeview.pack(fill="both", expand="yes")        
             
             # Create the Treeview columns
-            self.ledger_treeview['columns'] = ("ID", "Vendor_rowid", "Date", "Invoice_number", "Description", "Account",  "Debit", "Credit")
+            self.general_journal_treeview['columns'] = ("ID", "Vendor_rowid", "Date", "Invoice_number", "Description", "Account",  "Debit", "Credit")
             
             # Create the Treeview column headings
-            self.ledger_treeview.column("#0", width=0, stretch="false")
-            self.ledger_treeview.heading("#0", text="")
+            self.general_journal_treeview.column("#0", width=0, stretch="false")
+            self.general_journal_treeview.heading("#0", text="")
 
-            self.ledger_treeview.column("ID", width=0, stretch="false") 
-            self.ledger_treeview.heading("ID", text="ID")  
+            self.general_journal_treeview.column("ID", width=0, stretch="false") 
+            self.general_journal_treeview.heading("ID", text="ID")  
             
-            self.ledger_treeview.column("Vendor_rowid", width=0, stretch="false")
-            self.ledger_treeview.heading("Vendor_rowid", text="Vendor rowid")
+            self.general_journal_treeview.column("Vendor_rowid", width=0, stretch="false")
+            self.general_journal_treeview.heading("Vendor_rowid", text="Vendor rowid")
             
-            self.ledger_treeview.column("Date", minwidth=100, width=100, stretch="false")            
-            self.ledger_treeview.heading("Date", text="Date")
+            self.general_journal_treeview.column("Date", minwidth=100, width=100, stretch="false")            
+            self.general_journal_treeview.heading("Date", text="Date")
 
-            self.ledger_treeview.column("Invoice_number", minwidth=100, width=100, stretch="false")            
-            self.ledger_treeview.heading("Invoice_number", text="Invoice Number")       
+            self.general_journal_treeview.column("Invoice_number", minwidth=100, width=100, stretch="false")            
+            self.general_journal_treeview.heading("Invoice_number", text="Invoice Number")       
 
-            self.ledger_treeview.column("Description", minwidth=100, width=100, stretch="false")           
-            self.ledger_treeview.heading("Description", text="Description")
+            self.general_journal_treeview.column("Description", minwidth=100, width=100, stretch="false")           
+            self.general_journal_treeview.heading("Description", text="Description")
             
-            self.ledger_treeview.column("Account", minwidth=200, width=200, stretch="false")
-            self.ledger_treeview.heading("Account", text="Account") 
+            self.general_journal_treeview.column("Account", minwidth=200, width=200, stretch="false")
+            self.general_journal_treeview.heading("Account", text="Account") 
             
-            self.ledger_treeview.column("Invoice_number", minwidth=100, width=100, stretch="false")            
-            self.ledger_treeview.heading("Invoice_number", text="Invoice Number")          
+            self.general_journal_treeview.column("Invoice_number", minwidth=100, width=100, stretch="false")            
+            self.general_journal_treeview.heading("Invoice_number", text="Invoice Number")          
             
-            self.ledger_treeview.column("Debit", minwidth=100, width=100, stretch="false")          
-            self.ledger_treeview.heading("Debit", text="Debit")    
+            self.general_journal_treeview.column("Debit", minwidth=100, width=100, stretch="false")          
+            self.general_journal_treeview.heading("Debit", text="Debit")    
             
-            self.ledger_treeview.column("Credit", minwidth=100, width=100, stretch="false")           
-            self.ledger_treeview.heading("Credit", text="Credit")
+            self.general_journal_treeview.column("Credit", minwidth=100, width=100, stretch="false")           
+            self.general_journal_treeview.heading("Credit", text="Credit")
 
-            # Ledger total box
+            # general_journal total box
             # Create frame
-            ledger_total_frame = ttk.Frame(self.ledger_treeview_frame)
-            ledger_total_frame.pack(fill="both", padx=390, pady=10)
+            general_journal_total_frame = ttk.Frame(self.general_journal_treeview_frame)
+            general_journal_total_frame.pack(fill="both", padx=390, pady=10)
 
             # Create the boxes
-            debit_total_label = ttk.Label(ledger_total_frame, text="Debit Total")
+            debit_total_label = ttk.Label(general_journal_total_frame, text="Debit Total")
             debit_total_label.grid(row=1, column=1, padx=10)
-            self.debit_total_entry = ttk.Entry(ledger_total_frame, width=12)
+            self.debit_total_entry = ttk.Entry(general_journal_total_frame, width=12)
             self.debit_total_entry.grid(row=1, column=2)
             
 
-            credit_total_label = ttk.Label(ledger_total_frame, text="Credit Total")
+            credit_total_label = ttk.Label(general_journal_total_frame, text="Credit Total")
             credit_total_label.grid(row=2, column=1, padx=10)
-            self.credit_total_entry = ttk.Entry(ledger_total_frame, width=12)
+            self.credit_total_entry = ttk.Entry(general_journal_total_frame, width=12)
             self.credit_total_entry.grid(row=2, column=3)
                       
 
-        ledger_database_table()
-        ledger_tab()
-        ledger_treeview()
-        self.populate_ledger_tree()
+        general_journal_database_table()
+        general_journal_tab()
+        general_journal_treeview()
+        self.populate_general_journal_tree()
 
-    def populate_ledger_tree(self):  
+    def populate_general_journal_tree(self):  
         # Connect to the database
         conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Clear the treeview
-        for record in self.ledger_treeview.get_children():
-            self.ledger_treeview.delete(record)
+        for record in self.general_journal_treeview.get_children():
+            self.general_journal_treeview.delete(record)
 
         # Select the rowid and everything in the table and fetch 
-        cur.execute("SELECT rowid, * FROM ledger")
-        ledger_record = cur.fetchall()    
+        cur.execute("SELECT rowid, * FROM general_journal")
+        general_journal_record = cur.fetchall()    
 
         # For each row in the table, add the data to the Treeview columns
         global count
         count = 0
-        for row in ledger_record:
-            self.ledger_treeview.insert(parent='', index='end', iid=count, text='', values=(  
+        for row in general_journal_record:
+            self.general_journal_treeview.insert(parent='', index='end', iid=count, text='', values=(  
                 row[0], # row_id
                 row[2], # vendor_rowid
                 row[3], # date
@@ -4102,14 +4102,14 @@ class Ledger:
             count+=1    
         
         # Add the debit and credit total to the window
-        cur.execute("SELECT SUM(debit) FROM ledger")
+        cur.execute("SELECT SUM(debit) FROM general_journal")
         debit_total = cur.fetchone()
         self.debit_total_entry.configure(state="normal")
         self.debit_total_entry.delete(0, "end")
         self.debit_total_entry.insert(0, debit_total)
         self.debit_total_entry.configure(state="readonly")
 
-        cur.execute("SELECT SUM(credit) FROM ledger")
+        cur.execute("SELECT SUM(credit) FROM general_journal")
         credit_total = cur.fetchone()
         self.credit_total_entry.configure(state="normal")
         self.credit_total_entry.delete(0, "end")
@@ -4344,7 +4344,7 @@ chart_of_accounts = Chart_of_accounts()
 customers = Customers()
 vendors = Vendors()
 
-ledger = Ledger()
+general_journal = general_journal()
 settings = Settings()
 menu_bar = Menu_bar()
 
