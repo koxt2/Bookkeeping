@@ -46,6 +46,10 @@ class Menu_bar:
         customers_menu.add_command(label="New Customer", command=customers.new_customer)
         customers_menu.add_command(label="Edit Customer", command=customers.edit_customer, state="disabled")
         customers_menu.add_command(label="Delete Customer", command=customers.delete_customer, state="disabled")
+        customers_menu.add_separator()
+        customers_menu.add_command(label="New Customer Invoice", command=customers.new_customer_invoice, state="disabled")
+        customers_menu.add_separator()
+        customers_menu.add_command(label="Customer Report", command=customers.customer_report, state="disabled")
 
         # Enable certain items when a customer is selected in the treeview
         def enable_buttons(event):
@@ -55,6 +59,8 @@ class Menu_bar:
             if values_customer:
                 customers_menu.entryconfig("Edit Customer", state="normal")
                 customers_menu.entryconfig("Delete Customer", state="normal")
+                customers_menu.entryconfig("New Customer Invoice", state="normal")
+                customers_menu.entryconfig("Customer Report", state="normal")
             else:
                 pass
         
@@ -72,7 +78,9 @@ class Menu_bar:
         vendors_menu.add_command(label="New Vendor", command=vendors.new_vendor)
         vendors_menu.add_command(label="Edit Vendor", command=vendors.edit_vendor, state="disabled")
         vendors_menu.add_command(label="Delete Vendor", command=vendors.delete_vendor, state="disabled")
+        vendors_menu.add_separator()
         vendors_menu.add_command(label="New Vendor Invoice", command=vendors.new_vendor_invoice, state="disabled")
+        vendors_menu.add_separator()
         vendors_menu.add_command(label="Vendor Report", command=vendors.vendor_report, state="disabled")
 
         # Enable certain items when a vendor is selected in the treeview
@@ -182,6 +190,7 @@ class Customers:
             self.delete_customer_icon = tk.PhotoImage(file="images/delete_contact.png")
             self.edit_customer_icon = tk.PhotoImage(file="images/edit_contact.png")
             self.customer_invoice_icon = tk.PhotoImage(file="images/invoice.png")
+            self.customer_report_icon = tk.PhotoImage(file="images/report.png")
 
             # Add the new contact button to the frame
             new_customer_contact_button = ttk.Button(customer_ribbon_frame, image=self.new_customer_icon, command=self.new_customer)
@@ -207,6 +216,13 @@ class Customers:
             new_customer_invoice_label = ttk.Label(customer_ribbon_frame, text="Add Customer Invoice")
             new_customer_invoice_label.grid(padx=10, row=2, column=4)
 
+            # Customer report
+            customer_report_button = ttk.Button(customer_ribbon_frame, image=self.customer_report_icon, command=self.customer_report)
+            customer_report_button.grid(padx=10, row=1, column=5)
+            #customer_report_button.bind("<ButtonRelease-1>", self.vendor_report)
+            customer_report_label = ttk.Label(customer_ribbon_frame, text="Customer Report")
+            customer_report_label.grid(padx=10, row=2, column=5)
+
         def customer_treeview():
 
             def customer_double_clicked(event):
@@ -227,13 +243,16 @@ class Customers:
                 right_click_customer.add_command(label="Delete Customer", command=customers.delete_customer, state="disabled")   
                 right_click_customer.add_separator()
                 right_click_customer.add_command(label="New Customer Invoice", command=customers.new_customer_invoice, state="disabled")
-                right_click_customer.add_separator()               
+                right_click_customer.add_separator() 
+                right_click_customer.add_command(label="Customer Report", command=customers.customer_report, state="disabled")
+              
 
                 # If a customer is selected change the state of menu items
                 if values_customer:
                     right_click_customer.entryconfig("Edit Customer", state="normal")
                     right_click_customer.entryconfig("Delete Customer", state="normal")
                     right_click_customer.entryconfig("New Customer Invoice", state="normal")
+                    right_click_customer.entryconfig("Customer Report", state="normal")
                 else:
                     pass
 
@@ -348,7 +367,7 @@ class Customers:
         conn.commit()
         conn.close() 
 
-    def populate_customer_report_treeview(self, customer_rowid):
+    def populate_customer_report(self, customer_rowid):
             # Fetch data from database
             # Connect to database
             conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
@@ -366,10 +385,39 @@ class Customers:
             count = 0
 
             for row in record:
-                self.customer_report_tree.insert(parent='', index='end', iid=count, text='', values=(row[2], row[3], row[6], "", row[7], row[8]))
+                if row[7]:
+                    description = "invoice"
+                elif row[8]:
+                    description = "payment"
+
+                self.customer_report_tree.insert(parent='', index='end', iid=count, text='', values=(row[2], row[3], row[6], description, row[7], row[8]))
                 count+=1  
             
             del record
+
+            # Total boxes
+            # Debit
+            cur.execute("SELECT SUM(debit) FROM ledger WHERE customer_rowid = " + customer_rowid + " AND account = 'Accounts Receivable (Debtors)'")
+            debit_total = cur.fetchone()
+            customers.debit_total_entry.configure(state="normal")
+            customers.debit_total_entry.delete(0, "end")
+            customers.debit_total_entry.insert(0, debit_total)
+            customers.debit_total_entry.configure(state="readonly")
+
+            # Credit
+            cur.execute("SELECT SUM(credit) FROM ledger WHERE customer_rowid = " + customer_rowid + " AND account = 'Accounts Receivable (Debtors)'")
+            credit_total = cur.fetchone()
+            customers.credit_total_entry.configure(state="normal") 
+            customers.credit_total_entry.delete(0, "end")
+            customers.credit_total_entry.insert(0, credit_total)
+            customers.credit_total_entry.configure(state="readonly")   
+
+            # Total
+            total = debit_total[0]-credit_total[0]
+            customers.total_entry.configure(state="normal") 
+            customers.total_entry.delete(0, "end")
+            customers.total_entry.insert(0, total)
+            customers.total_entry.configure(state="readonly") 
 
             # Close connection
             conn.commit()
@@ -1141,6 +1189,12 @@ class Customers:
             # Re-populate ledger
             ledger.populate_ledger_tree()
 
+            # Repopulate Vendor Report
+            self.populate_customer_report(values_customer[0])
+
+            # Populate payment treeview
+            self.populate_payment_treeview(values_customer[0])  
+
         def delete_invoice_item():
 
             # Connect to the database
@@ -1332,47 +1386,38 @@ class Customers:
             #self.customer_report_tree.column("Total") 
             #self.customer_report_tree.heading("Total", text="Total")  
 
-            # Add the data to the treeview
-            self.populate_customer_report_treeview(customer_values[0])
-                  
-
-            # Vendor report total box
+            # Customer report total box
             # Create frame
             customer_report_total_frame = ttk.Frame(customer_report_window)
             customer_report_total_frame.pack(side="right", fill="both", padx=20, pady=10)
 
             # Create the boxes
-            cur.execute("SELECT SUM(debit) FROM ledger WHERE customer_rowid = " + customer_values[0] + " AND account = 'Accounts Receivable (Debtors)'")
-            debit_total = cur.fetchone()
             debit_total_label = ttk.Label(customer_report_total_frame, text="Debit Total")
             debit_total_label.grid(row=1, column=1, padx=10)
             self.debit_total_entry = ttk.Entry(customer_report_total_frame, width=12)
             self.debit_total_entry.grid(row=1, column=2)
-            self.debit_total_entry.insert(0, debit_total)
-            self.debit_total_entry.configure(state="readonly")
-
-            cur.execute("SELECT SUM(credit) FROM ledger WHERE customer_rowid = " + customer_values[0] + " AND account = 'Accounts Receivable (Debtors)'")
-            credit_total = cur.fetchone()
+            
             credit_total_label = ttk.Label(customer_report_total_frame, text="Credit Total")
             credit_total_label.grid(row=2, column=1, padx=10)
             self.credit_total_entry = ttk.Entry(customer_report_total_frame, width=12)
             self.credit_total_entry.grid(row=2, column=3)
-            self.credit_total_entry.insert(0, credit_total)
-            self.credit_total_entry.configure(state="readonly")   
-
-            total = debit_total[0]-credit_total[0]
+          
             total_label = ttk.Label(customer_report_total_frame, text="Total Due")
             total_label.grid(row=3, column=1, padx=10)
             self.total_entry = ttk.Entry(customer_report_total_frame, width=24)
             self.total_entry.grid(row=3, column=2, columnspan=2)
-            self.total_entry.insert(0, total)
-            self.total_entry.configure(state="readonly") 
-        
+
+            # Add the data to the treeview
+            self.populate_customer_report(customer_values[0])
+            self.customer_report_tree.bind("<Double-Button-1>", invoice_clicked)
+
         # If a supplier isn't selected tell the user to select a supplier
         else:
             Message("Please select a supplier first")
 
-        self.customer_report_tree.bind("<Double-Button-1>", invoice_clicked)
+        
+
+        
         
         # Disconnect from the database
         conn.commit()
@@ -1675,7 +1720,7 @@ class Customers:
             chart_of_accounts.populate_accounts_tree()
 
             # Re-populate vendor report
-            customers.populate_customer_report_treeview(self.customer_rowid)
+            customers.populate_customer_report(self.customer_rowid)
 
             # Re-populate payment treeview
             customers.populate_payment_treeview(self.customer_rowid)     
@@ -1739,33 +1784,33 @@ class Vendors:
             self.delete_vendor_icon = tk.PhotoImage(file="images/delete_contact.png")
             self.edit_vendor_icon = tk.PhotoImage(file="images/edit_contact.png")
             self.vendor_invoice_icon = tk.PhotoImage(file="images/new_invoice.png")
-            self.vendor_report_icon = tk.PhotoImage(file="images/vendor_report.png")
+            self.vendor_report_icon = tk.PhotoImage(file="images/report.png")
 
-            # Add new contact button to the frame
+            # New vendor
             new_vendor_button = ttk.Button(vendor_ribbon_frame, image=self.new_vendor_icon, command=self.new_vendor)
             new_vendor_button.grid(padx=10, row=1, column=1)
             new_vendor_label = ttk.Label(vendor_ribbon_frame, text="Add New Vendor")
             new_vendor_label.grid(padx=10, row=2, column=1)
 
-            # Add edit contact button to the frame
+            # Edit vendor
             edit_vendor_button = ttk.Button(vendor_ribbon_frame, image=self.edit_vendor_icon, command=self.edit_vendor)
             edit_vendor_button.grid(padx=10, row=1, column=2)
             edit_vendor_label = ttk.Label(vendor_ribbon_frame, text="Edit Vendor")
             edit_vendor_label.grid(padx=10, row=2, column=2)
 
-            # Add delete contact button to the frame
+            # Delete vendor
             delete_vendor_button = ttk.Button(vendor_ribbon_frame, image=self.delete_vendor_icon, command=self.delete_vendor)
             delete_vendor_button.grid(padx=10, row=1, column=3)
             delete_vendor_label = ttk.Label(vendor_ribbon_frame, text="Delete Vendor")
             delete_vendor_label.grid(padx=10, row=2, column=3)
 
-            # Add invoice button icon to the frame
+            # New invoice
             new_vendor_invoice_button = ttk.Button(vendor_ribbon_frame, image=self.vendor_invoice_icon, command=self.new_vendor_invoice)
             new_vendor_invoice_button.grid(padx=10, row=1, column=4)
             new_vendor_invoice_label = ttk.Label(vendor_ribbon_frame, text="Add Vendor Invoice")
             new_vendor_invoice_label.grid(padx=10, row=2, column=4)
 
-            # View invoices icon
+            # Vendor report
             vendor_report_button = ttk.Button(vendor_ribbon_frame, image=self.vendor_report_icon, command=self.vendor_report)
             vendor_report_button.grid(padx=10, row=1, column=5)
             #vendor_report_button.bind("<ButtonRelease-1>", self.vendor_report)
@@ -4295,9 +4340,10 @@ class Message:
     def __init__(self, message):
         messagebox.showerror('error', message)
 
+chart_of_accounts = Chart_of_accounts()
 customers = Customers()
 vendors = Vendors()
-chart_of_accounts = Chart_of_accounts()
+
 ledger = Ledger()
 settings = Settings()
 menu_bar = Menu_bar()
