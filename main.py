@@ -25,10 +25,10 @@ class Menu_bar:
         root.config(menu=self.menu_bar)
 
         self.file_menu()
+        self.chart_of_accounts_menu()
         self.customer_menu()
         self.vendor_menu()
-        self.chart_of_accounts_menu()
-
+        
     def file_menu(self):
         # File menu
         file_menu = tk.Menu(self.menu_bar, tearoff="false")
@@ -36,6 +36,39 @@ class Menu_bar:
 
         # File menu items
         file_menu.add_command(label="Exit", command=root.quit)
+
+    def chart_of_accounts_menu(self):
+        # Create chart of accounts menu
+        chart_of_accounts_menu = tk.Menu(self.menu_bar, tearoff="false")
+        self.menu_bar.add_cascade(label="Chart of Accounts", menu=chart_of_accounts_menu)
+
+        # Add menu items
+        chart_of_accounts_menu.add_command(label="New Account", command=chart_of_accounts.new_parent_account)
+        chart_of_accounts_menu.add_command(label="New Child Account", command=chart_of_accounts.new_child_account, state="disabled")
+        chart_of_accounts_menu.add_command(label="Edit Account", command=chart_of_accounts.edit_account, state="disabled")
+        chart_of_accounts_menu.add_command(label="Delete Account", command=chart_of_accounts.delete_account, state="disabled")
+
+        # Enable certain items if an account is selected in the treeview
+        def enable_buttons(event):
+            
+            selected_account = chart_of_accounts.accounts_treeview.focus()
+            values_accounts = chart_of_accounts.accounts_treeview.item(selected_account, 'values')
+
+            if values_accounts:
+                if values_accounts[6] == "YES":
+                    chart_of_accounts_menu.entryconfig("New Child Account", state="disabled")
+                    chart_of_accounts_menu.entryconfig("Edit Account", state="normal")
+                    chart_of_accounts_menu.entryconfig("Delete Account", state="normal")
+                
+                elif values_accounts[6] == "NO":
+                    chart_of_accounts_menu.entryconfig("New Child Account", state="normal")
+                    chart_of_accounts_menu.entryconfig("Edit Account", state="normal")
+                    chart_of_accounts_menu.entryconfig("Delete Account", state="normal")
+            
+            else:
+                pass
+
+        chart_of_accounts.accounts_treeview.bind("<ButtonRelease-1>", enable_buttons)
 
     def customer_menu(self):
         # Create customers menu
@@ -99,38 +132,13 @@ class Menu_bar:
         # Bind left clicking on a vendor to enabling certain menu items
         vendors.vendor_treeview.bind("<ButtonRelease-1>", enable_buttons)
 
-    def chart_of_accounts_menu(self):
-        # Create chart of accounts menu
-        chart_of_accounts_menu = tk.Menu(self.menu_bar, tearoff="false")
-        self.menu_bar.add_cascade(label="Chart of Accounts", menu=chart_of_accounts_menu)
+    
+    #def journals_menu(self):
+    #    # Create journals menu
+    #    journals_menu = tk.Menu(self.menu_bar, tearoff="false")
+    #    self.menu_bar.add_cascade(label="Journals", menu=journals_menu)
 
-        # Add menu items
-        chart_of_accounts_menu.add_command(label="New Account", command=chart_of_accounts.new_parent_account)
-        chart_of_accounts_menu.add_command(label="New Child Account", command=chart_of_accounts.new_child_account, state="disabled")
-        chart_of_accounts_menu.add_command(label="Edit Account", command=chart_of_accounts.edit_account, state="disabled")
-        chart_of_accounts_menu.add_command(label="Delete Account", command=chart_of_accounts.delete_account, state="disabled")
-
-        # Enable certain items if an account is selected in the treeview
-        def enable_buttons(event):
-            
-            selected_account = chart_of_accounts.accounts_treeview.focus()
-            values_accounts = chart_of_accounts.accounts_treeview.item(selected_account, 'values')
-
-            if values_accounts:
-                if values_accounts[6] == "YES":
-                    chart_of_accounts_menu.entryconfig("New Child Account", state="disabled")
-                    chart_of_accounts_menu.entryconfig("Edit Account", state="normal")
-                    chart_of_accounts_menu.entryconfig("Delete Account", state="normal")
-                
-                elif values_accounts[6] == "NO":
-                    chart_of_accounts_menu.entryconfig("New Child Account", state="normal")
-                    chart_of_accounts_menu.entryconfig("Edit Account", state="normal")
-                    chart_of_accounts_menu.entryconfig("Delete Account", state="normal")
-            
-            else:
-                pass
-
-        chart_of_accounts.accounts_treeview.bind("<ButtonRelease-1>", enable_buttons)
+    #    # Add menu items
 
 class Customers:
 
@@ -861,8 +869,8 @@ class Customers:
             customer_invoice_entry_frame.pack(fill="both", padx=10, pady=10, expand=1)
             
             # Add the entry boxes
-            # Create a list of the all the accounts for the account type Expenses
-            cur.execute("SELECT account_name FROM child_accounts WHERE type = 'Sales'")
+            # Create a list of the all the accounts for the account type Sales
+            cur.execute("SELECT account_name FROM chart_of_accounts WHERE child = 'YES' AND type = 'Sales'")
             accounts = cur.fetchall()
            
             expense_accounts = []
@@ -977,15 +985,15 @@ class Customers:
                     ])     
 
                 # Add the item value to the child account database
-                cur.execute('UPDATE child_accounts SET total = total+? WHERE account_name=?',(sub_total, invoice_item_account_combo.get(),))
+                cur.execute('UPDATE chart_of_accounts SET total = total+? WHERE account_name=?',(sub_total, invoice_item_account_combo.get(),))
 
                 # Add the item value to the parent account database
-                cur.execute('SELECT parent FROM child_accounts WHERE account_name=?', (invoice_item_account_combo.get(),))
+                cur.execute('SELECT parent FROM chart_of_accounts WHERE account_name=?', (invoice_item_account_combo.get(),))
                 parent_account = cur.fetchall()
-                cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_number=?', (sub_total, parent_account[0][0]),)
+                cur.execute('UPDATE chart_of_accounts SET total = total+? WHERE account_number=?', (sub_total, parent_account[0][0]),)
                 
                 # Add the invoice item value to the Accounts Payable database
-                cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_name=?', (sub_total, 'Accounts Receivable (Debtors)'))
+                cur.execute('UPDATE chart_of_accounts SET total = total+? WHERE account_name=?', (sub_total, 'Accounts Receivable (Debtors)'))
 
                 # Add the invoice to the general_journal
                 # Add up all the items in an invoice to give a total invoice figure
@@ -1187,7 +1195,7 @@ class Customers:
             chart_of_accounts.populate_accounts_tree()
 
             # Re-populate general_journal
-            general_journal.populate_general_journal_tree()
+            journals.general_journal()
 
             # Repopulate Vendor Report
             self.populate_customer_report(values_customer[0])
@@ -1219,14 +1227,14 @@ class Customers:
                 cur.execute("DELETE FROM customer_invoices WHERE rowid = " + invoice_item[0])
 
                 # Delete the item value from the parent account database
-                cur.execute('UPDATE parent_accounts SET total=total-? WHERE account_name=?',(sub_total, "Accounts Receivable (Debtors)"))
+                cur.execute('UPDATE chart_of_accounts SET total=total-? WHERE account_name=?',(sub_total, "Accounts Receivable (Debtors)"))
 
-                cur.execute("SELECT parent FROM child_accounts WHERE account_name=?", (invoice_item[2],))
+                cur.execute("SELECT parent FROM chart_of_accounts WHERE account_name=?", (invoice_item[2],))
                 parent_account = cur.fetchall()
-                cur.execute('UPDATE parent_accounts SET total=total-? WHERE account_number=?', (sub_total, parent_account[0][0]))
+                cur.execute('UPDATE chart_of_accounts SET total=total-? WHERE account_number=?', (sub_total, parent_account[0][0]))
                 
                 # Delete the item value from the child account database
-                cur.execute('UPDATE child_accounts SET total=total-? WHERE account_name=?',(sub_total, invoice_item[2]))
+                cur.execute('UPDATE chart_of_accounts SET total=total-? WHERE account_name=?',(sub_total, invoice_item[2]))
 
                 # Delete the item value from the general_journal
                 cur.execute('UPDATE general_journal SET debit=debit-? WHERE customer_rowid=? AND invoice_number=? AND account =?', (sub_total, values_customer[0], customer_invoice_number_entry.get(), "Accounts Receivable (Debtors)"))
@@ -1271,7 +1279,7 @@ class Customers:
             chart_of_accounts.populate_accounts_tree()
 
             # Re-populate general_journal treeview
-            general_journal.populate_general_journal_tree()
+            journals.general_journal()
 
     def customer_report(self):
 
@@ -1620,7 +1628,7 @@ class Customers:
         self.payment_window_treeview.heading("Ammount", text="Ammount")
         
         # Create a combobox listing accounts available to pay from 
-        cur.execute("SELECT account_name FROM child_accounts WHERE type = 'Bank'")
+        cur.execute("SELECT account_name FROM chart_of_accounts WHERE type = 'Bank' AND child = 'YES'")
         banks = cur.fetchall()
 
         payment_window_transfer_from_frame = ttk.LabelFrame(payment_window, text="Transfer Account")
@@ -1699,22 +1707,22 @@ class Customers:
                             ])
             
             # Update child account
-            cur.execute('UPDATE child_accounts SET total = total+? WHERE account_name=?',(invoice_values[2], self.transfer_account_combo.get(),))
+            cur.execute('UPDATE chart_of_accounts SET total = total+? WHERE account_name=?',(invoice_values[2], self.transfer_account_combo.get(),))
 
             # Update parent account 
-            cur.execute('SELECT parent FROM child_accounts WHERE account_name=?', (self.transfer_account_combo.get(),))
+            cur.execute('SELECT parent FROM chart_of_accounts WHERE account_name=?', (self.transfer_account_combo.get(),))
             parent_account = cur.fetchall()
-            cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_number=?', (invoice_values[2], parent_account[0][0]),)
+            cur.execute('UPDATE chart_of_accounts SET total = total+? WHERE account_number=?', (invoice_values[2], parent_account[0][0]),)
             
-            # Update accounts receivable in parent_accounts
-            cur.execute('UPDATE parent_accounts SET total = total-? WHERE account_name=?', (invoice_values[2], 'Accounts Receivable (Debtors)'))
+            # Update accounts receivable in chart_of_accounts
+            cur.execute('UPDATE chart_of_accounts SET total = total-? WHERE account_name=?', (invoice_values[2], 'Accounts Receivable (Debtors)'))
 
             # Close connection
             conn.commit()
             conn.close()
     
             # Re-populate general_journal
-            general_journal.populate_general_journal_tree()
+            journals.general_journal()
 
             # Re-populate the Chart of Accounts Treeview      
             chart_of_accounts.populate_accounts_tree()
@@ -1983,6 +1991,30 @@ class Vendors:
                 count+=1  
             
             del record
+
+            # Populate total boxes
+            # debit
+            cur.execute("SELECT SUM(debit) FROM general_journal WHERE vendor_rowid = " + vendor_rowid + " AND account = 'Accounts Payable (Creditors)'")
+            debit_total = cur.fetchone()
+            vendors.debit_total_entry.configure(state="normal")
+            vendors.debit_total_entry.delete(0, "end")
+            vendors.debit_total_entry.insert(0, debit_total)
+            vendors.debit_total_entry.configure(state="readonly")
+
+            # Credit
+            cur.execute("SELECT SUM(credit) FROM general_journal WHERE vendor_rowid = " + vendor_rowid + " AND account = 'Accounts Payable (Creditors)'")
+            credit_total = cur.fetchone()
+            vendors.credit_total_entry.configure(state="normal") 
+            vendors.credit_total_entry.delete(0, "end")
+            vendors.credit_total_entry.insert(0, credit_total)
+            vendors.credit_total_entry.configure(state="readonly") 
+
+            # Total
+            total = credit_total[0]-debit_total[0]
+            vendors.total_entry.configure(state="normal") 
+            vendors.total_entry.delete(0, "end")
+            vendors.total_entry.insert(0, total)
+            vendors.total_entry.configure(state="readonly") 
 
             # Close connection
             conn.commit()
@@ -2436,7 +2468,7 @@ class Vendors:
             
             # Add the entry boxes
             # Create a list of the all the accounts for the account type Expenses
-            cur.execute("SELECT account_name FROM child_accounts WHERE type = 'Expense'")
+            cur.execute("SELECT account_name FROM chart_of_accounts WHERE type = 'Expense' AND child = 'YES'")
             accounts = cur.fetchall()
            
             expense_accounts = []
@@ -2561,15 +2593,15 @@ class Vendors:
                     ])     
 
                 # Add the item value to the child account database
-                cur.execute('UPDATE child_accounts SET total = total+? WHERE account_name=?',(sub_total, invoice_item_account_combo.get(),))
+                cur.execute('UPDATE chart_of_accounts SET total = total+? WHERE account_name=?',(sub_total, invoice_item_account_combo.get(),))
 
                 # Add the item value to the parent account database
-                cur.execute('SELECT parent FROM child_accounts WHERE account_name=?', (invoice_item_account_combo.get(),))
+                cur.execute('SELECT parent FROM chart_of_accounts WHERE account_name=?', (invoice_item_account_combo.get(),))
                 parent_account = cur.fetchall()
-                cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_number=?', (sub_total, parent_account[0][0]),)
+                cur.execute('UPDATE chart_of_accounts SET total = total+? WHERE account_number=?', (sub_total, parent_account[0][0]),)
                 
                 # Add the invoice item value to the Accounts Payable database
-                cur.execute('UPDATE parent_accounts SET total = total+? WHERE account_name=?', (sub_total, 'Accounts Payable (Creditors)'))
+                cur.execute('UPDATE chart_of_accounts SET total = total+? WHERE account_name=?', (sub_total, 'Accounts Payable (Creditors)'))
 
                 # Add the invoice to the general_journal
                 # Add up all the items in an invoice to give a total invoice figure
@@ -2772,7 +2804,7 @@ class Vendors:
             chart_of_accounts.populate_accounts_tree()
 
             # Re-populate general_journal
-            general_journal.populate_general_journal_tree()
+            journals.general_journal()
 
             # Repopulate Vendor Report
             self.populate_vendor_report_treeview(values_vendor[0])
@@ -2804,14 +2836,14 @@ class Vendors:
                 cur.execute("DELETE FROM vendor_invoices WHERE rowid = " + invoice_item[0])
 
                 # Delete the item value from the parent account database
-                cur.execute('UPDATE parent_accounts SET total=total-? WHERE account_name=?',(sub_total, "Accounts Payable (Creditors)"))
+                cur.execute('UPDATE chart_of_accounts SET total=total-? WHERE account_name=?',(sub_total, "Accounts Payable (Creditors)"))
 
-                cur.execute("SELECT parent FROM child_accounts WHERE account_name=?", (invoice_item[2],))
+                cur.execute("SELECT parent FROM chart_of_accounts WHERE account_name=?", (invoice_item[2],))
                 parent_account = cur.fetchall()
-                cur.execute('UPDATE parent_accounts SET total=total-? WHERE account_number=?', (sub_total, parent_account[0][0]))
+                cur.execute('UPDATE chart_of_accounts SET total=total-? WHERE account_number=?', (sub_total, parent_account[0][0]))
                 
                 # Delete the item value from the child account database
-                cur.execute('UPDATE child_accounts SET total=total-? WHERE account_name=?',(sub_total, invoice_item[2]))
+                cur.execute('UPDATE chart_of_accounts SET total=total-? WHERE account_name=?',(sub_total, invoice_item[2]))
 
                 # Delete the item value from the general_journal
                 cur.execute('UPDATE general_journal SET credit=credit-? WHERE vendor_rowid=? AND invoice_number=? AND account =?', (sub_total, values_vendor[0], vendor_invoice_number_entry.get(), "Accounts Payable (Creditors)"))
@@ -2856,7 +2888,7 @@ class Vendors:
             chart_of_accounts.populate_accounts_tree()
 
             # Re-populate general_journal treeview
-            general_journal.populate_general_journal_tree()
+            journals.general_journal()
 
             # Re-populate vendor report
             self.populate_vendor_report_treeview(values_vendor[0])
@@ -2976,8 +3008,7 @@ class Vendors:
             #self.vendor_report_tree.column("Total") 
             #self.vendor_report_tree.heading("Total", text="Total")  
 
-            # Add the data to the treeview
-            self.populate_vendor_report_treeview(vendor_values[0])
+            
                   
 
             # Vendor report total box
@@ -2986,32 +3017,23 @@ class Vendors:
             vendor_report_total_frame.pack(side="right", fill="both", padx=20, pady=10)
 
             # Create the boxes
-            cur.execute("SELECT SUM(debit) FROM general_journal WHERE vendor_rowid = " + vendor_values[0] + " AND account = 'Accounts Payable (Creditors)'")
-            debit_total = cur.fetchone()
             debit_total_label = ttk.Label(vendor_report_total_frame, text="Debit Total")
             debit_total_label.grid(row=1, column=1, padx=10)
             self.debit_total_entry = ttk.Entry(vendor_report_total_frame, width=12)
             self.debit_total_entry.grid(row=1, column=2)
-            self.debit_total_entry.insert(0, debit_total)
-            self.debit_total_entry.configure(state="readonly")
-
-            cur.execute("SELECT SUM(credit) FROM general_journal WHERE vendor_rowid = " + vendor_values[0] + " AND account = 'Accounts Payable (Creditors)'")
-            credit_total = cur.fetchone()
+            
             credit_total_label = ttk.Label(vendor_report_total_frame, text="Credit Total")
             credit_total_label.grid(row=2, column=1, padx=10)
             self.credit_total_entry = ttk.Entry(vendor_report_total_frame, width=12)
             self.credit_total_entry.grid(row=2, column=3)
-            self.credit_total_entry.insert(0, credit_total)
-            self.credit_total_entry.configure(state="readonly")   
-
-            total = credit_total[0]-debit_total[0]
+              
             total_label = ttk.Label(vendor_report_total_frame, text="Total Due")
             total_label.grid(row=3, column=1, padx=10)
             self.total_entry = ttk.Entry(vendor_report_total_frame, width=24)
             self.total_entry.grid(row=3, column=2, columnspan=2)
-            self.total_entry.insert(0, total)
-            self.total_entry.configure(state="readonly") 
-        
+            
+            # Add the data to the treeview
+            self.populate_vendor_report_treeview(vendor_values[0])
         # If a supplier isn't selected tell the user to select a supplier
         else:
             Message("Please select a supplier first")
@@ -3219,7 +3241,7 @@ class Vendors:
         self.payment_window_treeview.heading("Ammount", text="Ammount")
         
         # Create a combobox listing accounts available to pay from 
-        cur.execute("SELECT account_name FROM child_accounts WHERE type = 'Bank'")
+        cur.execute("SELECT account_name FROM chart_of_accounts WHERE type = 'Bank' AND child = 'YES'")
         banks = cur.fetchall()
 
         payment_window_transfer_from_frame = ttk.LabelFrame(payment_window, text="Transfer Account")
@@ -3298,22 +3320,22 @@ class Vendors:
                             ])
             
             # Update child account
-            cur.execute('UPDATE child_accounts SET total = total-? WHERE account_name=?',(invoice_values[2], self.transfer_account_combo.get(),))
+            cur.execute('UPDATE chart_of_accounts SET total = total-? WHERE account_name=?',(invoice_values[2], self.transfer_account_combo.get(),))
 
             # Update parent account 
-            cur.execute('SELECT parent FROM child_accounts WHERE account_name=?', (self.transfer_account_combo.get(),))
+            cur.execute('SELECT parent FROM chart_of_accounts WHERE account_name=?', (self.transfer_account_combo.get(),))
             parent_account = cur.fetchall()
-            cur.execute('UPDATE parent_accounts SET total = total-? WHERE account_number=?', (invoice_values[2], parent_account[0][0]),)
+            cur.execute('UPDATE chart_of_accounts SET total = total-? WHERE account_number=?', (invoice_values[2], parent_account[0][0]),)
             
-            # Update accounts payable in parent_accounts
-            cur.execute('UPDATE parent_accounts SET total = total-? WHERE account_name=?', (invoice_values[2], 'Accounts Payable (Creditors)'))
+            # Update accounts payable in chart_of_accounts
+            cur.execute('UPDATE chart_of_accounts SET total = total-? WHERE account_name=?', (invoice_values[2], 'Accounts Payable (Creditors)'))
 
             # Close connection
             conn.commit()
             conn.close()
     
             # Re-populate general_journal
-            general_journal.populate_general_journal_tree()
+            journals.general_journal()
 
             # Re-populate the Chart of Accounts Treeview      
             chart_of_accounts.populate_accounts_tree()
@@ -3334,7 +3356,7 @@ class Chart_of_accounts:
             cur = conn.cursor()
 
             # Create the database table
-            cur.execute("""CREATE TABLE IF NOT EXISTS parent_accounts (
+            cur.execute("""CREATE TABLE IF NOT EXISTS chart_of_accounts (
                 id INTEGER, 
                 account_number INTEGER, 
                 account_name TEXT, 
@@ -3343,36 +3365,26 @@ class Chart_of_accounts:
                 child TEXT,
                 type TEXT
                 )""")
-            cur.execute("""CREATE TABLE IF NOT EXISTS child_accounts (
-                id INTEGER, 
-                account_number INTEGER, 
-                account_name TEXT, 
-                total FLOAT, 
-                parent INTEGER, 
-                child TEXT,
-                type TEXT
-                )""")
-
-            cur.execute("SELECT * FROM parent_accounts WHERE account_name = 'Current Accounts'")
+            
+            cur.execute("SELECT * FROM chart_of_accounts WHERE account_name = 'Current Account'")
             initial = cur.fetchall()
             if initial:
                 pass
             else:
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (1000, 'Current Accounts', 0.00, "NO", 'Bank'))
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (1100, 'Accounts Receivable (Debtors)', 0.00, "NO", 'Asset'))
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (2000, 'Accounts Payable (Creditors)', 0.00, "NO", 'Liability'))
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (4000, 'Income', 0.00, "NO", 'Sales'))
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (5000, 'Expenses', 0.00, "NO", 'Expense'))
+                cur.execute("INSERT INTO chart_of_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (1000, 'Current Account', 0.00, "NO", 'Bank'))
+                cur.execute("INSERT INTO chart_of_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (1100, 'Accounts Receivable (Debtors)', 0.00, "NO", 'Asset'))
+                cur.execute("INSERT INTO chart_of_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (2000, 'Accounts Payable (Creditors)', 0.00, "NO", 'Liability'))
+                cur.execute("INSERT INTO chart_of_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (4000, 'Income', 0.00, "NO", 'Sales'))
+                cur.execute("INSERT INTO chart_of_accounts (account_number, account_name, total, child, type) VALUES (?, ?, ?, ?, ?)", (5000, 'Expenses', 0.00, "NO", 'Expense'))
                 conn.commit()
 
-            
-            cur.execute("SELECT * FROM parent_accounts WHERE account_name = 'Income'")
+            cur.execute("SELECT * FROM chart_of_accounts WHERE account_name = 'Income'")
             income = cur.fetchall()
             if income:
                 pass
             else:
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (1100, 'Accounts Receivable (Debtors)', 0.00, 'Asset'))
-                cur.execute("INSERT INTO parent_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (2000, 'Accounts Payable (Creditors)', 0.00, 'Liability'))
+                cur.execute("INSERT INTO chart_of_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (1100, 'Accounts Receivable (Debtors)', 0.00, 'Asset'))
+                cur.execute("INSERT INTO chart_of_accounts (account_number, account_name, total, type) VALUES (?, ?, ?, ?)", (2000, 'Accounts Payable (Creditors)', 0.00, 'Liability'))
                 conn.commit()
 
         def accounts_tab():
@@ -3513,11 +3525,11 @@ class Chart_of_accounts:
             self.accounts_treeview.delete(record)
 
         # Select the rowid and everything in the parent account table
-        cur.execute("SELECT rowid, * FROM parent_accounts")
+        cur.execute("SELECT rowid, * FROM chart_of_accounts WHERE child = 'NO'")
         parent_record = cur.fetchall()  
         
         # Select the rowid and everything in the child account table
-        cur.execute("SELECT rowid, * FROM child_accounts")
+        cur.execute("SELECT rowid, * FROM chart_of_accounts WHERE child ='YES'")
         child_record = cur.fetchall()
         
         # For each row in the parent table, add the data to the Treeview columns
@@ -3622,13 +3634,13 @@ class Chart_of_accounts:
             else:
                 if len(new_account_number_entry.get() and new_account_name_entry.get()) != 0:
                     # Check to see if the account number is in use already. Attempt to make an account number list from the database using the account number in the entry box        
-                    cur.execute("SELECT account_number FROM parent_accounts WHERE account_number = " + new_account_number_entry.get() + "")
+                    cur.execute("SELECT account_number FROM chart_of_accounts WHERE account_number = " + new_account_number_entry.get() + "")
                     parent_account_number_query = cur.fetchone()
-                    cur.execute("SELECT account_number FROM child_accounts WHERE account_number = " + new_account_number_entry.get() + "")
+                    cur.execute("SELECT account_number FROM chart_of_accounts WHERE account_number = " + new_account_number_entry.get() + "")
                     child_account_number_query = cur.fetchone()
 
                     # Check to see if the account name is in use
-                    cur.execute("SELECT account_name FROM parent_accounts")
+                    cur.execute("SELECT account_name FROM chart_of_accounts")
                     account_name = cur.fetchall()  
 
                     account_names = []
@@ -3648,7 +3660,7 @@ class Chart_of_accounts:
                     # If false, (account number in entry box isn't in database) insert entry box data into database
                     else:
                         # Insert entry box data into database and close connection.
-                        cur.execute("""INSERT INTO parent_accounts (
+                        cur.execute("""INSERT INTO chart_of_accounts (
                             account_number, 
                             account_name, 
                             total,
@@ -3753,13 +3765,13 @@ class Chart_of_accounts:
             elif len(child_account_number_entry.get() and child_account_name_entry.get()) != 0: 
 
                 # Check to see if the account number is in use already. Attempt to make an account number list from the database using the account number in the entry box        
-                cur.execute("SELECT account_number FROM parent_accounts WHERE account_number = " + child_account_number_entry.get() + "")
+                cur.execute("SELECT account_number FROM chart_of_accounts WHERE account_number = " + child_account_number_entry.get() + "")
                 parent_account_number_query = cur.fetchone()
-                cur.execute("SELECT account_number FROM child_accounts WHERE account_number = " + child_account_number_entry.get() + "")
+                cur.execute("SELECT account_number FROM chart_of_accounts WHERE account_number = " + child_account_number_entry.get() + "")
                 child_account_number_query = cur.fetchone()
 
                 # Check to see if the account name is in use
-                cur.execute("SELECT account_name FROM child_accounts")
+                cur.execute("SELECT account_name FROM chart_of_accounts")
                 account_name = cur.fetchall()  
 
                 account_names = []
@@ -3777,7 +3789,7 @@ class Chart_of_accounts:
                 # If the list doesn't exist (False), add the contents of the entry boxes to the database
                 else:
                     # Add contents of entry boxes to the database
-                    cur.execute("INSERT INTO child_accounts (account_number, account_name, total, parent, child, type) VALUES (?, ?, 0.00, ?, ?, ?)", inputted_data)
+                    cur.execute("INSERT INTO chart_of_accounts (account_number, account_name, total, parent, child, type) VALUES (?, ?, 0.00, ?, ?, ?)", inputted_data)
 
             # Close connection
             conn.commit()
@@ -3878,7 +3890,7 @@ class Chart_of_accounts:
             # If the account that is being enetered is not a child account insert the data from the entry boxes into the Accounts table
             elif values_account[6] == "NO":
                 # Update the parent account
-                cur.execute("""UPDATE parent_accounts SET 
+                cur.execute("""UPDATE chart_of_accounts SET 
                     account_name = :account_name 
                     
                     WHERE 
@@ -3888,10 +3900,10 @@ class Chart_of_accounts:
                     'oid' : edit_account_id_entry.get()
                     })
             
-            # If the account that is being enetered is a child account insert the data from the entry boxes into the Child_accounts tabel
+            # If the account that is being enetered is a child account insert the data from the entry boxes into the chart_of_accounts tabel
             else:
                 # Update the child account database
-                cur.execute("""UPDATE child_accounts SET 
+                cur.execute("""UPDATE chart_of_accounts SET 
                 account_number = :account_number, 
                 account_name = :account_name 
                 
@@ -3927,20 +3939,20 @@ class Chart_of_accounts:
         if values_account:
             # If the account that is being deleted is a child account...
             if values_account[6] == "YES":
-                # Select rowid and everything in the Child_accounts table. 
-                #cur.execute("SELECT rowid, * FROM child_accounts")
+                # Select rowid and everything in the chart_of_accounts table. 
+                #cur.execute("SELECT rowid, * FROM chart_of_accounts")
 
                 if values_account[4] != 0:
                     Message("This account has transactions linked to it so it cannot be deleted")
                 
                 else:
                     # Delete the database row(rowid) that has the same rowid as the one selected in the Treeview         
-                    cur.execute("DELETE FROM child_accounts WHERE rowid = " + str(values_account[0])) 
+                    cur.execute("DELETE FROM chart_of_accounts WHERE rowid = " + str(values_account[0])) 
             
             # If the account that is being deleted is not a child account...
             elif values_account[6] == "NO":
-                # Does the account number exist in the Child_accounts table named as a parent account (ie, does the account to be deleted have child accounts?)
-                cur.execute("SELECT parent FROM child_accounts WHERE parent = " + values_account[1] + "")
+                # Does the account number exist in the chart_of_accounts table named as a parent account (ie, does the account to be deleted have child accounts?)
+                cur.execute("SELECT parent FROM chart_of_accounts WHERE parent = " + values_account[1] + "")
                 parent_to_child_query = cur.fetchone()
 
                 #If true, show a popup window telling user to delete all child accoutns first
@@ -3950,10 +3962,10 @@ class Chart_of_accounts:
                 # If the account doesn't have children delete from database
                 else:
                     # Select rowid and everything in table, fetch and save as 'record'
-                    cur.execute("SELECT rowid, * FROM parent_accounts")
+                    cur.execute("SELECT rowid, * FROM chart_of_accounts")
                     
                     # Delete the row whchi has the rowid from the entry box    
-                    cur.execute("DELETE FROM parent_accounts WHERE rowid = " + str(values_account[0])) 
+                    cur.execute("DELETE FROM chart_of_accounts WHERE rowid = " + str(values_account[0])) 
 
         else:
             Message("Please select an account to delete")
@@ -3968,10 +3980,11 @@ class Chart_of_accounts:
         # Regenerate Menu bar
         Menu_bar()
 
-class general_journal:
+class Journals:
     
     def __init__(self):
-        def general_journal_database_table():
+        
+        def journals_database_tables():
             # Connect to the database
             conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
@@ -3992,26 +4005,41 @@ class general_journal:
             # Close connection
             conn.commit()
             conn.close() 
-        
-        def general_journal_tab():
+     
+        def journals_tab():
             # Create the tab
             self.tab = ttk.Frame(main_window)
             self.tab.pack(fill="both", expand="yes")
 
             # Add the tab to the notebook and provide a heading
-            main_window.add(self.tab, text="General Journal")
+            main_window.add(self.tab, text="Journals")
 
-        def general_journal_treeview():
+            # Add a frame for the selected journal
+            self.journal_frame = ttk.Frame(self.tab)
+            self.journal_frame.pack(side="top", fill="both", padx=10, expand=1)
+
+            # Add selection dropdown
+            def selection(event):
+                if journal_selected.get() == "General":
+                    self.general_journal()
+                else:
+                    pass
+            
+            journal_selected = ttk.Combobox(self.journal_frame, values="General")
+            journal_selected.pack(side="top", pady=10)
+            #journal_selected.set(journal_selected.get())
+            journal_selected.bind("<ButtonRelease-1>", selection)
+        
             # Create a frame for the Treeview
-            self.general_journal_treeview_frame = ttk.Frame(self.tab)
-            self.general_journal_treeview_frame.pack(side="bottom", fill="both", padx=10, expand=1)
+            #self.journal_frame = ttk.Frame(self.journal_frame)
+            #self.journal_frame.pack(side="top", fill="both", expand=1)
 
             # Create a scrollbar for the Treeview
-            self.general_journal_treeview_scroll = ttk.Scrollbar(self.general_journal_treeview_frame)
+            self.general_journal_treeview_scroll = ttk.Scrollbar(self.journal_frame)
             self.general_journal_treeview_scroll.pack(side="right", fill="y") 
 
             # Create the Treeview
-            self.general_journal_treeview = ttk.Treeview(self.general_journal_treeview_frame, yscrollcommand=self.general_journal_treeview_scroll.set, selectmode="extended") 
+            self.general_journal_treeview = ttk.Treeview(self.journal_frame, yscrollcommand=self.general_journal_treeview_scroll.set, selectmode="extended") 
             self.general_journal_treeview.pack(fill="both", expand="yes")        
             
             # Create the Treeview columns
@@ -4050,7 +4078,7 @@ class general_journal:
 
             # general_journal total box
             # Create frame
-            general_journal_total_frame = ttk.Frame(self.general_journal_treeview_frame)
+            general_journal_total_frame = ttk.Frame(self.journal_frame)
             general_journal_total_frame.pack(fill="both", padx=390, pady=10)
 
             # Create the boxes
@@ -4064,62 +4092,73 @@ class general_journal:
             credit_total_label.grid(row=2, column=1, padx=10)
             self.credit_total_entry = ttk.Entry(general_journal_total_frame, width=12)
             self.credit_total_entry.grid(row=2, column=3)
-                      
 
-        general_journal_database_table()
-        general_journal_tab()
-        general_journal_treeview()
-        self.populate_general_journal_tree()
-
-    def populate_general_journal_tree(self):  
-        # Connect to the database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
-        cur = conn.cursor()
-
-        # Clear the treeview
-        for record in self.general_journal_treeview.get_children():
-            self.general_journal_treeview.delete(record)
-
-        # Select the rowid and everything in the table and fetch 
-        cur.execute("SELECT rowid, * FROM general_journal")
-        general_journal_record = cur.fetchall()    
-
-        # For each row in the table, add the data to the Treeview columns
-        global count
-        count = 0
-        for row in general_journal_record:
-            self.general_journal_treeview.insert(parent='', index='end', iid=count, text='', values=(  
-                row[0], # row_id
-                row[2], # vendor_rowid
-                row[3], # date
-                row[6], # invoice_number
-                row[4], # description
-                row[5], # account
-                row[7], # debit
-                row[8], # credit
-                ))
-
-            count+=1    
+        journals_database_tables()
+        journals_tab()
         
-        # Add the debit and credit total to the window
-        cur.execute("SELECT SUM(debit) FROM general_journal")
-        debit_total = cur.fetchone()
-        self.debit_total_entry.configure(state="normal")
-        self.debit_total_entry.delete(0, "end")
-        self.debit_total_entry.insert(0, debit_total)
-        self.debit_total_entry.configure(state="readonly")
+    def general_journal(self):  
+            # Connect to the database
+            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            cur = conn.cursor()
 
-        cur.execute("SELECT SUM(credit) FROM general_journal")
-        credit_total = cur.fetchone()
-        self.credit_total_entry.configure(state="normal")
-        self.credit_total_entry.delete(0, "end")
-        self.credit_total_entry.insert(0, credit_total)
-        self.credit_total_entry.configure(state="readonly")
+            # Clear the treeview
+            for record in self.general_journal_treeview.get_children():
+                self.general_journal_treeview.delete(record)
 
-        # Close connection
-        conn.commit()
-        conn.close()
-            
+            # Select the rowid and everything in the table and fetch 
+            cur.execute("SELECT rowid, * FROM general_journal")
+            general_journal_record = cur.fetchall()    
+
+            # For each row in the table, add the data to the Treeview columns
+            global count
+            count = 0
+            for row in general_journal_record:
+                self.general_journal_treeview.insert(parent='', index='end', iid=count, text='', values=(  
+                    row[0], # row_id
+                    row[2], # vendor_rowid
+                    row[3], # date
+                    row[6], # invoice_number
+                    row[4], # description
+                    row[5], # account
+                    row[7], # debit
+                    row[8], # credit
+                    ))
+
+                count+=1    
+
+            # Add the debit and credit total to the window
+            cur.execute("SELECT SUM(debit) FROM general_journal")
+            debit_total = cur.fetchone()
+            self.debit_total_entry.configure(state="normal")
+            self.debit_total_entry.delete(0, "end")
+            self.debit_total_entry.insert(0, debit_total)
+            self.debit_total_entry.configure(state="readonly")
+
+            cur.execute("SELECT SUM(credit) FROM general_journal")
+            credit_total = cur.fetchone()
+            self.credit_total_entry.configure(state="normal")
+            self.credit_total_entry.delete(0, "end")
+            self.credit_total_entry.insert(0, credit_total)
+            self.credit_total_entry.configure(state="readonly")
+
+            # Close connection
+            conn.commit()
+            conn.close()
+
+class Ledgers:
+    
+    def __init__(self):
+
+        def ledgers_tab():
+            # Create the tab
+            self.tab = ttk.Frame(main_window)
+            self.tab.pack(fill="both", expand="yes")
+
+            # Add the tab to the notebook and provide a heading
+            main_window.add(self.tab, text="Ledgers")                        
+
+        ledgers_tab()
+
 class Settings:
 
     def __init__(self):
@@ -4343,8 +4382,8 @@ class Message:
 chart_of_accounts = Chart_of_accounts()
 customers = Customers()
 vendors = Vendors()
-
-general_journal = general_journal()
+journals = Journals()
+ledgers = Ledgers()
 settings = Settings()
 menu_bar = Menu_bar()
 
