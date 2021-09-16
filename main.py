@@ -1078,10 +1078,11 @@ class Customers:
                             account,
                             invoice_number, 
                             debit,
-                            credit                            
+                            credit,
+                            type                            
                             )
 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",[
 
                             values_customer[0], 
                             cal.get(),
@@ -1089,7 +1090,8 @@ class Customers:
                             invoice_item_account_combo.get(),
                             customer_invoice_number_entry.get(),
                             '',
-                            sub_total
+                            sub_total,
+                            "sales"
                             ])
                     
                 else:      
@@ -1101,10 +1103,11 @@ class Customers:
                             account,
                             invoice_number,  
                             debit,
-                            credit
+                            credit,
+                            type
                             )
 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",[
 
                             values_customer[0], 
                             cal.get(),
@@ -1112,7 +1115,8 @@ class Customers:
                             'Accounts Receivable (Debtors)',
                             customer_invoice_number_entry.get(),
                             total_figure,
-                            ''                           
+                            '',
+                            "asset"                           
                             ])
 
                     # Add child account to general_journal
@@ -1123,10 +1127,11 @@ class Customers:
                             account,
                             invoice_number, 
                             debit,
-                            credit                       
+                            credit,
+                            type                      
                             )
 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",[
 
                             values_customer[0], 
                             cal.get(),
@@ -1134,7 +1139,8 @@ class Customers:
                             invoice_item_account_combo.get(),
                             customer_invoice_number_entry.get(),
                             '',
-                            sub_total
+                            sub_total,
+                            "sales"
                             ])
                            
                 # Re-populate the invoice treeview
@@ -3511,7 +3517,7 @@ class Chart_of_accounts:
             self.accounts_treeview.column("ID", width=0, stretch="false") 
             self.accounts_treeview.heading("ID", text="ID")  
             
-            self.accounts_treeview.column("Account Number", minwidth=100, width=100, stretch="false")
+            self.accounts_treeview.column("Account Number", minwidth=150, width=150, stretch="false")
             self.accounts_treeview.heading("Account Number", text="Account Number")
             
             self.accounts_treeview.column("Type", minwidth=100, width=100, stretch="false")            
@@ -4021,7 +4027,8 @@ class Journals:
                 invoice_number INTEGER, 
                 debit FLOAT, 
                 credit FLOAT,
-                customer_rowid INTEGER
+                customer_rowid INTEGER,
+                type TEXT
                 )""")
             
             # Close connection
@@ -4042,8 +4049,8 @@ class Journals:
 
             # Add selection dropdown
             def selection(event):
-                if self.journal_selected.get() == "General":
-                    self.general_journal()
+                if self.journal_selected.get() == "Cash Book (Combined)":
+                    self.cash_book_journal()
                 elif self.journal_selected.get() == "Sales":
                     self.sales_journal()
                 elif self.journal_selected.get() == "Purchases":
@@ -4051,7 +4058,7 @@ class Journals:
                 else:
                     pass
             
-            self.journal_selected = ttk.Combobox(self.journal_frame, values=["Sales", "Purchases", "General"])
+            self.journal_selected = ttk.Combobox(self.journal_frame, values=["Cash Book (Combined)", "Cash Book (Receipts)", "Sales", "Purchases"])
             self.journal_selected.pack(side="top", pady=10)
             self.journal_selected.set("Choose journal")
             self.journal_selected.bind("<<ComboboxSelected>>", selection)
@@ -4093,7 +4100,7 @@ class Journals:
                 self.journal_treeview.delete(record)
 
             # Create the Treeview columns
-            self.journal_treeview['columns'] = ("ID", "Vendor_rowid", "Date", "Description", "Invoice_number", "Accounts Receivable (Debtors)", "Sales Credit")
+            self.journal_treeview['columns'] = ("ID", "Date", "Description", "Invoice_number", "Accounts Receivable (Debtors)", "Sales Credit", "Customer_rowid")
             
             # Create the Treeview column headings
             self.journal_treeview.column("#0", width=0, stretch="false")
@@ -4102,33 +4109,34 @@ class Journals:
             self.journal_treeview.column("ID", width=0, stretch="false") 
             self.journal_treeview.heading("ID", text="ID")  
             
-            self.journal_treeview.column("Vendor_rowid", width=0, stretch="false")
-            self.journal_treeview.heading("Vendor_rowid", text="Vendor rowid")
-            
             self.journal_treeview.column("Date", minwidth=100, width=100, stretch="false")            
             self.journal_treeview.heading("Date", text="Date")
 
-            self.journal_treeview.column("Invoice_number", minwidth=100, width=100, stretch="false")            
+            self.journal_treeview.column("Invoice_number", minwidth=120, width=120, stretch="false")            
             self.journal_treeview.heading("Invoice_number", text="Invoice Number")       
 
-            self.journal_treeview.column("Description", minwidth=100, width=100, stretch="false")           
+            self.journal_treeview.column("Description", minwidth=150, width=150, stretch="false")           
             self.journal_treeview.heading("Description", text="Description")
             
             #self.journal_treeview.column("Account", minwidth=200, width=200, stretch="false")
             #self.journal_treeview.heading("Account", text="Account") 
             
-            self.journal_treeview.column("Invoice_number", minwidth=100, width=100, stretch="false")            
+            self.journal_treeview.column("Invoice_number", minwidth=150, width=150, stretch="false")            
             self.journal_treeview.heading("Invoice_number", text="Invoice Number")          
             
-            self.journal_treeview.column("Accounts Receivable (Debtors)", minwidth=100, width=100, stretch="false")          
+            self.journal_treeview.column("Accounts Receivable (Debtors)", minwidth=200, width=200, stretch="false")          
             self.journal_treeview.heading("Accounts Receivable (Debtors)", text="Accounts Receivable (Debtors)")    
             
-            self.journal_treeview.column("Sales Credit", minwidth=100, width=100, stretch="false")           
+            self.journal_treeview.column("Sales Credit", minwidth=200, width=200, stretch="false")           
             self.journal_treeview.heading("Sales Credit", text="Sales Credit")
+
+            self.journal_treeview.column("Customer_rowid", width=0, stretch="false")
+            self.journal_treeview.heading("Customer_rowid", text="Customer rowid")
             
             # Select the rowid and everything in the table and fetch 
-            cur.execute("SELECT rowid, * FROM general_journal WHERE account = 'Accounts Receivable (Debtors)'")
-            general_journal_record = cur.fetchall()    
+            cur.execute("SELECT rowid, date, description, invoice_number, MIN(debit) AS debit, MIN(credit) AS credit, customer_rowid FROM general_journal WHERE account = 'Accounts Receivable (Debtors)' GROUP BY description, invoice_number")
+            general_journal_record = cur.fetchall()   
+            print(general_journal_record) 
 
             # For each row in the table, add the data to the Treeview columns
             global count
@@ -4136,13 +4144,12 @@ class Journals:
             for row in general_journal_record:
                 self.journal_treeview.insert(parent='', index='end', iid=count, text='', values=(  
                     row[0], # row_id
-                    row[2], # vendor_rowid
-                    row[3], # date
-                    row[4], # description
-                    row[6], # invoice_number
-                    #row[5], # account
-                    row[7], # debit
-                    row[8], # credit
+                    row[1], # date
+                    row[2], # description
+                    row[3], # invoice_number
+                    row[4], # debit
+                    row[5], # credit
+                    row[6]  # customer_rowid
                     ))
 
                 count+=1    
@@ -4155,7 +4162,7 @@ class Journals:
             self.debit_total_entry.insert(0, debit_total)
             self.debit_total_entry.configure(state="readonly")
 
-            cur.execute("SELECT SUM(credit) FROM general_journal WHERE type = 'Sales'")
+            cur.execute("SELECT SUM(credit) FROM general_journal WHERE account = 'Accounts Receivable (Debtors)'")
             credit_total = cur.fetchone()
             self.credit_total_entry.configure(state="normal")
             self.credit_total_entry.delete(0, "end")
@@ -4191,27 +4198,28 @@ class Journals:
             self.journal_treeview.column("Date", minwidth=100, width=100, stretch="false")            
             self.journal_treeview.heading("Date", text="Date")
 
-            self.journal_treeview.column("Invoice_number", minwidth=100, width=100, stretch="false")            
+            self.journal_treeview.column("Invoice_number", minwidth=120, width=120, stretch="false")            
             self.journal_treeview.heading("Invoice_number", text="Invoice Number")       
 
-            self.journal_treeview.column("Description", minwidth=100, width=100, stretch="false")           
+            self.journal_treeview.column("Description", minwidth=150, width=150, stretch="false")           
             self.journal_treeview.heading("Description", text="Description")
             
             #self.journal_treeview.column("Account", minwidth=200, width=200, stretch="false")
             #self.journal_treeview.heading("Account", text="Account") 
             
-            self.journal_treeview.column("Invoice_number", minwidth=100, width=100, stretch="false")            
+            self.journal_treeview.column("Invoice_number", minwidth=150, width=150, stretch="false")            
             self.journal_treeview.heading("Invoice_number", text="Invoice Number")          
             
-            self.journal_treeview.column("Accounts Payable (Creditors)", minwidth=100, width=100, stretch="false")          
+            self.journal_treeview.column("Accounts Payable (Creditors)", minwidth=200, width=100, stretch="false")          
             self.journal_treeview.heading("Accounts Payable (Creditors)", text="Accounts Payable (Creditors)")    
             
-            self.journal_treeview.column("Purchases Debit", minwidth=100, width=100, stretch="false")           
+            self.journal_treeview.column("Purchases Debit", minwidth=200, width=200, stretch="false")           
             self.journal_treeview.heading("Purchases Debit", text="Purchases Debit")
             
             # Select the rowid and everything in the table and fetch 
-            cur.execute("SELECT rowid, * FROM general_journal WHERE type = 'Expenses' OR account = 'Accounts Payable (Creditors)'")
-            general_journal_record = cur.fetchall()    
+            cur.execute("SELECT rowid, vendor_rowid, date, description, invoice_number, MIN(debit) AS debit, MIN(credit) AS credit FROM general_journal WHERE account = 'Accounts Payable (Creditors)' GROUP BY description, invoice_number")
+            general_journal_record = cur.fetchall()   
+            print(general_journal_record)   
 
             # For each row in the table, add the data to the Treeview columns
             global count
@@ -4219,13 +4227,12 @@ class Journals:
             for row in general_journal_record:
                 self.journal_treeview.insert(parent='', index='end', iid=count, text='', values=(  
                     row[0], # row_id
-                    row[2], # vendor_rowid
-                    row[3], # date
-                    row[4], # description
-                    row[6], # invoice_number
-                    #row[5], # account
-                    row[8], # accounts_payable
-                    row[7], # purchases debit
+                    row[1], # vendor_rowid
+                    row[2], # date
+                    row[3], # description
+                    row[4], # invoice_number
+                    row[5], # accounts_payable
+                    row[6], # purchases debit
                     ))
 
                 count+=1    
@@ -4238,7 +4245,7 @@ class Journals:
             self.debit_total_entry.insert(0, debit_total)
             self.debit_total_entry.configure(state="readonly")
 
-            cur.execute("SELECT SUM(credit) FROM general_journal WHERE type = 'Expenses'")
+            cur.execute("SELECT SUM(credit) FROM general_journal WHERE account = 'Accounts Payable (Creditors)'")
             credit_total = cur.fetchone()
             self.credit_total_entry.configure(state="normal")
             self.credit_total_entry.delete(0, "end")
@@ -4249,13 +4256,13 @@ class Journals:
             conn.commit()
             conn.close()
 
-    def general_journal(self):  
+    def cash_book_journal(self):  
             # Connect to the database
             conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Create the Treeview columns
-            self.journal_treeview['columns'] = ("ID", "Vendor_rowid", "Date", "Invoice_number", "Description", "Account",  "Debit", "Credit")
+            self.journal_treeview['columns'] = ("ID", "Vendor_rowid", "Date", "Invoice_number", "Description", "Account",  "Debit", "Credit", "Customer_rowid")
             
             # Create the Treeview column headings
             self.journal_treeview.column("#0", width=0, stretch="false")
@@ -4288,30 +4295,61 @@ class Journals:
             self.journal_treeview.column("Credit", minwidth=100, width=100, stretch="false")           
             self.journal_treeview.heading("Credit", text="Credit")
 
-            # Clear the treeview
-            for record in self.journal_treeview.get_children():
-                self.journal_treeview.delete(record)
+            self.journal_treeview.column("Customer_rowid", minwidth=100, width=100, stretch="false")           
+            self.journal_treeview.heading("Customer_rowid", text="Customer rowid")
 
-            # Select the rowid and everything in the table and fetch 
-            cur.execute("SELECT rowid, * FROM general_journal")
-            general_journal_record = cur.fetchall()    
+            if self.journal_selected.get() == "Cash Book (Combined)":
+                # Clear the treeview
+                for record in self.journal_treeview.get_children():
+                    self.journal_treeview.delete(record)
 
-            # For each row in the table, add the data to the Treeview columns
-            global count
-            count = 0
-            for row in general_journal_record:
-                self.journal_treeview.insert(parent='', index='end', iid=count, text='', values=(  
-                    row[0], # row_id
-                    row[2], # vendor_rowid
-                    row[3], # date
-                    row[6], # invoice_number
-                    row[4], # description
-                    row[5], # account
-                    row[7], # debit
-                    row[8], # credit
-                    ))
+                # Select the rowid and everything in the table and fetch 
+                cur.execute("SELECT rowid, * FROM general_journal")
+                general_journal_record = cur.fetchall()    
 
-                count+=1    
+                # For each row in the table, add the data to the Treeview columns
+                global count
+                count = 0
+                for row in general_journal_record:
+                    self.journal_treeview.insert(parent='', index='end', iid=count, text='', values=(  
+                        row[0], # row_id
+                        row[2], # vendor_rowid
+                        row[3], # date
+                        row[6], # invoice_number
+                        row[4], # description
+                        row[5], # account
+                        row[7], # debit
+                        row[8], # credit
+                        #row[9]  # customer_rowid
+                        ))
+
+                    count+=1    
+            elif self.journal_selected.get() == "Cash Book (Receipts)":
+                
+                # Clear the treeview
+                for record in self.journal_treeview.get_children():
+                    self.journal_treeview.delete(record)
+
+                # Select the rowid and everything in the table and fetch 
+                cur.execute("SELECT rowid, * FROM general_journal")
+                general_journal_record = cur.fetchall()    
+
+                # For each row in the table, add the data to the Treeview columns
+                count = 0
+                for row in general_journal_record:
+                    self.journal_treeview.insert(parent='', index='end', iid=count, text='', values=(  
+                        row[0], # row_id
+                        row[2], # vendor_rowid
+                        row[3], # date
+                        row[6], # invoice_number
+                        row[4], # description
+                        row[5], # account
+                        row[7], # debit
+                        row[8], # credit
+                        #row[9]  # customer_rowid
+                        ))
+
+                    count+=1 
 
             # Add the debit and credit total to the window
             cur.execute("SELECT SUM(debit) FROM general_journal")
