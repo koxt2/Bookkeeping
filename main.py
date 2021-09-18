@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from ttkthemes import ThemedTk
 from tkinter import messagebox
-import sqlite3
+import sqlite3 as sq
 import tkcalendar as tkcal
 
 # Create root
@@ -16,7 +16,7 @@ main_window = ttk.Notebook(root)
 main_window.pack(fill="both", expand="yes")
 
 # Create database
-conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+conn = sq.connect('Bookkeeping_Database.sqlite3')
 
 class Menu_bar:
     def __init__(self):
@@ -146,7 +146,7 @@ class Customers:
         
         def customer_database_table():
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Create the database table
@@ -341,7 +341,7 @@ class Customers:
         
     def populate_customer_tree(self):  
         # Connect to the database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Clear the treeview
@@ -378,7 +378,7 @@ class Customers:
     def populate_customer_report(self, customer_rowid):
             # Fetch data from database
             # Connect to database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Clear the treeview
@@ -435,7 +435,7 @@ class Customers:
     def populate_payment_treeview(self, customer_rowid):
 
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Clear the treeview
@@ -532,7 +532,7 @@ class Customers:
         def save_new_customer():
 
             # Connect to database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
             
             # Make sure the new contact has at least a name. If not, provide a popup window asking for a name.
@@ -672,7 +672,7 @@ class Customers:
 
         def update_customer():
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Make sure the contact has a name. If not, show a pop-up window asking for a name
@@ -722,7 +722,7 @@ class Customers:
 
     def delete_customer (self):
         # Connect to the database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Select the customer to delete
@@ -750,7 +750,7 @@ class Customers:
     
     def new_customer_invoice(self):
         # Connect to database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Select a vendor
@@ -919,7 +919,7 @@ class Customers:
         
         def add_invoice_item():
             # Connect to database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Make a list of all the invoice numbers in use already
@@ -1220,7 +1220,7 @@ class Customers:
         def delete_invoice_item():
 
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Make the selected item in Treeview the focus and make it a variable called 'selected'
@@ -1302,7 +1302,7 @@ class Customers:
             self.view_invoice()
 
         # Connect to the database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Select a vendor
@@ -1447,7 +1447,7 @@ class Customers:
 
     def view_invoice(self):
         # Connect to the database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Select vendor
@@ -1607,7 +1607,7 @@ class Customers:
         self.customer_rowid = customer_rowid
         self.customer_name = customer_name
         
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Create window
@@ -1680,7 +1680,7 @@ class Customers:
         
         def pay(self):
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
     
             selected_invoice = self.payment_window_treeview.focus()
@@ -1774,7 +1774,7 @@ class Vendors:
         def vendor_database_table():
             
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Create the database tables
@@ -1969,7 +1969,7 @@ class Vendors:
         
     def populate_vendor_tree(self):  
         # Connect to the database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Clear the treeview
@@ -2006,7 +2006,7 @@ class Vendors:
     def populate_vendor_report_treeview(self, vendor_rowid):
             # Fetch data from database
             # Connect to database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Clear the treeview
@@ -2057,7 +2057,7 @@ class Vendors:
     def populate_payment_treeview(self, vendor_rowid):
 
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Clear the treeview
@@ -2157,7 +2157,7 @@ class Vendors:
             """
             
             # Connect to database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
             
             # Make sure the new contact has at least a name. If not, provide a popup window asking for a name.
@@ -2301,7 +2301,7 @@ class Vendors:
             """
         
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Make sure the contact has at least a name. If not, show a pop-up window asking for a name
@@ -2351,7 +2351,7 @@ class Vendors:
 
     def delete_vendor (self):
         # Connect to the database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Select a vendor to delete
@@ -2379,7 +2379,7 @@ class Vendors:
     
     def new_vendor_invoice(self):
         # Connect to database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Select a vendor
@@ -2554,7 +2554,7 @@ class Vendors:
 
         def add_invoice_item():
             # Connect to database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Make a list of all the invoice numbers in use already
@@ -2864,7 +2864,7 @@ class Vendors:
         def delete_invoice_item():
 
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Make the selected item in Treeview the focus and make it a variable called 'selected'
@@ -2952,7 +2952,7 @@ class Vendors:
             self.view_invoice()
         
         # Connect to the database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Select a vendor
@@ -3095,7 +3095,7 @@ class Vendors:
     
     def view_invoice(self):
         # Connect to the database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Select vendor
@@ -3248,7 +3248,7 @@ class Vendors:
         self.vendor_rowid = vendor_rowid
         self.vendor_name = vendor_name
         
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Create window
@@ -3315,7 +3315,7 @@ class Vendors:
         
         def pay(self):
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
     
             selected_invoice = self.payment_window_treeview.focus()
@@ -3405,7 +3405,7 @@ class Chart_of_accounts:
 
         def accounts_database_table():
             # Connect to database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Create the database table
@@ -3554,10 +3554,10 @@ class Chart_of_accounts:
             self.accounts_treeview.column("Total", minwidth=250, width=250, stretch="false")            
             self.accounts_treeview.heading("Total", text="Total")          
             
-            self.accounts_treeview.column("Parent", width=20, stretch="false")          
+            self.accounts_treeview.column("Parent", width=0, stretch="false")          
             self.accounts_treeview.heading("Parent", text="Parent")    
             
-            self.accounts_treeview.column("Child", width=20, stretch="false")           
+            self.accounts_treeview.column("Child", width=0, stretch="false")           
             self.accounts_treeview.heading("Child", text="Child") 
 
             self.accounts_treeview.bind("<ButtonRelease-3>", right_click_accounts)
@@ -3570,7 +3570,7 @@ class Chart_of_accounts:
              
     def populate_accounts_tree(self): 
         # Connect to database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Clear the treeview
@@ -3673,7 +3673,7 @@ class Chart_of_accounts:
             Take the data from the enrty boxes in new_account_window and add to the database table as a new account
             """        
 
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Pull the data from the entry boxes and store them in a list called 'inputted_data'. "NO" is to signal that this is not a child account.
@@ -3804,7 +3804,7 @@ class Chart_of_accounts:
         
         def save_child_account():
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Pull the data from the entry boxes and store them in a list called 'inputted_data'. "YES" is to signal that it's a child account.
@@ -3933,7 +3933,7 @@ class Chart_of_accounts:
     
         def save_account_edit():
             #Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Make sure the account has a name, if not show a popup window telling customer to set a name
@@ -3981,7 +3981,7 @@ class Chart_of_accounts:
 
     def delete_account(self):
         # Connect to the database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Select an account to delete
@@ -4039,7 +4039,7 @@ class Journals:
         
         def journals_database_tables():
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Create database table
@@ -4147,7 +4147,7 @@ class Journals:
             self.date_to = date_to
             
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Clear the treeview
@@ -4238,7 +4238,7 @@ class Journals:
         self.date_to = date_to
         
         # Connect to the database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Clear the treeview
@@ -4329,7 +4329,7 @@ class Journals:
             self.date_to = date_to
             
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Create the Treeview columns
@@ -4481,7 +4481,7 @@ class Ledgers:
         self.date_to = date_to 
         
         # Connect to the database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Create the Treeview columns
@@ -4574,7 +4574,7 @@ class Ledgers:
         self.date_to = date_to 
         
         # Connect to the database
-        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
         cur = conn.cursor()
 
         # Create the Treeview columns
@@ -4662,7 +4662,7 @@ class Settings:
 
         def settings_database_table():
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Create database table
@@ -4741,7 +4741,7 @@ class Settings:
 
         def populate_business_address():
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # Clear the business address entry boxes 
@@ -4785,7 +4785,7 @@ class Settings:
 
         def save_business_address():
                 # Connect to the database
-                conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+                conn = sq.connect('Bookkeeping_Database.sqlite3')
                 cur = conn.cursor()
 
                 # Get the data from the entry boxes
@@ -4830,7 +4830,7 @@ class Settings:
 
         def update_business_address():
             # Connect to the database
-            conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+            conn = sq.connect('Bookkeeping_Database.sqlite3')
             cur = conn.cursor()
 
             # If a business name hasn't been entered pop up a window asking for a name
