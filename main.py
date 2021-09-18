@@ -1091,7 +1091,7 @@ class Customers:
                             customer_invoice_number_entry.get(),
                             '',
                             sub_total,
-                            "sales"
+                            "Sales"
                             ])
                     
                 else:      
@@ -1140,7 +1140,7 @@ class Customers:
                             customer_invoice_number_entry.get(),
                             '',
                             sub_total,
-                            "sales"
+                            "Sales"
                             ])
                            
                 # Re-populate the invoice treeview
@@ -1178,8 +1178,6 @@ class Customers:
                 invoice_total_box_entry.insert(0, total_figure)
                 invoice_total_box_entry.configure(state="readonly")
             
-
-
             # Close connection
             conn.commit()
             conn.close() 
@@ -1699,10 +1697,11 @@ class Customers:
                             account,
                             invoice_number,  
                             debit,
-                            credit
+                            credit,
+                            type
                             )
 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",[
 
                             self.customer_rowid, 
                             cal.get(),
@@ -1710,7 +1709,8 @@ class Customers:
                             'Accounts Receivable (Debtors)',
                             invoice_values[1],
                             '',
-                            invoice_values[2]
+                            invoice_values[2],
+                            'asset'
                             ])
     
             # Update bank account in general_journal
@@ -1721,10 +1721,11 @@ class Customers:
                             account,
                             invoice_number,  
                             debit,
-                            credit
+                            credit,
+                            type
                             )
 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",[
 
                             self.customer_rowid, 
                             cal.get(),
@@ -1732,7 +1733,8 @@ class Customers:
                             self.transfer_account_combo.get(),
                             invoice_values[1],
                             invoice_values[2],
-                            ''
+                            '',
+                            'asset'
                             ])
             
             # Update child account
@@ -2719,10 +2721,11 @@ class Vendors:
                             account,
                             invoice_number, 
                             debit,
-                            credit                            
+                            credit,
+                            type                            
                             )
 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",[
 
                             values_vendor[0], 
                             cal.get(),
@@ -2730,7 +2733,8 @@ class Vendors:
                             invoice_item_account_combo.get(),
                             vendor_invoice_number_entry.get(),
                             sub_total,
-                            ''
+                            '',
+                            'expense'
                             ])
                     
                 # Insert into child account and general_journal    
@@ -2743,10 +2747,11 @@ class Vendors:
                             account,
                             invoice_number,  
                             debit,
-                            credit
+                            credit,
+                            type
                             )
 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",[
 
                             values_vendor[0], 
                             cal.get(),
@@ -2754,7 +2759,8 @@ class Vendors:
                             'Accounts Payable (Creditors)',
                             vendor_invoice_number_entry.get(),
                             '',
-                            total_figure
+                            total_figure,
+                            'liability'
                             ])
 
                     # Add child account to general_journal
@@ -2765,10 +2771,11 @@ class Vendors:
                             account,
                             invoice_number, 
                             debit,
-                            credit                          
+                            credit,
+                            type                          
                             )
 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",[
 
                             values_vendor[0], 
                             cal.get(),
@@ -2776,7 +2783,8 @@ class Vendors:
                             invoice_item_account_combo.get(),
                             vendor_invoice_number_entry.get(),
                             sub_total,
-                            ''
+                            '',
+                            'expense'
                             ])
                            
                 # Re-populate the invoice treeview
@@ -3324,10 +3332,11 @@ class Vendors:
                             account,
                             invoice_number,  
                             debit,
-                            credit
+                            credit,
+                            type
                             )
 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",[
 
                             self.vendor_rowid, 
                             invoice_values[0],
@@ -3335,7 +3344,8 @@ class Vendors:
                             'Accounts Payable (Creditors)',
                             invoice_values[1],
                             invoice_values[2],
-                            ''
+                            '',
+                            'liability'
                             ])
     
             # Update bank account in general_journal
@@ -3346,10 +3356,11 @@ class Vendors:
                             account,
                             invoice_number,  
                             debit,
-                            credit
+                            credit,
+                            type
                             )
 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)""",[
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",[
 
                             self.vendor_rowid, 
                             invoice_values[0],
@@ -3357,7 +3368,8 @@ class Vendors:
                             self.transfer_account_combo.get(),
                             invoice_values[1],
                             '',
-                            invoice_values[2]
+                            invoice_values[2],
+                            'expense'
                             ])
             
             # Update child account
@@ -4122,6 +4134,11 @@ class Journals:
             self.credit_total_entry = ttk.Entry(journal_total_frame, width=12)
             self.credit_total_entry.grid(row=2, column=3)
 
+            balance_label = ttk.Label(journal_total_frame, text="Balance")
+            balance_label.grid(row=3, column=1, padx=10)
+            self.balance_entry = ttk.Entry(journal_total_frame, width=12)
+            self.balance_entry.grid(row=3, column=2)
+
         journals_database_tables()
         journals_tab()
     
@@ -4191,7 +4208,7 @@ class Journals:
 
                 count+=1    
 
-            # Add the debit and credit total to the window
+            # Add the debit and credit total, and balance to the window
             cur.execute("SELECT SUM(debit) FROM general_journal WHERE account = 'Accounts Receivable (Debtors)'")
             debit_total = cur.fetchone()
             self.debit_total_entry.configure(state="normal")
@@ -4205,6 +4222,12 @@ class Journals:
             self.credit_total_entry.delete(0, "end")
             self.credit_total_entry.insert(0, credit_total)
             self.credit_total_entry.configure(state="readonly")
+
+            sales_balance = debit_total[0] - credit_total[0]
+            self.balance_entry.configure(state="normal")
+            self.balance_entry.delete(0, "end")
+            self.balance_entry.insert(0, sales_balance)
+            self.balance_entry.configure(state="readonly")
 
             # Close connection
             conn.commit()
@@ -4223,7 +4246,7 @@ class Journals:
                 self.journal_treeview.delete(record)
 
         # Create the Treeview columns
-        self.journal_treeview['columns'] = ("ID", "Vendor_rowid", "Date", "Description", "Invoice_number", "Accounts Payable (Creditors)", "Purchases Debit")
+        self.journal_treeview['columns'] = ("ID", "Vendor_rowid", "Date", "Description", "Invoice_number", "Purchases Debit", "Accounts Payable (Creditors)")
         
         # Create the Treeview column headings
         self.journal_treeview.column("#0", width=0, stretch="false")
@@ -4250,11 +4273,11 @@ class Journals:
         self.journal_treeview.column("Invoice_number", minwidth=150, width=150, stretch="false")            
         self.journal_treeview.heading("Invoice_number", text="Invoice Number")          
         
-        self.journal_treeview.column("Accounts Payable (Creditors)", minwidth=200, width=200, stretch="false")          
-        self.journal_treeview.heading("Accounts Payable (Creditors)", text="Accounts Payable (Creditors)")    
-        
         self.journal_treeview.column("Purchases Debit", minwidth=200, width=200, stretch="false")           
         self.journal_treeview.heading("Purchases Debit", text="Purchases Debit")
+
+        self.journal_treeview.column("Accounts Payable (Creditors)", minwidth=200, width=200, stretch="false")          
+        self.journal_treeview.heading("Accounts Payable (Creditors)", text="Accounts Payable (Creditors)")    
         
         # Select the rowid and everything in the table and fetch 
         cur.execute("SELECT rowid, vendor_rowid, date, description, invoice_number, MIN(debit) AS debit, MIN(credit) AS credit FROM general_journal WHERE account = 'Accounts Payable (Creditors)' AND date BETWEEN '" + self.date_from + "' AND '" + self.date_to + "' GROUP BY description, invoice_number")
@@ -4290,6 +4313,12 @@ class Journals:
         self.credit_total_entry.delete(0, "end")
         self.credit_total_entry.insert(0, credit_total)
         self.credit_total_entry.configure(state="readonly")
+
+        purchases_balance = credit_total[0] - debit_total[0]
+        self.balance_entry.configure(state="normal")
+        self.balance_entry.delete(0, "end")
+        self.balance_entry.insert(0, purchases_balance)
+        self.balance_entry.configure(state="readonly")
 
         # Close connection
         conn.commit()
@@ -4390,14 +4419,242 @@ class Ledgers:
     def __init__(self):
 
         def ledgers_tab():
+
+            def selection(event):
+                if self.ledger_selected.get() == "Sales Ledger":
+                    self.sales_ledger(cal_from.get(), cal_to.get())
+                elif self.ledger_selected.get() == "Expenses Ledger":
+                    self.expenses_ledger(cal_from.get(), cal_to.get())
+                else:
+                    pass
+
             # Create the tab
             self.tab = ttk.Frame(main_window)
             self.tab.pack(fill="both", expand="yes")
 
             # Add the tab to the notebook and provide a heading
-            main_window.add(self.tab, text="Ledgers")                        
+            main_window.add(self.tab, text="Ledgers")      
 
+            # Add a frame for the options
+            self.ledger_options_frame = ttk.Frame(self.tab)
+            self.ledger_options_frame.pack(fill="both", padx=10)
+
+            # Add a frame for the selected journal
+            self.ledger_frame = ttk.Frame(self.tab)
+            self.ledger_frame.pack(fill="both", side="top", padx=10, expand=1)
+
+            # Select which journal to display
+            self.ledger_selected = ttk.Combobox(self.ledger_options_frame, values=["Sales Ledger", "Expenses Ledger"])
+            self.ledger_selected.grid(row=1, column=1, padx=10, pady=10)
+            self.ledger_selected.set("Choose ledger")
+            self.ledger_selected.bind("<<ComboboxSelected>>", selection)
+
+            # Choose the from and to dates
+            date_label = ttk.Label(self.ledger_options_frame, text="From")
+            date_label.grid(sticky="w", row=1, column=2, padx=0)
+            cal_from = tkcal.DateEntry(self.ledger_options_frame, showweeknumbers=False, date_pattern='yyyy-mm-dd')
+            cal_from.grid(sticky="w", row=1, column=3, padx=10)
+            cal_from._top_cal.overrideredirect(False) 
+           
+            date_label = ttk.Label(self.ledger_options_frame, text="To")
+            date_label.grid(sticky="w", row=1, column=4, padx=0)
+            cal_to = tkcal.DateEntry(self.ledger_options_frame, showweeknumbers=False, date_pattern='yyyy-mm-dd')
+            cal_to.grid(sticky="w", row=1, column=5, padx=10)
+            cal_to._top_cal.overrideredirect(False)   
+
+            refresh_button = ttk.Button(self.ledger_options_frame, text="Refresh")
+            refresh_button.grid(row=1, column=6, padx=10)        
+            refresh_button.bind("<ButtonRelease-1>", selection) 
+        
+            # Create a scrollbar for the Treeview
+            self.ledger_treeview_scroll = ttk.Scrollbar(self.ledger_frame)
+            self.ledger_treeview_scroll.pack(side="right", fill="y") 
+
+            # Create the Treeview
+            self.ledger_treeview = ttk.Treeview(self.ledger_frame, yscrollcommand=self.ledger_treeview_scroll.set, selectmode="extended") 
+            self.ledger_treeview.pack(fill="both", expand="yes")                  
+        
         ledgers_tab()
+    
+    def sales_ledger(self, date_from, date_to):
+        self.date_from = date_from
+        self.date_to = date_to 
+        
+        # Connect to the database
+        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        cur = conn.cursor()
+
+        # Create the Treeview columns
+        self.ledger_treeview['columns'] = ("Date", "Description", "Debit", "Credit", "Balance")
+        
+        # Create the Treeview column headings
+        self.ledger_treeview.column("#0", width=0, stretch="false")
+        self.ledger_treeview.heading("#0", text="")
+        
+        self.ledger_treeview.column("Date", minwidth=100, width=100, stretch="false")            
+        self.ledger_treeview.heading("Date", text="Date")
+        
+        self.ledger_treeview.column("Description", minwidth=200, width=200, stretch="false")
+        self.ledger_treeview.heading("Description", text="Description")          
+        
+        self.ledger_treeview.column("Debit", minwidth=100, width=100, stretch="false")          
+        self.ledger_treeview.heading("Debit", text="Debit")    
+        
+        self.ledger_treeview.column("Credit", minwidth=100, width=100, stretch="false")           
+        self.ledger_treeview.heading("Credit", text="Credit")
+
+        self.ledger_treeview.column("Balance", minwidth=100, width=100, stretch="false")           
+        self.ledger_treeview.heading("Balance", text="Balance")      
+
+        # Clear the treeview
+        for record in self.ledger_treeview.get_children():
+            self.ledger_treeview.delete(record)
+
+        # Get balance brought forward
+        cur.execute("SELECT SUM(debit) FROM general_journal WHERE account = 'Accounts Receivable (Debtors)' AND date < '" + self.date_to + "'")
+        previous_accounts_receivable_debit_total = cur.fetchone()  
+
+        cur.execute("SELECT SUM(credit) FROM general_journal WHERE account = 'Accounts Receivable (Debtors)' AND date < '" + self.date_to + "'")
+        previous_sales_credit_total = cur.fetchone()
+
+        try:
+            opening_balance = (previous_sales_credit_total[0] - previous_accounts_receivable_debit_total[0])
+        except:
+            opening_balance = 0
+
+        # Get the accounts receivable debit total
+        cur.execute("SELECT 'Accounts Receivable (Debitors)', SUM(debit), '' FROM general_journal WHERE account = 'Accounts Receivable (Debtors)' AND date BETWEEN '" + self.date_from + "' AND '" + self.date_to + "'")
+        accounts_receivable_debit_total = cur.fetchone()  
+        #print(accounts_receivable_debit_total)
+
+        # Get the sales credit total
+        cur.execute("SELECT 'Sales', '', SUM(credit) FROM general_journal WHERE account = 'Accounts Receivable (Debtors)' AND date BETWEEN '" + self.date_from + "' AND '" + self.date_to + "'")
+        sales_credit_total = cur.fetchone()
+        print(sales_credit_total)
+
+        sales_ledger_record = [accounts_receivable_debit_total, sales_credit_total]
+        #print(sales_ledger_record)       
+
+        # Add figures to treeview
+        global count
+        count = 0
+        self.ledger_treeview.insert(parent='', index='end', iid=count, text='', values=(
+            self.date_from,     # date
+            'Opening Balance',  # description
+            '',                 # debit    
+            '',                 # credit
+            opening_balance     # balance
+            ))
+        count+=1
+        
+        for row in sales_ledger_record:
+            self.ledger_treeview.insert(parent='', index='end', iid=count, text='', values=(  
+                self.date_to,   # date
+                row[0],         # description
+                row[1],         # debit
+                row[2]          # credit
+                ))
+
+            count+=1
+        
+        self.ledger_treeview.insert(parent='', index='end', iid=count, text='', values=('', '', '', ''))
+        count+=1
+
+        closing_balance = (sales_credit_total[2] - accounts_receivable_debit_total[1])
+        self.ledger_treeview.insert(parent='', index='end', iid=count, text='', values=(
+            '',     # date
+            'Closing Balance',  # description
+            '',                 # debit    
+            '',                 # credit
+            closing_balance     # balance
+            ))
+
+    def expenses_ledger(self, date_from, date_to):
+        self.date_from = date_from
+        self.date_to = date_to 
+        
+        # Connect to the database
+        conn = sqlite3.connect('Bookkeeping_Database.sqlite3')
+        cur = conn.cursor()
+
+        # Create the Treeview columns
+        self.ledger_treeview['columns'] = ("Date", "Description", "Debit", "Credit", "Balance")
+        
+        # Create the Treeview column headings
+        self.ledger_treeview.column("#0", width=0, stretch="false")
+        self.ledger_treeview.heading("#0", text="")
+        
+        self.ledger_treeview.column("Date", minwidth=100, width=100, stretch="false")            
+        self.ledger_treeview.heading("Date", text="Date")
+        
+        self.ledger_treeview.column("Description", minwidth=200, width=200, stretch="false")
+        self.ledger_treeview.heading("Description", text="Description")          
+        
+        self.ledger_treeview.column("Debit", minwidth=100, width=100, stretch="false")          
+        self.ledger_treeview.heading("Debit", text="Debit")    
+        
+        self.ledger_treeview.column("Credit", minwidth=100, width=100, stretch="false")           
+        self.ledger_treeview.heading("Credit", text="Credit")
+
+        self.ledger_treeview.column("Balance", minwidth=100, width=100, stretch="false")           
+        self.ledger_treeview.heading("Balance", text="Balance")      
+
+        # Clear the treeview
+        for record in self.ledger_treeview.get_children():
+            self.ledger_treeview.delete(record)
+
+        # Get balance brought forward
+        cur.execute("SELECT SUM(credit) FROM general_journal WHERE account = 'Accounts Payable (Creditors)' AND date < '" + self.date_to + "'")
+        previous_accounts_payable_credit_total = cur.fetchone()  
+
+        cur.execute("SELECT SUM(debit) FROM general_journal WHERE  account = 'Accounts Payable (Creditors)' AND date < '" + self.date_to + "'")
+        previous_expenses_debit_total = cur.fetchone()
+
+        try:
+            opening_balance = (previous_expenses_debit_total[0] - previous_accounts_payable_credit_total[0])
+        except:
+            opening_balance = 0
+
+        # Get the accounts receivable debit total
+        cur.execute("SELECT 'Accounts Payable (Creditors)', SUM(credit), '' FROM general_journal WHERE account = 'Accounts Payable (Creditors)' AND date BETWEEN '" + self.date_from + "' AND '" + self.date_to + "'")
+        accounts_payable_credit_total = cur.fetchone()  
+        
+        # Get the sales credit total
+        cur.execute("SELECT 'Expenses', '', SUM(debit) FROM general_journal WHERE account = 'Accounts Payable (Creditors)' AND date BETWEEN '" + self.date_from + "' AND '" + self.date_to + "'")
+        expenses_debit_total = cur.fetchone()
+        
+        sales_ledger_record = [accounts_payable_credit_total, expenses_debit_total]    
+
+        # Add figures to treeview
+        global count
+        count = 0
+        self.ledger_treeview.insert(parent='', index='end', iid=count, text='', values=(
+            self.date_from,     # date
+            'Opening Balance',  # description
+            '',                 # debit    
+            '',                 # credit
+            opening_balance     # balance
+            ))
+        count+=1
+        
+        for row in sales_ledger_record:
+            self.ledger_treeview.insert(parent='', index='end', iid=count, text='', values=(  
+                self.date_to,   # date
+                row[0],         # description
+                row[1],         # debit
+                row[2]          # credit
+                ))
+
+            count+=1
+        
+        closing_balance = (expenses_debit_total[2] - accounts_payable_credit_total[1])
+        self.ledger_treeview.insert(parent='', index='end', iid=count, text='', values=(
+            '',                 # date
+            'Closing Balance',  # description
+            '',                 # debit    
+            '',                 # credit
+            closing_balance     # balance
+            ))
 
 class Settings:
 
