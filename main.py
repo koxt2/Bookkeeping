@@ -3388,7 +3388,7 @@ class Vendors:
             conn.close()
     
             # Re-populate general_journal
-            journals.general_journal()
+            journals.combined_journal()
 
             # Re-populate the Chart of Accounts Treeview      
             chart_of_accounts.populate_accounts_tree()
@@ -3539,7 +3539,7 @@ class Chart_of_accounts:
             self.accounts_treeview.column("#0", minwidth=20, width=20, stretch="false")
             self.accounts_treeview.heading("#0", text="")
 
-            self.accounts_treeview.column("ID", width=20, stretch="false") 
+            self.accounts_treeview.column("ID", width=0, stretch="false") 
             self.accounts_treeview.heading("ID", text="ID")  
             
             self.accounts_treeview.column("Account Number", minwidth=150, width=150, stretch="false")
@@ -4189,7 +4189,7 @@ class Journals:
             #self.journal_treeview.heading("Customer_rowid", text="Customer rowid")
             
             # Select the rowid and everything in the table and fetch 
-            cur.execute("SELECT rowid, date, description, invoice_number, MIN(debit) AS debit, MIN(credit) AS credit, customer_rowid FROM general_journal WHERE account = 'Accounts Receivable (Debtors)' AND date BETWEEN '" + self.date_from + "' AND '" + self.date_to + "' GROUP BY description, invoice_number")
+            cur.execute("SELECT rowid, date, description, invoice_number, MIN(debit) AS debit, MIN(credit) AS credit, customer_rowid FROM general_journal WHERE account = 'Accounts Receivable (Debtors)' AND date BETWEEN '" + self.date_from + "' AND '" + self.date_to + "' GROUP BY description, invoice_number ORDER BY date")
             general_journal_record = cur.fetchall()   
     
             # For each row in the table, add the data to the Treeview columns
@@ -4374,7 +4374,7 @@ class Journals:
                 self.journal_treeview.delete(record)
 
             # Select the rowid and everything in the table and fetch 
-            cur.execute("SELECT rowid, * FROM general_journal WHERE date BETWEEN '" + self.date_from + "' AND '" + self.date_to + "'")
+            cur.execute("SELECT rowid, * FROM general_journal WHERE date BETWEEN '" + self.date_from + "' AND '" + self.date_to + "' ORDER BY date")
             combined_journal_record = cur.fetchall()    
 
             # For each row in the table, add the data to the Treeview 
@@ -4409,6 +4409,10 @@ class Journals:
             self.credit_total_entry.delete(0, "end")
             self.credit_total_entry.insert(0, credit_total)
             self.credit_total_entry.configure(state="readonly")
+
+            self.balance_entry.configure(state="normal")
+            self.balance_entry.delete(0, "end")
+            self.balance_entry.configure(state="readonly")
 
             # Close connection
             conn.commit()
@@ -4511,10 +4515,10 @@ class Ledgers:
             self.ledger_treeview.delete(record)
 
         # Get balance brought forward
-        cur.execute("SELECT SUM(debit) FROM general_journal WHERE account = 'Accounts Receivable (Debtors)' AND date < '" + self.date_to + "'")
+        cur.execute("SELECT SUM(debit) FROM general_journal WHERE account = 'Accounts Receivable (Debtors)' AND date < '" + self.date_from + "'")
         previous_accounts_receivable_debit_total = cur.fetchone()  
 
-        cur.execute("SELECT SUM(credit) FROM general_journal WHERE account = 'Accounts Receivable (Debtors)' AND date < '" + self.date_to + "'")
+        cur.execute("SELECT SUM(credit) FROM general_journal WHERE account = 'Accounts Receivable (Debtors)' AND date < '" + self.date_from + "'")
         previous_sales_credit_total = cur.fetchone()
 
         try:
@@ -4655,6 +4659,21 @@ class Ledgers:
             '',                 # credit
             closing_balance     # balance
             ))
+
+class Reports:
+    
+    def __init__(self):
+
+        def reports_tab():
+
+            # Create the tab
+            self.tab = ttk.Frame(main_window)
+            self.tab.pack(fill="both", expand="yes")
+
+            # Add the tab to the notebook and provide a heading
+            main_window.add(self.tab, text="Reports") 
+
+        reports_tab()
 
 class Settings:
 
@@ -4881,11 +4900,14 @@ customers = Customers()
 vendors = Vendors()
 journals = Journals()
 ledgers = Ledgers()
+reports = Reports()
 settings = Settings()
 menu_bar = Menu_bar()
 
 
 # To do list
 # add child account - pull data from database not treeview then remove parent/child columns
+# Ledgers and Reports
+# Import csv
 
 root.mainloop()
