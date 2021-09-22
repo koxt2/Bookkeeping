@@ -4,25 +4,27 @@ from tkinter import ttk
 from ttkthemes import ThemedTk
 from tkinter import messagebox
 import sqlite3 as sq
-import tkcalendar as tkcal
+import tkcalendar as tkcal     
 
-# Create root
-root = ThemedTk(theme='plastik')
-root.title("Bookkeeping")
-root.geometry("1920x1080")
-
-# Create Tkinter Notebook
-main_window = ttk.Notebook(root)
-main_window.pack(fill="both", expand="yes")
-
-# Create database
-conn = sq.connect('Bookkeeping_Database.sqlite3')
+class Root:
+    def __init__(self):
+        # Create root
+        self.root = ThemedTk(theme='plastik')
+        self.root.title("Bookkeeping")
+        self.root.geometry("1920x1080")
+        
+        # Create Tkinter Notebook
+        self.main_window = ttk.Notebook(self.root)
+        self.main_window.pack(fill="both", expand="yes")
+        
+        # Create database
+        conn = sq.connect('Bookkeeping_Database.sqlite3')
 
 class Menu_bar:
     def __init__(self):
-        # Create a menu in root called top_menu and configure root to use top_menu
-        self.menu_bar = tk.Menu(root)
-        root.config(menu=self.menu_bar)
+        # Create a menu in root.root called top_menu and configure root.root to use top_menu
+        self.menu_bar = tk.Menu(root.root)
+        root.root.config(menu=self.menu_bar)
 
         self.file_menu()
         self.chart_of_accounts_menu()
@@ -35,7 +37,7 @@ class Menu_bar:
         self.menu_bar.add_cascade(label="File", menu=file_menu)
 
         # File menu items
-        file_menu.add_command(label="Exit", command=root.quit)
+        file_menu.add_command(label="Exit", command=root.root.quit)
 
     def chart_of_accounts_menu(self):
         # Create chart of accounts menu
@@ -182,11 +184,11 @@ class Customers:
 
         def customer_tab():
             # Create the tab
-            self.tab = ttk.Frame(main_window)
+            self.tab = ttk.Frame(root.main_window)
             self.tab.pack(fill="both")
         
             # Add the tab to the notebook and provide a heading
-            main_window.add(self.tab, text="Customers")
+            root.main_window.add(self.tab, text="Customers")
         
         def customer_ribbon():       
             # Make a frame for the buttons
@@ -265,7 +267,7 @@ class Customers:
                     pass
 
                 # Pop-up the menu 
-                right_click_customer.tk_popup(event.x_root, event.y_root)
+                right_click_customer.tk_popup(event.x_root.root, event.y_root.root)
 
             # Create a frame for the customer treeview
             self.customer_treeview_frame = ttk.Frame(self.tab)
@@ -1810,11 +1812,11 @@ class Vendors:
 
         def vendor_tab():
             # Create the tab
-            self.tab = ttk.Frame(main_window)
+            self.tab = ttk.Frame(root.main_window)
             self.tab.pack(fill="both")
         
             # Add the tab to the notebook and provide a heading
-            main_window.add(self.tab, text="Vendors")
+            root.main_window.add(self.tab, text="Vendors")
         
         def vendor_ribbon():
             # Make a frame for the buttons
@@ -1892,7 +1894,7 @@ class Vendors:
                     pass
                 
                 # Pop-up the menu 
-                right_click_vendor.tk_popup(event.x_root, event.y_root)
+                right_click_vendor.tk_popup(event.x_root.root, event.y_root.root)
 
             # Create a frame for the vendor treeview
             self.vendor_treeview_frame = ttk.Frame(self.tab)
@@ -3442,11 +3444,11 @@ class Chart_of_accounts:
 
         def accounts_tab():
             # Create the tab
-            self.tab = ttk.Frame(main_window)
+            self.tab = ttk.Frame(root.main_window)
             self.tab.pack(fill="both", expand="yes")
 
             # Add the tab to the notebook and provide a heading
-            main_window.add(self.tab, text="Chart of Accounts")
+            root.main_window.add(self.tab, text="Chart of Accounts")
         
         def accounts_ribbon():
             # Make a frame for the ribbon
@@ -3517,7 +3519,7 @@ class Chart_of_accounts:
                     pass
                 
                 # Pop-up the menu 
-                right_click_accounts.tk_popup(event.x_root, event.y_root)
+                right_click_accounts.tk_popup(event.x_root.root, event.y_root.root)
 
                 
             # Create a frame for the Treeview
@@ -4073,11 +4075,11 @@ class Journals:
                     pass
             
             # Create the tab
-            self.tab = ttk.Frame(main_window)
+            self.tab = ttk.Frame(root.main_window)
             self.tab.pack(fill="both", expand="yes")
 
             # Add the tab to the notebook and provide a heading
-            main_window.add(self.tab, text="Journals")
+            root.main_window.add(self.tab, text="Journals")
 
             # Add a frame for the options
             self.journal_options_frame = ttk.Frame(self.tab)
@@ -4433,11 +4435,11 @@ class Ledgers:
                     pass
 
             # Create the tab
-            self.tab = ttk.Frame(main_window)
+            self.tab = ttk.Frame(root.main_window)
             self.tab.pack(fill="both", expand="yes")
 
             # Add the tab to the notebook and provide a heading
-            main_window.add(self.tab, text="Ledgers")      
+            root.main_window.add(self.tab, text="Ledgers")      
 
             # Add a frame for the options
             self.ledger_options_frame = ttk.Frame(self.tab)
@@ -4667,11 +4669,11 @@ class Reports:
         def reports_tab():
 
             # Create the tab
-            self.tab = ttk.Frame(main_window)
+            self.tab = ttk.Frame(root.main_window)
             self.tab.pack(fill="both", expand="yes")
 
             # Add the tab to the notebook and provide a heading
-            main_window.add(self.tab, text="Reports") 
+            root.main_window.add(self.tab, text="Reports") 
 
         reports_tab()
 
@@ -4702,11 +4704,11 @@ class Settings:
 
         def settings_tab():
             # Create the settings tab
-            self.settings_tab = ttk.Frame(main_window)
+            self.settings_tab = ttk.Frame(root.main_window)
             self.settings_tab.pack(fill="both")
 
             # Add the tab to the Notebook
-            main_window.add(self.settings_tab, text="Settings")         
+            root.main_window.add(self.settings_tab, text="Settings")         
         
         settings_database_table()
         settings_tab()
@@ -4895,6 +4897,7 @@ class Message:
     def __init__(self, message):
         messagebox.showerror('error', message)
 
+root = Root()
 chart_of_accounts = Chart_of_accounts()
 customers = Customers()
 vendors = Vendors()
@@ -4905,9 +4908,12 @@ settings = Settings()
 menu_bar = Menu_bar()
 
 
+
+
+
 # To do list
 # add child account - pull data from database not treeview then remove parent/child columns
 # Ledgers and Reports
 # Import csv
 
-root.mainloop()
+root.root.mainloop()
